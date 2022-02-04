@@ -1,0 +1,413 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F70BF401-DAA2-46AF-8B34-27B4CC804FEB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CSI.PCC.PCX</RootNamespace>
+    <AssemblyName>CSI.PCC.PCX.PCXBOMManagement</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\..\..\..\..\JihooSoft\JBrowser5\BusinessApp\SVC_203.228.108.44_PCC_TEST_Service\PCX\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CSI.Client.ProjectBaseForm, Version=1.0.8046.15814, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\JihooSoft\JBrowser5\CSI.Client.ProjectBaseForm.dll</HintPath>
+    </Reference>
+    <Reference Include="CSI.PCC.PCX.PCXComment, Version=1.0.7859.20977, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\JihooSoft\PCC ERP\CSI.PCC.PCX.PCXComment.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Data.v13.1, Version=13.1.8.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\JihooSoft\JBrowser5\DevExpress.Data.v13.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v13.1, Version=13.1.8.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\JihooSoft\JBrowser5\DevExpress.Utils.v13.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraBars.v13.1, Version=13.1.8.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraEditors.v13.1, Version=13.1.8.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\JihooSoft\JBrowser5\DevExpress.XtraEditors.v13.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraGrid.v13.1, Version=13.1.8.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\JihooSoft\JBrowser5\DevExpress.XtraGrid.v13.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraPrinting.v13.1, Version=13.1.8.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\JihooSoft\JBrowser5\DevExpress.XtraPrinting.v13.1.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraTreeList.v13.1, Version=13.1.8.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\JihooSoft\JBrowser5\DevExpress.XtraTreeList.v13.1.dll</HintPath>
+    </Reference>
+    <Reference Include="JPlatform.Client.ChildForm5, Version=5.1.0.0, Culture=neutral, PublicKeyToken=cc9936b6c61a2684, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\JihooSoft\JBrowser5\JPlatform.Client.ChildForm5.dll</HintPath>
+    </Reference>
+    <Reference Include="JPlatform.Client.Controls5, Version=5.1.0.0, Culture=neutral, PublicKeyToken=744cff4a7dda5f1b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\JihooSoft\JBrowser5\JPlatform.Client.Controls5.dll</HintPath>
+    </Reference>
+    <Reference Include="JPlatform.Client.JBaseForm5">
+      <HintPath>..\..\..\..\..\..\..\JihooSoft\JBrowser5\JPlatform.Client.JBaseForm5.dll</HintPath>
+    </Reference>
+    <Reference Include="JPlatform.Client.JERPBaseForm5">
+      <HintPath>..\..\..\..\..\..\..\JihooSoft\JBrowser5\JPlatform.Client.JERPBaseForm5.dll</HintPath>
+    </Reference>
+    <Reference Include="JPlatform.Client.Library5, Version=5.1.0.0, Culture=neutral, PublicKeyToken=6186179b113c9d9c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\JihooSoft\JBrowser5\JPlatform.Client.Library5.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\..\..\..\..\..\..\JihooSoft\PCC Sephiroth\Microsoft.Office.Interop.Excel.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\JihooSoft\PCC ERP\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationClient" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BOMEditing.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BOMEditing.Designer.cs">
+      <DependentUpon>BOMEditing.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BOMEditing_FakeBOM.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BOMEditing_FakeBOM.Designer.cs">
+      <DependentUpon>BOMEditing_FakeBOM.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BOMHeadUpdater.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BOMHeadUpdater.Designer.cs">
+      <DependentUpon>BOMHeadUpdater.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BOMImport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BOMImport.Designer.cs">
+      <DependentUpon>BOMImport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BOMSearch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BOMSearch.Designer.cs">
+      <DependentUpon>BOMSearch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BOMUploader.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BOMUploader.Designer.cs">
+      <DependentUpon>BOMUploader.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BOMSelection.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BOMSelection.Designer.cs">
+      <DependentUpon>BOMSelection.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CompareBOM.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CompareBOM.Designer.cs">
+      <DependentUpon>CompareBOM.cs</DependentUpon>
+    </Compile>
+    <Compile Include="COM\Common.cs" />
+    <Compile Include="COM\Package.cs" />
+    <Compile Include="ConfirmReason.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConfirmReason.Designer.cs">
+      <DependentUpon>ConfirmReason.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CopyBOM.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CopyBOM.Designer.cs">
+      <DependentUpon>CopyBOM.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CSMaterialInformation.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CSMaterialInformation.Designer.cs">
+      <DependentUpon>CSMaterialInformation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BOMUploader_FakeBOM.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BOMUploader_FakeBOM.Designer.cs">
+      <DependentUpon>BOMUploader_FakeBOM.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FindCode.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FindCode.Designer.cs">
+      <DependentUpon>FindCode.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FindProcess.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FindProcess.Designer.cs">
+      <DependentUpon>FindProcess.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LogicBOMEditing.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LogicBOMEditing.Designer.cs">
+      <DependentUpon>LogicBOMEditing.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainWaitForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainWaitForm.Designer.cs">
+      <DependentUpon>MainWaitForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MatchOption.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MatchOption.Designer.cs">
+      <DependentUpon>MatchOption.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NewMultiEdit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NewMultiEdit.Designer.cs">
+      <DependentUpon>NewMultiEdit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PartListForPE.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PartListForPE.Designer.cs">
+      <DependentUpon>PartListForPE.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ReplaceOption.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ReplaceOption.Designer.cs">
+      <DependentUpon>ReplaceOption.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TransferRecord.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TransferRecord.Designer.cs">
+      <DependentUpon>TransferRecord.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TypeSelection_WSTmplt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TypeSelection_WSTmplt.Designer.cs">
+      <DependentUpon>TypeSelection_WSTmplt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorksheetTemplate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorksheetTemplate.Designer.cs">
+      <DependentUpon>WorksheetTemplate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MaterialInformation.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MaterialInformation.Designer.cs">
+      <DependentUpon>MaterialInformation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PCXBOMManagement.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PCXBOMManagement.Designer.cs">
+      <DependentUpon>PCXBOMManagement.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Purchase.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Purchase.Designer.cs">
+      <DependentUpon>Purchase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PurchaseRecords.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PurchaseRecords.Designer.cs">
+      <DependentUpon>PurchaseRecords.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TypeSelection_BOM.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TypeSelection_BOM.Designer.cs">
+      <DependentUpon>TypeSelection_BOM.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WorksheetMaking.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorksheetMaking.Designer.cs">
+      <DependentUpon>WorksheetMaking.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="BOMEditing.resx">
+      <DependentUpon>BOMEditing.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BOMEditing_FakeBOM.resx">
+      <DependentUpon>BOMEditing_FakeBOM.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BOMHeadUpdater.resx">
+      <DependentUpon>BOMHeadUpdater.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BOMImport.resx">
+      <DependentUpon>BOMImport.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BOMSearch.resx">
+      <DependentUpon>BOMSearch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BOMUploader.resx">
+      <DependentUpon>BOMUploader.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BOMSelection.resx">
+      <DependentUpon>BOMSelection.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CompareBOM.resx">
+      <DependentUpon>CompareBOM.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConfirmReason.resx">
+      <DependentUpon>ConfirmReason.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CopyBOM.resx">
+      <DependentUpon>CopyBOM.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CSMaterialInformation.resx">
+      <DependentUpon>CSMaterialInformation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BOMUploader_FakeBOM.resx">
+      <DependentUpon>BOMUploader_FakeBOM.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FindCode.resx">
+      <DependentUpon>FindCode.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FindProcess.resx">
+      <DependentUpon>FindProcess.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LogicBOMEditing.resx">
+      <DependentUpon>LogicBOMEditing.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainWaitForm.resx">
+      <DependentUpon>MainWaitForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MatchOption.resx">
+      <DependentUpon>MatchOption.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MaterialInformation.resx">
+      <DependentUpon>MaterialInformation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NewMultiEdit.resx">
+      <DependentUpon>NewMultiEdit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PartListForPE.resx">
+      <DependentUpon>PartListForPE.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PCXBOMManagement.resx">
+      <DependentUpon>PCXBOMManagement.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="Purchase.resx">
+      <DependentUpon>Purchase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PurchaseRecords.resx">
+      <DependentUpon>PurchaseRecords.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ReplaceOption.resx">
+      <DependentUpon>ReplaceOption.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TransferRecord.resx">
+      <DependentUpon>TransferRecord.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TypeSelection_BOM.resx">
+      <DependentUpon>TypeSelection_BOM.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TypeSelection_WSTmplt.resx">
+      <DependentUpon>TypeSelection_WSTmplt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorksheetMaking.resx">
+      <DependentUpon>WorksheetMaking.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorksheetTemplate.resx">
+      <DependentUpon>WorksheetTemplate.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
