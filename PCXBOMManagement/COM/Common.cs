@@ -715,9 +715,9 @@ namespace CSI.PCC.PCX.COM
         {
             foreach (int rowHandle in view.GetSelectedRows())
             {
-                if (view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString() == "D")
+                if (view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString().Equals("D"))
                 {
-                    MessageBox.Show("There are line items to be deleted.");
+                    ShowMessageBox("There are line items to be deleted.", "W");
                     return true;
                 }
             }

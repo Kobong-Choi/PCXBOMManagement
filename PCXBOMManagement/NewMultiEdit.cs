@@ -1194,15 +1194,17 @@ namespace CSI.PCC.PCX
             }
             #endregion
 
-            FindProcess findForm = new FindProcess();
-            findForm.SELECTED_PROCESS_FROM_PARENT = vwTreeList.FocusedNode.GetValue("PROCESS").ToString().ToUpper();
+            FindProcess findForm = new FindProcess()
+            {
+                EnteredProcess = vwTreeList.FocusedNode.GetValue("PROCESS").ToString().ToUpper()
+            };
 
             if (findForm.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 // 불필요한 이벤트 반복을 피함
                 vwTreeList.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
                 // 자식폼에게 전달 받은 프로세스 리스트
-                List<string> listOfSelectedProcess = (List<string>)findForm.LIST_OF_SELECTED_PROCESS;
+                List<string> listOfSelectedProcess = (List<string>)findForm.SelectedProcess;
                 // 프로세스1,프로세스2,프로세스3 형태의 프로세스 나열
                 string process = string.Join(",", listOfSelectedProcess.ToArray());
                 // 선택한 노드 개수만큼 반복

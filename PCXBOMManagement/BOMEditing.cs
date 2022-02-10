@@ -244,12 +244,15 @@ namespace CSI.PCC.PCX
                     if (isLocked)
                         break;
 
-                    DeleteRows_Single();
+                    DeleteRows();
                     break;
 
                 case "DeleteRow_Multiple":
 
-                    DeleteRows_Multiple();
+                    if (!AllowMultiFunction())
+                        return;
+
+                    DeleteRows_Multi();
                     break;
 
                 case "FindCode_Single":
@@ -257,60 +260,60 @@ namespace CSI.PCC.PCX
                     if (isLocked)
                         break;
 
-                    FindCodeFromLibrary(gvwSingleEdit);
+                    FindCodeFromLibrary();
                     break;
 
                 case "FindCode_Multiple":
 
-                    FindCodeFromLibrary(gvwMultipleEdit);
+                    FindCodeFromLibrary();
                     break;
 
                 case "FindProcess_Single":
 
-                    FindProcessFromMaster(gvwSingleEdit);
+                    FindProcessFromMaster();
                     break;
 
                 case "FindProcess_Multiple":
 
-                    FindProcessFromMaster(gvwMultipleEdit);
+                    FindProcessFromMaster();
                     break;
 
                 case "BindPtrnTop_Single":
 
-                    if (Common.IsFilterApplied(gvwSingleEdit))
+                    if (Common.IsFilterApplied(view))
                         break;
 
                     if (isLocked)
                         break;
 
-                    BindPtrnPartName("Top", gvwSingleEdit);
+                    BindPtrnPartName("Top");
                     break;
 
                 case "BindPtrnTop_Multiple":
 
-                    if (Common.IsFilterApplied(gvwMultipleEdit))
+                    if (Common.IsFilterApplied(view))
                         break;
 
-                    BindPtrnPartName("Top", gvwMultipleEdit);
+                    BindPtrnPartName("Top");
                     break;
 
                 case "BindPtrnEach_Single":
 
-                    if (Common.IsFilterApplied(gvwSingleEdit))
+                    if (Common.IsFilterApplied(view))
                         break;
 
                     if (isLocked)
                         break;
 
-                    BindPtrnPartName("Each", gvwSingleEdit);
+                    BindPtrnPartName("Each");
                     break;
 
                 case "BindPtrnEach_Multiple":
 
-                    if (Common.IsFilterApplied(gvwMultipleEdit))
+                    if (Common.IsFilterApplied(view))
                         break;
 
-                    BindPtrnPartName("Each", gvwMultipleEdit);
+                    BindPtrnPartName("Each");
                     break;
 
                 case "MulChkComb_Single":
@@ -922,90 +925,65 @@ namespace CSI.PCC.PCX
         /// 4. D : 삭제
         /// 선택한 행의 상태 값을 'D'로 변경
         /// </summary>
-        private void DeleteRows_Single()
+        private void DeleteRows()
         {
+            if (view.RowCount.Equals(0))
+                return;
+
             try
             {
-                // 이벤트 꼬임을 방지하기 위해 CellValueChanged 이벤트 끊음
-                gvwSingleEdit.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
-                // 삭제할 행이 하나도 없는 경우 리턴
-                if (gvwSingleEdit.RowCount == 0) return;
-                // 선택된 행의 로우핸들 배열
-                int[] rowHandles = gvwSingleEdit.GetSelectedRows();
-                // 선택된 행의 개수만큼 반복
-                foreach (int rowHandle in rowHandles)
+                view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
+
+                foreach (int rowHandle in view.GetSelectedRows())
                 {
-                    // 선택된 행의 상태값
-                    string rowStatus = gvwSingleEdit.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-                    if (rowStatus != "D")
+                    if (!view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString().Equals("D"))
                     {
-                        // 상태값이 삭제가 아니라면, 현재의 상태값을 기록해둠
-                        gvwSingleEdit.SetRowCellValue(rowHandle, "PRVS_STATUS", rowStatus);
-                        // 현재 상태값을 삭제로 변경
-                        gvwSingleEdit.SetRowCellValue(rowHandle, "ROW_STATUS", "D");
+                        view.SetRowCellValue(rowHandle, "PRVS_STATUS", view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString());
+                        view.SetRowCellValue(rowHandle, "ROW_STATUS", "D");
                     }
                     else
                     {
-                        // 현재 상태값이 삭제인 경우 이전 상태값을 가져옴
-                        string previousRowStatus = gvwSingleEdit.GetRowCellValue(rowHandle, "PRVS_STATUS").ToString();
-                        // 이전 상태값으로 변경
-                        gvwSingleEdit.SetRowCellValue(rowHandle, "ROW_STATUS", previousRowStatus);
+                        view.SetRowCellValue(rowHandle, "ROW_STATUS", view.GetRowCellValue(rowHandle, "PRVS_STATUS").ToString());
                     }
                 }
-                // 셀 스타일 새로 적용
-                gvwSingleEdit.RefreshData();
-                // 이벤트 다시 연결
-                gvwSingleEdit.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
             }
-            catch (Exception ex)
+            finally
             {
-                MessageBox.Show(ex.ToString());
-                return;
+                view.RefreshData();
+                view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
             }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        private void DeleteRows_Multiple()
+        private void DeleteRows_Multi()
         {
+            int rowHandle = 0;
+
             try
             {
-                // 실행 가능 여부 확인
-                if (AllowMultiFunction() == false) return;
-                // 이벤트 꼬임을 방지하기 위해 CellValueChanged 이벤트 끊음
-                gvwMultipleEdit.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
-                // 유저가 선택한 BOM의 개수만큼 반복
+                view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
+
                 for (int i = 0; i < NumSelectedBOMs; i++)
                 {
-                    // 삭제할 행의 로우핸들
-                    int rowHandle = gvwMultipleEdit.FocusedRowHandle + i;
-                    // 현재 행의 상태값을 가져옴
-                    string rowStatus = gvwMultipleEdit.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-                    if (rowStatus != "D")
+                    rowHandle = view.FocusedRowHandle + i;
+
+                    if (!view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString().Equals("D"))
                     {
-                        // 상태값이 삭제가 아니라면, 현재의 상태값을 기록해둠
-                        gvwMultipleEdit.SetRowCellValue(rowHandle, "PRVS_STATUS", rowStatus);
-                        // 현재 상태값을 삭제로 변경
-                        gvwMultipleEdit.SetRowCellValue(rowHandle, "ROW_STATUS", "D");
+                        view.SetRowCellValue(rowHandle, "PRVS_STATUS", view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString());
+                        view.SetRowCellValue(rowHandle, "ROW_STATUS", "D");
                     }
                     else
                     {
-                        // 현재 상태값이 삭제인 경우 이전 상태값을 가져옴
-                        string previousRowStatus = gvwMultipleEdit.GetRowCellValue(rowHandle, "PRVS_STATUS").ToString();
-                        // 이전 상태값으로 변경
-                        gvwMultipleEdit.SetRowCellValue(rowHandle, "ROW_STATUS", previousRowStatus);
+                        view.SetRowCellValue(rowHandle, "ROW_STATUS", view.GetRowCellValue(rowHandle, "PRVS_STATUS").ToString());
                     }
                 }
-                // 셀 스타일 새로 적용
-                gvwMultipleEdit.RefreshData();
-                // 이벤트 다시 연결
-                gvwMultipleEdit.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
             }
-            catch (Exception ex)
+            finally
             {
-                MessageBox.Show(ex.ToString());
-                return;
+                view.RefreshData();
+                view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
             }
         }
 
@@ -1013,9 +991,10 @@ namespace CSI.PCC.PCX
         /// 라이브러리에서 코드를 찾아 셀에 입력
         /// </summary>
         /// <param name="_type"></param>
-        private void FindCodeFromLibrary(GridView view)
+        private void FindCodeFromLibrary()
         {
-            if (Common.HasLineitemDeleted(view) == true) return;
+            if (Common.HasLineitemDeleted(view))
+                return;
 
             // Parameters to send to the childForm.
             int initSearchType = 0;
@@ -1406,131 +1385,158 @@ namespace CSI.PCC.PCX
         /// <summary>
         /// 프로세스 마스터에서 프로세스를 선택하여 저장
         /// </summary>
-        private void FindProcessFromMaster(GridView view)
+        private void FindProcessFromMaster()
         {
             List<DataRow> rows = new List<DataRow>();
 
             foreach (int rowHandle in view.GetSelectedRows())
                 rows.Add(view.GetDataRow(rowHandle));
 
-            foreach (DataRow row in rows)
+            if (rows.AsEnumerable().Where(x => x["ROW_STATUS"].ToString().Equals("D")).Count() > 0)
             {
-                if (row["ROW_STATUS"].ToString().Equals("D"))
-                {
-                    MessageBox.Show("There are rows which will be deleted.");
-                    return;
-                }
+                Common.ShowMessageBox("There are rows to be deleted.", "W");
+                return;
             }
 
-            FindProcess findForm = new FindProcess();
-            findForm.SELECTED_PROCESS_FROM_PARENT = view.GetRowCellValue(view.FocusedRowHandle, "PROCESS").ToString().ToUpper();
+            FindProcess findForm = new FindProcess()
+            {
+                EnteredProcess = view.GetRowCellValue(view.FocusedRowHandle, "PROCESS").ToString().ToUpper()
+            };
 
             if (findForm.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
-
-                // Process list received from child form.
-                List<string> listOfSelectedProcess = (List<string>)findForm.LIST_OF_SELECTED_PROCESS;
-
-                // List process like process1, process2, process3,...
-                string process = string.Join(",", listOfSelectedProcess.ToArray());
-
-                foreach (DataRow row in rows)
+                try
                 {
-                    row["PROCESS"] = process;
+                    view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
 
-                    if (row["ROW_STATUS"].ToString().Equals("I") == false)
-                        row["ROW_STATUS"] = "U";
+                    // List process like process1, process2, process3,...
+                    string process = string.Join(",", findForm.SelectedProcess.ToArray());
+
+                    foreach (DataRow row in rows)
+                    {
+                        row["PROCESS"] = process;
+
+                        if (!row["ROW_STATUS"].ToString().Equals("I"))
+                            row["ROW_STATUS"] = "U";
+                    }
                 }
-
-                //foreach (int rowHandle in rowHandles)
-                //{
-                //    // 생성된 프로세스를 셀에 바인딩
-                //    view.SetRowCellValue(rowHandle, "PROCESS", process);
-
-                //    // 선택한 행의 현재 상태 값
-                //    string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-
-                //    // 신규 행은 인디케이터 변경 안 함
-                //    if (rowStatus != "I")
-                //        view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
-                //}
-
-                view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
+                finally
+                {
+                    view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
+                }
             }
         }
 
         /// <summary>
         /// 타입에 맞게 패턴파트 적용
         /// </summary>
-        /// <param name="_type"></param>
-        private void BindPtrnPartName(string _type, GridView view)
+        /// <param name="type"></param>
+        private void BindPtrnPartName(string type)
         {
+            int[] rowHandles = view.GetSelectedRows();
+            string partName = string.Empty;
+            string partCode = string.Empty;
+            string rowStatus = string.Empty;
+
             try
             {
-                // 이벤트 꼬임을 방지하기 위해 CellValueChanged 이벤트 끊음
                 view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
 
-                // 유저가 선택한 행의 로우핸들 배열
-                int[] rowHandles = view.GetSelectedRows();
-
-                if (_type == "Top")
+                foreach (int rowHandle in rowHandles)
                 {
-                    // 가장 상단의 행으로 일괄 적용
-                    string partName = view.GetRowCellValue(rowHandles[0], "PART_NAME").ToString();
-                    string partCode = view.GetRowCellValue(rowHandles[0], "PART_CD").ToString();
+                    partName = type.Equals("Top") ? view.GetRowCellValue(rowHandles[0], "PART_NAME").ToString()
+                        : view.GetRowCellValue(rowHandle, "PART_NAME").ToString();
 
-                    // 선택한 행의 개수만큼 반복
-                    foreach (int rowHandle in rowHandles)
+                    partCode = type.Equals("Top") ? view.GetRowCellValue(rowHandles[0], "PART_CD").ToString()
+                        : view.GetRowCellValue(rowHandle, "PART_CD").ToString();
+
+                    rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
+
+                    if (!rowStatus.Equals("D"))
                     {
-                        // 선택한 행의 현재 상태 값
-                        string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
+                        view.SetRowCellValue(rowHandle, "CS_PTRN_NAME", partName);
+                        view.SetRowCellValue(rowHandle, "CS_PTRN_CD", partCode);
 
-                        if (rowStatus != "D")
-                        {
-                            view.SetRowCellValue(rowHandle, "CS_PTRN_NAME", partName);
-                            view.SetRowCellValue(rowHandle, "CS_PTRN_CD", partCode);
-                        }
-
-                        // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
-                        if (rowStatus != "I" && rowStatus != "D")
+                        if (!rowStatus.Equals("I"))
                             view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
                     }
                 }
-                else if (_type == "Each")
-                {
-                    // 각 행의 파트명으로 적용
-                    foreach (int rowHandle in rowHandles)
-                    {
-                        string partName = view.GetRowCellValue(rowHandle, "PART_NAME").ToString();
-                        string partCode = view.GetRowCellValue(rowHandle, "PART_CD").ToString();
-
-                        // 선택한 행의 현재 상태 값
-                        string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-
-                        if (rowStatus != "D")
-                        {
-                            view.SetRowCellValue(rowHandle, "CS_PTRN_NAME", partName);
-                            view.SetRowCellValue(rowHandle, "CS_PTRN_CD", partCode);
-                        }
-
-                        // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
-                        if (rowStatus != "I" && rowStatus != "D")
-                            view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
-                    }
-                }
-
-                // 스타일을 새로 적용하기 위해 DataSource Refresh
+            }
+            finally
+            {
                 view.RefreshData();
-
-                // 이벤트 다시 연결
                 view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return;
-            }
+
+            #region backup
+
+            //try
+            //{
+            //    // 이벤트 꼬임을 방지하기 위해 CellValueChanged 이벤트 끊음
+            //    view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
+
+            //    // 유저가 선택한 행의 로우핸들 배열
+            //    int[] rowHandles = view.GetSelectedRows();
+
+            //    if (type == "Top")
+            //    {
+            //        // 가장 상단의 행으로 일괄 적용
+            //        string partName = view.GetRowCellValue(rowHandles[0], "PART_NAME").ToString();
+            //        string partCode = view.GetRowCellValue(rowHandles[0], "PART_CD").ToString();
+
+            //        // 선택한 행의 개수만큼 반복
+            //        foreach (int rowHandle in rowHandles)
+            //        {
+            //            // 선택한 행의 현재 상태 값
+            //            string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
+
+            //            if (rowStatus != "D")
+            //            {
+            //                view.SetRowCellValue(rowHandle, "CS_PTRN_NAME", partName);
+            //                view.SetRowCellValue(rowHandle, "CS_PTRN_CD", partCode);
+            //            }
+
+            //            // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
+            //            if (rowStatus != "I" && rowStatus != "D")
+            //                view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
+            //        }
+            //    }
+            //    else if (type == "Each")
+            //    {
+            //        // 각 행의 파트명으로 적용
+            //        foreach (int rowHandle in rowHandles)
+            //        {
+            //            string partName = view.GetRowCellValue(rowHandle, "PART_NAME").ToString();
+            //            string partCode = view.GetRowCellValue(rowHandle, "PART_CD").ToString();
+
+            //            // 선택한 행의 현재 상태 값
+            //            string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
+
+            //            if (rowStatus != "D")
+            //            {
+            //                view.SetRowCellValue(rowHandle, "CS_PTRN_NAME", partName);
+            //                view.SetRowCellValue(rowHandle, "CS_PTRN_CD", partCode);
+            //            }
+
+            //            // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
+            //            if (rowStatus != "I" && rowStatus != "D")
+            //                view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
+            //        }
+            //    }
+
+            //    // 스타일을 새로 적용하기 위해 DataSource Refresh
+            //    view.RefreshData();
+
+            //    // 이벤트 다시 연결
+            //    view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.ToString());
+            //    return;
+            //}
+            
+            #endregion
         }
 
         /// <summary>
