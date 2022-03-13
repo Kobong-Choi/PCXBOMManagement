@@ -58,17 +58,17 @@
             this.CopyPtrnV1N4_Single = new System.Windows.Forms.ToolStripMenuItem();
             this.CopyPtrnF1F4_Single = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.MulChkComb_Single = new System.Windows.Forms.ToolStripMenuItem();
             this.MulChkStc_Single = new System.Windows.Forms.ToolStripMenuItem();
             this.MulChkMdsl_Single = new System.Windows.Forms.ToolStripMenuItem();
             this.MulChkOtsl_Single = new System.Windows.Forms.ToolStripMenuItem();
             this.MulChkCode_Single = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
-            this.AddAggregate_Single = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
             this.Transfer_Single = new System.Windows.Forms.ToolStripMenuItem();
             this.trnsRecord_Single = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
+            this.AddAggregate_Single = new System.Windows.Forms.ToolStripMenuItem();
             this.MatInfo_Single = new System.Windows.Forms.ToolStripMenuItem();
             this.BlackList_Single = new System.Windows.Forms.ToolStripMenuItem();
             this.StockInfo_Single = new System.Windows.Forms.ToolStripMenuItem();
@@ -145,6 +145,7 @@
             this.CopyPtrnV1N4_Multiple = new System.Windows.Forms.ToolStripMenuItem();
             this.CopyPtrnF1F4_Multiple = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.MulChkComb_Multiple = new System.Windows.Forms.ToolStripMenuItem();
             this.MulChkStc_Multiple = new System.Windows.Forms.ToolStripMenuItem();
             this.MulChkMdsl_Multiple = new System.Windows.Forms.ToolStripMenuItem();
@@ -410,17 +411,12 @@
             this.CopyPtrnV1N4_Single,
             this.CopyPtrnF1F4_Single,
             this.toolStripSeparator1,
-            this.MulChkComb_Single,
-            this.MulChkStc_Single,
-            this.MulChkMdsl_Single,
-            this.MulChkOtsl_Single,
-            this.MulChkCode_Single,
+            this.toolStripMenuItem1,
             this.toolStripSeparator7,
-            this.AddAggregate_Single,
-            this.toolStripSeparator9,
             this.Transfer_Single,
             this.trnsRecord_Single,
             this.toolStripSeparator11,
+            this.AddAggregate_Single,
             this.MatInfo_Single,
             this.BlackList_Single,
             this.StockInfo_Single,
@@ -428,13 +424,13 @@
             this.MDMPartAdd_Single,
             this.exportToExcel});
             this.singleEditCtxMenuStrip.Name = "singleEditCtxMenuStrip";
-            this.singleEditCtxMenuStrip.Size = new System.Drawing.Size(262, 612);
+            this.singleEditCtxMenuStrip.Size = new System.Drawing.Size(325, 518);
             // 
             // RowUp_Single
             // 
             this.RowUp_Single.Name = "RowUp_Single";
             this.RowUp_Single.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
-            this.RowUp_Single.Size = new System.Drawing.Size(261, 22);
+            this.RowUp_Single.Size = new System.Drawing.Size(324, 22);
             this.RowUp_Single.Text = "Row Up";
             this.RowUp_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -442,7 +438,7 @@
             // 
             this.RowDown_Single.Name = "RowDown_Single";
             this.RowDown_Single.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.RowDown_Single.Size = new System.Drawing.Size(261, 22);
+            this.RowDown_Single.Size = new System.Drawing.Size(324, 22);
             this.RowDown_Single.Text = "Row Down";
             this.RowDown_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -450,7 +446,7 @@
             // 
             this.AddRow_Single.Name = "AddRow_Single";
             this.AddRow_Single.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.AddRow_Single.Size = new System.Drawing.Size(261, 22);
+            this.AddRow_Single.Size = new System.Drawing.Size(324, 22);
             this.AddRow_Single.Text = "Add Row";
             this.AddRow_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -458,20 +454,20 @@
             // 
             this.DeleteRow_Single.Name = "DeleteRow_Single";
             this.DeleteRow_Single.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
-            this.DeleteRow_Single.Size = new System.Drawing.Size(261, 22);
+            this.DeleteRow_Single.Size = new System.Drawing.Size(324, 22);
             this.DeleteRow_Single.Text = "Delete Row";
             this.DeleteRow_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(258, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(321, 6);
             // 
             // FindCode_Single
             // 
             this.FindCode_Single.Name = "FindCode_Single";
             this.FindCode_Single.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.FindCode_Single.Size = new System.Drawing.Size(261, 22);
+            this.FindCode_Single.Size = new System.Drawing.Size(324, 22);
             this.FindCode_Single.Text = "Find Code";
             this.FindCode_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -479,7 +475,7 @@
             // 
             this.FindProcess_Single.Name = "FindProcess_Single";
             this.FindProcess_Single.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
-            this.FindProcess_Single.Size = new System.Drawing.Size(261, 22);
+            this.FindProcess_Single.Size = new System.Drawing.Size(324, 22);
             this.FindProcess_Single.Text = "Find Process";
             this.FindProcess_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -487,7 +483,7 @@
             // 
             this.FillColor_Single.Name = "FillColor_Single";
             this.FillColor_Single.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-            this.FillColor_Single.Size = new System.Drawing.Size(261, 22);
+            this.FillColor_Single.Size = new System.Drawing.Size(324, 22);
             this.FillColor_Single.Text = "Fill Color";
             this.FillColor_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -495,20 +491,20 @@
             // 
             this.genComment_Single.Name = "genComment_Single";
             this.genComment_Single.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.genComment_Single.Size = new System.Drawing.Size(261, 22);
+            this.genComment_Single.Size = new System.Drawing.Size(324, 22);
             this.genComment_Single.Text = "Generate Comment";
             this.genComment_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(258, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(321, 6);
             // 
             // BindPtrnTop_Single
             // 
             this.BindPtrnTop_Single.Name = "BindPtrnTop_Single";
             this.BindPtrnTop_Single.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
-            this.BindPtrnTop_Single.Size = new System.Drawing.Size(261, 22);
+            this.BindPtrnTop_Single.Size = new System.Drawing.Size(324, 22);
             this.BindPtrnTop_Single.Text = "Set Ptrn. Part by Top";
             this.BindPtrnTop_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -516,112 +512,119 @@
             // 
             this.BindPtrnEach_Single.Name = "BindPtrnEach_Single";
             this.BindPtrnEach_Single.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.BindPtrnEach_Single.Size = new System.Drawing.Size(261, 22);
+            this.BindPtrnEach_Single.Size = new System.Drawing.Size(324, 22);
             this.BindPtrnEach_Single.Text = "Set Ptrn. Part by Each";
             this.BindPtrnEach_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // CopyPtrnV1N4_Single
             // 
             this.CopyPtrnV1N4_Single.Name = "CopyPtrnV1N4_Single";
-            this.CopyPtrnV1N4_Single.Size = new System.Drawing.Size(261, 22);
-            this.CopyPtrnV1N4_Single.Text = "Copy Pattern part (V1-N4, SU22~)";
+            this.CopyPtrnV1N4_Single.Size = new System.Drawing.Size(324, 22);
+            this.CopyPtrnV1N4_Single.Text = "Copy Pattern part (V1-N4, SU22~ / NCF TCO)";
             this.CopyPtrnV1N4_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // CopyPtrnF1F4_Single
             // 
             this.CopyPtrnF1F4_Single.Name = "CopyPtrnF1F4_Single";
-            this.CopyPtrnF1F4_Single.Size = new System.Drawing.Size(261, 22);
+            this.CopyPtrnF1F4_Single.Size = new System.Drawing.Size(324, 22);
             this.CopyPtrnF1F4_Single.Text = "Copy Pattern part (F1-F4, ~SU22)";
             this.CopyPtrnF1F4_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(258, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(321, 6);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MulChkComb_Single,
+            this.MulChkStc_Single,
+            this.MulChkMdsl_Single,
+            this.MulChkOtsl_Single,
+            this.MulChkCode_Single});
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(324, 22);
+            this.toolStripMenuItem1.Text = "Multi Check";
             // 
             // MulChkComb_Single
             // 
             this.MulChkComb_Single.Name = "MulChkComb_Single";
-            this.MulChkComb_Single.Size = new System.Drawing.Size(261, 22);
-            this.MulChkComb_Single.Text = "Multi Check Combine";
+            this.MulChkComb_Single.Size = new System.Drawing.Size(135, 22);
+            this.MulChkComb_Single.Text = "Combine";
             this.MulChkComb_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MulChkStc_Single
             // 
             this.MulChkStc_Single.Name = "MulChkStc_Single";
-            this.MulChkStc_Single.Size = new System.Drawing.Size(261, 22);
-            this.MulChkStc_Single.Text = "Multi Check Sticker";
+            this.MulChkStc_Single.Size = new System.Drawing.Size(135, 22);
+            this.MulChkStc_Single.Text = "Stikcer";
             this.MulChkStc_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MulChkMdsl_Single
             // 
             this.MulChkMdsl_Single.Name = "MulChkMdsl_Single";
-            this.MulChkMdsl_Single.Size = new System.Drawing.Size(261, 22);
-            this.MulChkMdsl_Single.Text = "Multi Check Midsole";
+            this.MulChkMdsl_Single.Size = new System.Drawing.Size(135, 22);
+            this.MulChkMdsl_Single.Text = "Midsole";
             this.MulChkMdsl_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MulChkOtsl_Single
             // 
             this.MulChkOtsl_Single.Name = "MulChkOtsl_Single";
-            this.MulChkOtsl_Single.Size = new System.Drawing.Size(261, 22);
-            this.MulChkOtsl_Single.Text = "Multi Check Outsole";
+            this.MulChkOtsl_Single.Size = new System.Drawing.Size(135, 22);
+            this.MulChkOtsl_Single.Text = "Outsole";
             this.MulChkOtsl_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MulChkCode_Single
             // 
             this.MulChkCode_Single.Name = "MulChkCode_Single";
-            this.MulChkCode_Single.Size = new System.Drawing.Size(261, 22);
-            this.MulChkCode_Single.Text = "Multi Check Codemaker";
+            this.MulChkCode_Single.Size = new System.Drawing.Size(135, 22);
+            this.MulChkCode_Single.Text = "Codemaker";
             this.MulChkCode_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator7
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(258, 6);
-            // 
-            // AddAggregate_Single
-            // 
-            this.AddAggregate_Single.Name = "AddAggregate_Single";
-            this.AddAggregate_Single.Size = new System.Drawing.Size(261, 22);
-            this.AddAggregate_Single.Text = "Add Aggregate Part";
-            this.AddAggregate_Single.Click += new System.EventHandler(this.ContextMenu_Click);
-            // 
-            // toolStripSeparator9
-            // 
-            this.toolStripSeparator9.Name = "toolStripSeparator9";
-            this.toolStripSeparator9.Size = new System.Drawing.Size(258, 6);
+            this.toolStripSeparator7.Size = new System.Drawing.Size(321, 6);
             // 
             // Transfer_Single
             // 
             this.Transfer_Single.Name = "Transfer_Single";
-            this.Transfer_Single.Size = new System.Drawing.Size(261, 22);
+            this.Transfer_Single.Size = new System.Drawing.Size(324, 22);
             this.Transfer_Single.Text = "Transfer to Codemaker";
             this.Transfer_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // trnsRecord_Single
             // 
             this.trnsRecord_Single.Name = "trnsRecord_Single";
-            this.trnsRecord_Single.Size = new System.Drawing.Size(261, 22);
+            this.trnsRecord_Single.Size = new System.Drawing.Size(324, 22);
             this.trnsRecord_Single.Text = "Transfer Record";
             this.trnsRecord_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator11
             // 
             this.toolStripSeparator11.Name = "toolStripSeparator11";
-            this.toolStripSeparator11.Size = new System.Drawing.Size(258, 6);
+            this.toolStripSeparator11.Size = new System.Drawing.Size(321, 6);
+            // 
+            // AddAggregate_Single
+            // 
+            this.AddAggregate_Single.Name = "AddAggregate_Single";
+            this.AddAggregate_Single.Size = new System.Drawing.Size(324, 22);
+            this.AddAggregate_Single.Text = "Add Aggregate Part";
+            this.AddAggregate_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MatInfo_Single
             // 
             this.MatInfo_Single.Name = "MatInfo_Single";
             this.MatInfo_Single.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.I)));
-            this.MatInfo_Single.Size = new System.Drawing.Size(261, 22);
+            this.MatInfo_Single.Size = new System.Drawing.Size(324, 22);
             this.MatInfo_Single.Text = "Material Information";
             this.MatInfo_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // BlackList_Single
             // 
             this.BlackList_Single.Name = "BlackList_Single";
-            this.BlackList_Single.Size = new System.Drawing.Size(261, 22);
+            this.BlackList_Single.Size = new System.Drawing.Size(324, 22);
             this.BlackList_Single.Text = "Black List Material Info";
             this.BlackList_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -629,7 +632,7 @@
             // 
             this.StockInfo_Single.Name = "StockInfo_Single";
             this.StockInfo_Single.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.K)));
-            this.StockInfo_Single.Size = new System.Drawing.Size(261, 22);
+            this.StockInfo_Single.Size = new System.Drawing.Size(324, 22);
             this.StockInfo_Single.Text = "Stock Information";
             this.StockInfo_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -637,7 +640,7 @@
             // 
             this.ShowFocusedRow_Single.Name = "ShowFocusedRow_Single";
             this.ShowFocusedRow_Single.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.ShowFocusedRow_Single.Size = new System.Drawing.Size(261, 22);
+            this.ShowFocusedRow_Single.Size = new System.Drawing.Size(324, 22);
             this.ShowFocusedRow_Single.Text = "Show Focused Row";
             this.ShowFocusedRow_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -647,14 +650,14 @@
             this.MDMPartAdd_Single.ForeColor = System.Drawing.Color.Red;
             this.MDMPartAdd_Single.Name = "MDMPartAdd_Single";
             this.MDMPartAdd_Single.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.M)));
-            this.MDMPartAdd_Single.Size = new System.Drawing.Size(261, 22);
+            this.MDMPartAdd_Single.Size = new System.Drawing.Size(324, 22);
             this.MDMPartAdd_Single.Text = "MDM - Part Add";
             this.MDMPartAdd_Single.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // exportToExcel
             // 
             this.exportToExcel.Name = "exportToExcel";
-            this.exportToExcel.Size = new System.Drawing.Size(261, 22);
+            this.exportToExcel.Size = new System.Drawing.Size(324, 22);
             this.exportToExcel.Text = "Export to Excel";
             this.exportToExcel.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -1417,11 +1420,7 @@
             this.CopyPtrnV1N4_Multiple,
             this.CopyPtrnF1F4_Multiple,
             this.toolStripSeparator4,
-            this.MulChkComb_Multiple,
-            this.MulChkStc_Multiple,
-            this.MulChkMdsl_Multiple,
-            this.MulChkOtsl_Multiple,
-            this.MulChkCode_Multiple,
+            this.toolStripMenuItem2,
             this.toolStripSeparator8,
             this.Transfer_Multiple,
             this.trnsRecord_Multiple,
@@ -1431,13 +1430,13 @@
             this.ShowFocusedRow_Multiple,
             this.MDMPartAdd_Multiple});
             this.multipleEditCtxMenuStrip.Name = "multiEditCtxMenuStrip";
-            this.multipleEditCtxMenuStrip.Size = new System.Drawing.Size(262, 540);
+            this.multipleEditCtxMenuStrip.Size = new System.Drawing.Size(325, 474);
             // 
             // RowUp_Multiple
             // 
             this.RowUp_Multiple.Name = "RowUp_Multiple";
             this.RowUp_Multiple.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
-            this.RowUp_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.RowUp_Multiple.Size = new System.Drawing.Size(324, 22);
             this.RowUp_Multiple.Text = "Row Up";
             this.RowUp_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -1445,7 +1444,7 @@
             // 
             this.RowDown_Multiple.Name = "RowDown_Multiple";
             this.RowDown_Multiple.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.RowDown_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.RowDown_Multiple.Size = new System.Drawing.Size(324, 22);
             this.RowDown_Multiple.Text = "Row Down";
             this.RowDown_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -1453,7 +1452,7 @@
             // 
             this.AddRow_Multiple.Name = "AddRow_Multiple";
             this.AddRow_Multiple.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.AddRow_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.AddRow_Multiple.Size = new System.Drawing.Size(324, 22);
             this.AddRow_Multiple.Text = "Add Row";
             this.AddRow_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -1461,20 +1460,20 @@
             // 
             this.DeleteRow_Multiple.Name = "DeleteRow_Multiple";
             this.DeleteRow_Multiple.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
-            this.DeleteRow_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.DeleteRow_Multiple.Size = new System.Drawing.Size(324, 22);
             this.DeleteRow_Multiple.Text = "Delete Row";
             this.DeleteRow_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(258, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(321, 6);
             // 
             // FindCode_Multiple
             // 
             this.FindCode_Multiple.Name = "FindCode_Multiple";
             this.FindCode_Multiple.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.FindCode_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.FindCode_Multiple.Size = new System.Drawing.Size(324, 22);
             this.FindCode_Multiple.Text = "Find Code";
             this.FindCode_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -1482,7 +1481,7 @@
             // 
             this.FindProcess_Multiple.Name = "FindProcess_Multiple";
             this.FindProcess_Multiple.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
-            this.FindProcess_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.FindProcess_Multiple.Size = new System.Drawing.Size(324, 22);
             this.FindProcess_Multiple.Text = "Find Process";
             this.FindProcess_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -1490,7 +1489,7 @@
             // 
             this.FillColor_Multiple.Name = "FillColor_Multiple";
             this.FillColor_Multiple.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-            this.FillColor_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.FillColor_Multiple.Size = new System.Drawing.Size(324, 22);
             this.FillColor_Multiple.Text = "Fill Color";
             this.FillColor_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -1498,20 +1497,20 @@
             // 
             this.genComment_Multiple.Name = "genComment_Multiple";
             this.genComment_Multiple.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.genComment_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.genComment_Multiple.Size = new System.Drawing.Size(324, 22);
             this.genComment_Multiple.Text = "Generate Comment";
             this.genComment_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(258, 6);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(321, 6);
             // 
             // BindPtrnTop_Multiple
             // 
             this.BindPtrnTop_Multiple.Name = "BindPtrnTop_Multiple";
             this.BindPtrnTop_Multiple.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
-            this.BindPtrnTop_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.BindPtrnTop_Multiple.Size = new System.Drawing.Size(324, 22);
             this.BindPtrnTop_Multiple.Text = "Set Ptrn. Part by Top";
             this.BindPtrnTop_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -1519,100 +1518,112 @@
             // 
             this.BindPtrnEach_Multiple.Name = "BindPtrnEach_Multiple";
             this.BindPtrnEach_Multiple.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.BindPtrnEach_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.BindPtrnEach_Multiple.Size = new System.Drawing.Size(324, 22);
             this.BindPtrnEach_Multiple.Text = "Set Ptrn. Part by Each";
             this.BindPtrnEach_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // CopyPtrnV1N4_Multiple
             // 
             this.CopyPtrnV1N4_Multiple.Name = "CopyPtrnV1N4_Multiple";
-            this.CopyPtrnV1N4_Multiple.Size = new System.Drawing.Size(261, 22);
-            this.CopyPtrnV1N4_Multiple.Text = "Copy Pattern part (V1-N4, SU22~)";
+            this.CopyPtrnV1N4_Multiple.Size = new System.Drawing.Size(324, 22);
+            this.CopyPtrnV1N4_Multiple.Text = "Copy Pattern part (V1-N4, SU22~ / NCF TCO)";
             this.CopyPtrnV1N4_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // CopyPtrnF1F4_Multiple
             // 
             this.CopyPtrnF1F4_Multiple.Name = "CopyPtrnF1F4_Multiple";
-            this.CopyPtrnF1F4_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.CopyPtrnF1F4_Multiple.Size = new System.Drawing.Size(324, 22);
             this.CopyPtrnF1F4_Multiple.Text = "Copy Pattern part (F1-F4, ~SU22)";
             this.CopyPtrnF1F4_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(258, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(321, 6);
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MulChkComb_Multiple,
+            this.MulChkStc_Multiple,
+            this.MulChkMdsl_Multiple,
+            this.MulChkOtsl_Multiple,
+            this.MulChkCode_Multiple});
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(324, 22);
+            this.toolStripMenuItem2.Text = "Multi Check";
             // 
             // MulChkComb_Multiple
             // 
             this.MulChkComb_Multiple.Name = "MulChkComb_Multiple";
-            this.MulChkComb_Multiple.Size = new System.Drawing.Size(261, 22);
-            this.MulChkComb_Multiple.Text = "Multi Check Combine";
+            this.MulChkComb_Multiple.Size = new System.Drawing.Size(135, 22);
+            this.MulChkComb_Multiple.Text = "Combine";
             this.MulChkComb_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MulChkStc_Multiple
             // 
             this.MulChkStc_Multiple.Name = "MulChkStc_Multiple";
-            this.MulChkStc_Multiple.Size = new System.Drawing.Size(261, 22);
-            this.MulChkStc_Multiple.Text = "Multi Check Sticker";
+            this.MulChkStc_Multiple.Size = new System.Drawing.Size(135, 22);
+            this.MulChkStc_Multiple.Text = "Sticker";
             this.MulChkStc_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MulChkMdsl_Multiple
             // 
             this.MulChkMdsl_Multiple.Name = "MulChkMdsl_Multiple";
-            this.MulChkMdsl_Multiple.Size = new System.Drawing.Size(261, 22);
-            this.MulChkMdsl_Multiple.Text = "Multi Check Midsole";
+            this.MulChkMdsl_Multiple.Size = new System.Drawing.Size(135, 22);
+            this.MulChkMdsl_Multiple.Text = "Midsole";
             this.MulChkMdsl_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MulChkOtsl_Multiple
             // 
             this.MulChkOtsl_Multiple.Name = "MulChkOtsl_Multiple";
-            this.MulChkOtsl_Multiple.Size = new System.Drawing.Size(261, 22);
-            this.MulChkOtsl_Multiple.Text = "Multi Check Outsole";
+            this.MulChkOtsl_Multiple.Size = new System.Drawing.Size(135, 22);
+            this.MulChkOtsl_Multiple.Text = "Outsole";
             this.MulChkOtsl_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MulChkCode_Multiple
             // 
             this.MulChkCode_Multiple.Name = "MulChkCode_Multiple";
-            this.MulChkCode_Multiple.Size = new System.Drawing.Size(261, 22);
-            this.MulChkCode_Multiple.Text = "Multi Check Codemaker";
+            this.MulChkCode_Multiple.Size = new System.Drawing.Size(135, 22);
+            this.MulChkCode_Multiple.Text = "Codemaker";
             this.MulChkCode_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator8
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(258, 6);
+            this.toolStripSeparator8.Size = new System.Drawing.Size(321, 6);
             // 
             // Transfer_Multiple
             // 
             this.Transfer_Multiple.Name = "Transfer_Multiple";
-            this.Transfer_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.Transfer_Multiple.Size = new System.Drawing.Size(324, 22);
             this.Transfer_Multiple.Text = "Transfer to Codemaker";
             this.Transfer_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // trnsRecord_Multiple
             // 
             this.trnsRecord_Multiple.Name = "trnsRecord_Multiple";
-            this.trnsRecord_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.trnsRecord_Multiple.Size = new System.Drawing.Size(324, 22);
             this.trnsRecord_Multiple.Text = "Transfer Record";
             this.trnsRecord_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator12
             // 
             this.toolStripSeparator12.Name = "toolStripSeparator12";
-            this.toolStripSeparator12.Size = new System.Drawing.Size(258, 6);
+            this.toolStripSeparator12.Size = new System.Drawing.Size(321, 6);
             // 
             // MatInfo_Multiple
             // 
             this.MatInfo_Multiple.Name = "MatInfo_Multiple";
             this.MatInfo_Multiple.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.I)));
-            this.MatInfo_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.MatInfo_Multiple.Size = new System.Drawing.Size(324, 22);
             this.MatInfo_Multiple.Text = "Material Information";
             this.MatInfo_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // BlackList_Multiple
             // 
             this.BlackList_Multiple.Name = "BlackList_Multiple";
-            this.BlackList_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.BlackList_Multiple.Size = new System.Drawing.Size(324, 22);
             this.BlackList_Multiple.Text = "BlackList Material Info";
             this.BlackList_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -1620,7 +1631,7 @@
             // 
             this.ShowFocusedRow_Multiple.Name = "ShowFocusedRow_Multiple";
             this.ShowFocusedRow_Multiple.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.ShowFocusedRow_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.ShowFocusedRow_Multiple.Size = new System.Drawing.Size(324, 22);
             this.ShowFocusedRow_Multiple.Text = "Show Focused Row";
             this.ShowFocusedRow_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -1630,7 +1641,7 @@
             this.MDMPartAdd_Multiple.ForeColor = System.Drawing.Color.Red;
             this.MDMPartAdd_Multiple.Name = "MDMPartAdd_Multiple";
             this.MDMPartAdd_Multiple.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.M)));
-            this.MDMPartAdd_Multiple.Size = new System.Drawing.Size(261, 22);
+            this.MDMPartAdd_Multiple.Size = new System.Drawing.Size(324, 22);
             this.MDMPartAdd_Multiple.Text = "MDM - Part Add";
             this.MDMPartAdd_Multiple.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -2524,12 +2535,7 @@
         private DevExpress.XtraEditors.Repository.RepositoryItemCheckEdit repositoryItemCheckEdit3;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn42;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripMenuItem MulChkComb_Single;
-        private System.Windows.Forms.ToolStripMenuItem MulChkStc_Single;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
-        private System.Windows.Forms.ToolStripMenuItem MulChkComb_Multiple;
-        private System.Windows.Forms.ToolStripMenuItem MulChkStc_Multiple;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
         private System.Windows.Forms.ToolStripMenuItem MatInfo_Single;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
         private System.Windows.Forms.ToolStripMenuItem MatInfo_Multiple;
@@ -2548,10 +2554,6 @@
         private DevExpress.XtraEditors.Repository.RepositoryItemCheckEdit repositoryItemCheckEdit6;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn48;
         private DevExpress.XtraEditors.Repository.RepositoryItemCheckEdit repositoryItemCheckEdit7;
-        private System.Windows.Forms.ToolStripMenuItem MulChkMdsl_Single;
-        private System.Windows.Forms.ToolStripMenuItem MulChkOtsl_Single;
-        private System.Windows.Forms.ToolStripMenuItem MulChkMdsl_Multiple;
-        private System.Windows.Forms.ToolStripMenuItem MulChkOtsl_Multiple;
         private DevExpress.XtraEditors.SimpleButton btnReset;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn50;
         private DevExpress.XtraEditors.SimpleButton btnImport;
@@ -2563,7 +2565,6 @@
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn54;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn55;
         private System.Windows.Forms.ToolStripMenuItem AddAggregate_Single;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
         private System.Windows.Forms.ToolStripMenuItem StockInfo_Single;
         private System.Windows.Forms.ToolStripMenuItem FillColor_Single;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn56;
@@ -2584,8 +2585,6 @@
         private DevExpress.XtraEditors.Repository.RepositoryItemCheckEdit repositoryItemCheckEdit8;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn65;
         private DevExpress.XtraEditors.Repository.RepositoryItemCheckEdit repositoryItemCheckEdit9;
-        private System.Windows.Forms.ToolStripMenuItem MulChkCode_Single;
-        private System.Windows.Forms.ToolStripMenuItem MulChkCode_Multiple;
         private System.Windows.Forms.ToolStripMenuItem Transfer_Single;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
         private System.Windows.Forms.ToolStripMenuItem Transfer_Multiple;
@@ -2601,6 +2600,19 @@
         private System.Windows.Forms.ToolStripMenuItem genComment_Multiple;
         private System.Windows.Forms.ToolStripMenuItem CopyPtrnF1F4_Single;
         private System.Windows.Forms.ToolStripMenuItem CopyPtrnF1F4_Multiple;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem MulChkComb_Single;
+        private System.Windows.Forms.ToolStripMenuItem MulChkStc_Single;
+        private System.Windows.Forms.ToolStripMenuItem MulChkMdsl_Single;
+        private System.Windows.Forms.ToolStripMenuItem MulChkOtsl_Single;
+        private System.Windows.Forms.ToolStripMenuItem MulChkCode_Single;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem MulChkComb_Multiple;
+        private System.Windows.Forms.ToolStripMenuItem MulChkStc_Multiple;
+        private System.Windows.Forms.ToolStripMenuItem MulChkMdsl_Multiple;
+        private System.Windows.Forms.ToolStripMenuItem MulChkOtsl_Multiple;
+        private System.Windows.Forms.ToolStripMenuItem MulChkCode_Multiple;
 
     }
 }

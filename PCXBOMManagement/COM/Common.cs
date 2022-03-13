@@ -752,7 +752,7 @@ namespace CSI.PCC.PCX.COM
         /// <param name="factory"></param>
         /// <param name="wsNo"></param>
         /// <returns></returns>
-        public static bool HasBOMLocked(GridView view)
+        public static bool HasBOMLocked(GridView view, bool allowShowing)
         {
             DataSet ds = null;
 
@@ -767,8 +767,9 @@ namespace CSI.PCC.PCX.COM
             {
                 if (ds.Tables[0].AsEnumerable().Where(x => x["LOCK_YN"].ToString().Equals("Y")).Count() > 0)
                 {
-                    MessageBox.Show("Locked BOM is included in the selection.", "",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                    if (allowShowing)
+                        Common.ShowMessageBox("Locked BOM is included in the selection.", "E");
+
                     return true;
                 }
                 else

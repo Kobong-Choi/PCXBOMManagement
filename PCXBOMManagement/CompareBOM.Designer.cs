@@ -42,6 +42,7 @@
             this.SetPtrnByTop = new System.Windows.Forms.ToolStripMenuItem();
             this.SetPtrnByEach = new System.Windows.Forms.ToolStripMenuItem();
             this.CopyPtrnV1N4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.CopyPtrnF1F4 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.MulCheckCombine = new System.Windows.Forms.ToolStripMenuItem();
             this.MulCheckSticker = new System.Windows.Forms.ToolStripMenuItem();
@@ -108,7 +109,6 @@
             this.gridColumn5 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.panelControl2 = new DevExpress.XtraEditors.PanelControl();
             this.btnSave = new DevExpress.XtraEditors.SimpleButton();
-            this.CopyPtrnF1F4 = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
             this.panelControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
@@ -191,13 +191,13 @@
             this.FocusRow,
             this.PartAdd});
             this.ctxMenuStrip.Name = "ctxMenuStrip";
-            this.ctxMenuStrip.Size = new System.Drawing.Size(262, 402);
+            this.ctxMenuStrip.Size = new System.Drawing.Size(325, 380);
             // 
             // FindCode
             // 
             this.FindCode.Name = "FindCode";
             this.FindCode.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.FindCode.Size = new System.Drawing.Size(231, 22);
+            this.FindCode.Size = new System.Drawing.Size(324, 22);
             this.FindCode.Text = "Find Code";
             this.FindCode.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -205,7 +205,7 @@
             // 
             this.FindProcess.Name = "FindProcess";
             this.FindProcess.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
-            this.FindProcess.Size = new System.Drawing.Size(231, 22);
+            this.FindProcess.Size = new System.Drawing.Size(324, 22);
             this.FindProcess.Text = "Find Process";
             this.FindProcess.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -213,20 +213,20 @@
             // 
             this.genComment.Name = "genComment";
             this.genComment.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.genComment.Size = new System.Drawing.Size(231, 22);
+            this.genComment.Size = new System.Drawing.Size(324, 22);
             this.genComment.Text = "Generate Comment";
             this.genComment.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(228, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(321, 6);
             // 
             // SetPtrnByTop
             // 
             this.SetPtrnByTop.Name = "SetPtrnByTop";
             this.SetPtrnByTop.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
-            this.SetPtrnByTop.Size = new System.Drawing.Size(231, 22);
+            this.SetPtrnByTop.Size = new System.Drawing.Size(324, 22);
             this.SetPtrnByTop.Text = "Set Ptrn. Part by Top";
             this.SetPtrnByTop.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -234,78 +234,85 @@
             // 
             this.SetPtrnByEach.Name = "SetPtrnByEach";
             this.SetPtrnByEach.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.SetPtrnByEach.Size = new System.Drawing.Size(231, 22);
+            this.SetPtrnByEach.Size = new System.Drawing.Size(324, 22);
             this.SetPtrnByEach.Text = "Set Ptrn. Part by Each";
             this.SetPtrnByEach.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // CopyPtrnV1N4
             // 
             this.CopyPtrnV1N4.Name = "CopyPtrnV1N4";
-            this.CopyPtrnV1N4.Size = new System.Drawing.Size(261, 22);
-            this.CopyPtrnV1N4.Text = "Copy Pattern part (V1-N4, SU22~)";
+            this.CopyPtrnV1N4.Size = new System.Drawing.Size(324, 22);
+            this.CopyPtrnV1N4.Text = "Copy Pattern part (V1-N4, SU22~ / NCF TCO)";
             this.CopyPtrnV1N4.Click += new System.EventHandler(this.ContextMenu_Click);
+            // 
+            // CopyPtrnF1F4
+            // 
+            this.CopyPtrnF1F4.Name = "CopyPtrnF1F4";
+            this.CopyPtrnF1F4.Size = new System.Drawing.Size(324, 22);
+            this.CopyPtrnF1F4.Text = "Copy Pattern part (F1-F4, ~SU22)";
+            this.CopyPtrnF1F4.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(228, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(321, 6);
             // 
             // MulCheckCombine
             // 
             this.MulCheckCombine.Name = "MulCheckCombine";
-            this.MulCheckCombine.Size = new System.Drawing.Size(231, 22);
+            this.MulCheckCombine.Size = new System.Drawing.Size(324, 22);
             this.MulCheckCombine.Text = "Multi Check - Combine";
             this.MulCheckCombine.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MulCheckSticker
             // 
             this.MulCheckSticker.Name = "MulCheckSticker";
-            this.MulCheckSticker.Size = new System.Drawing.Size(231, 22);
+            this.MulCheckSticker.Size = new System.Drawing.Size(324, 22);
             this.MulCheckSticker.Text = "Multi Check - Sticker";
             this.MulCheckSticker.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MulCheckMidsole
             // 
             this.MulCheckMidsole.Name = "MulCheckMidsole";
-            this.MulCheckMidsole.Size = new System.Drawing.Size(231, 22);
+            this.MulCheckMidsole.Size = new System.Drawing.Size(324, 22);
             this.MulCheckMidsole.Text = "Multi Check - Midsole";
             this.MulCheckMidsole.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MulCheckOutsole
             // 
             this.MulCheckOutsole.Name = "MulCheckOutsole";
-            this.MulCheckOutsole.Size = new System.Drawing.Size(231, 22);
+            this.MulCheckOutsole.Size = new System.Drawing.Size(324, 22);
             this.MulCheckOutsole.Text = "Multi Check - Outsole";
             this.MulCheckOutsole.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(228, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(321, 6);
             // 
             // transfer
             // 
             this.transfer.Name = "transfer";
-            this.transfer.Size = new System.Drawing.Size(231, 22);
+            this.transfer.Size = new System.Drawing.Size(324, 22);
             this.transfer.Text = "Transfer to Codemaker";
             this.transfer.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // transferRecord
             // 
             this.transferRecord.Name = "transferRecord";
-            this.transferRecord.Size = new System.Drawing.Size(231, 22);
+            this.transferRecord.Size = new System.Drawing.Size(324, 22);
             this.transferRecord.Text = "Transfer Record";
             this.transferRecord.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(228, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(321, 6);
             // 
             // MatInfo
             // 
             this.MatInfo.Name = "MatInfo";
-            this.MatInfo.Size = new System.Drawing.Size(231, 22);
+            this.MatInfo.Size = new System.Drawing.Size(324, 22);
             this.MatInfo.Text = "Material Info.";
             this.MatInfo.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -313,7 +320,7 @@
             // 
             this.FocusRow.Name = "FocusRow";
             this.FocusRow.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.FocusRow.Size = new System.Drawing.Size(231, 22);
+            this.FocusRow.Size = new System.Drawing.Size(324, 22);
             this.FocusRow.Text = "Focus Row";
             this.FocusRow.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -322,7 +329,7 @@
             this.PartAdd.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
             this.PartAdd.ForeColor = System.Drawing.Color.Red;
             this.PartAdd.Name = "PartAdd";
-            this.PartAdd.Size = new System.Drawing.Size(231, 22);
+            this.PartAdd.Size = new System.Drawing.Size(324, 22);
             this.PartAdd.Text = "MDM - Part Add";
             this.PartAdd.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
@@ -1029,8 +1036,8 @@
             // 
             // btnSave
             // 
-            this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSave.Image = ((System.Drawing.Image)(resources.GetObject("btnSave.Image")));
             this.btnSave.Location = new System.Drawing.Point(1611, 7);
             this.btnSave.Name = "btnSave";
@@ -1038,13 +1045,6 @@
             this.btnSave.TabIndex = 4;
             this.btnSave.Text = "Save";
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
-            // 
-            // CopyPtrnF1F4
-            // 
-            this.CopyPtrnF1F4.Name = "CopyPtrnF1F4";
-            this.CopyPtrnF1F4.Size = new System.Drawing.Size(261, 22);
-            this.CopyPtrnF1F4.Text = "Copy Pattern part (F1-F4, ~SU22)";
-            this.CopyPtrnF1F4.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // CompareBOM
             // 

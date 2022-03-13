@@ -12,6 +12,7 @@ using DevExpress.XtraGrid;                      // GridControl
 using DevExpress.XtraGrid.Views.Base;           // GridCell
 using DevExpress.XtraGrid.Views.Grid;           // GridView
 using DevExpress.XtraGrid.Views.Grid.ViewInfo;  // GridHitInfo
+using DevExpress.XtraGrid.Columns;
 using DevExpress.Utils;                         // DXMouseEventArgs
 using DevExpress.XtraEditors;                   // GridLookUpEdit
 using CSI.Client.ProjectBaseForm;               // ProjectBaseForm Class
@@ -29,13 +30,13 @@ namespace CSI.PCC.PCX
         public bool HasLockedBOM { get; set; }
         public int ParentRowhandle { get; set; }
 
-        private static GridView ActiveViewOfBOM = null;
-        private static GridView ActiveViewOfPMC = null;
-        private static GridView ActiveViewOf3P = null;
+        private static GridView ActiveViewBOM = null;
+        private static GridView ActiveViewPMC = null;
+        private static GridView ActiveView3P = null;
         
-        private static GridControl ActiveControlOfBOM = null;
-        private static GridControl ActiveControlOfPMC = null;
-        private static GridControl ActiveControlOf3P = null;
+        private static GridControl ActiveControlBOM = null;
+        private static GridControl ActiveControlPMC = null;
+        private static GridControl ActiveControl3P = null;
 
         private static Font font = new Font("Tahoma", 9, FontStyle.Bold);
 
@@ -52,7 +53,7 @@ namespace CSI.PCC.PCX
         private static List<string> RequiredFields = new List<string>() {
             "PART_NAME", "PART_TYPE", "MAT_NAME", "COLOR_NAME" };
 
-        public ProjectBaseForm projectBaseForm = Common.projectBaseForm;
+        //public ProjectBaseForm projectBaseForm = Common.projectBaseForm;
 
         public Purchase()
         {
@@ -64,17 +65,14 @@ namespace CSI.PCC.PCX
             base.OnLoad(e);
 
             // Get each active gridcontrol.
-            ActiveControlOfBOM = (this.EditType == "Single") ? grdBomSingle : grdBomMultiple;
-            ActiveControlOfPMC = (this.EditType == "Single") ? grdPMCSingle : grdPMCMultiple;
-            ActiveControlOf3P = (this.EditType == "Single") ? grd3PSingle : grd3PMultiple;
+            ActiveControlBOM = (this.EditType == "Single") ? grdBomSingle : grdBomMultiple;
+            ActiveControlPMC = (this.EditType == "Single") ? grdPMCSingle : grdPMCMultiple;
+            ActiveControl3P = (this.EditType == "Single") ? grd3PSingle : grd3PMultiple;
 
             // Get each active gridview.
-            ActiveViewOfBOM = (this.EditType == "Single") ? gvwBomSingle : gvwBomMultiple;
-            ActiveViewOfPMC = (this.EditType == "Single") ? gvwPMCSingle : gvwPMCMultiple;
-            ActiveViewOf3P = (this.EditType == "Single") ? gvw3PSingle : gvw3PMultiple;
-
-            // In case of a locked BOM, Can't order materials.
-            btnMove.Enabled = HasLockedBOM ? false : true;
+            ActiveViewBOM = (this.EditType == "Single") ? gvwBomSingle : gvwBomMultiple;
+            ActiveViewPMC = (this.EditType == "Single") ? gvwPMCSingle : gvwPMCMultiple;
+            ActiveView3P = (this.EditType == "Single") ? gvw3PSingle : gvw3PMultiple;
 
             // Activate gridview.
             switch (this.EditType)
@@ -113,8 +111,8 @@ namespace CSI.PCC.PCX
                 pkgSelect.ARG_WS_NO = this.WorksheetNumbers;
                 pkgSelect.ARG_PART_SEQ = "";
                 pkgSelect.OUT_CURSOR = string.Empty;
-                
-                DataTable dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
+
+                DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
                 
                 if (dataSource != null)
                 {
@@ -135,18 +133,18 @@ namespace CSI.PCC.PCX
 
             if (sourceOfBom.Rows.Count == 0)
             {
-                MessageBox.Show("There is nothing to request an order in the BOM.");
+                Common.ShowMessageBox("There is nothing to request an order in the BOM.", "E");
                 this.Close();
             }
             else if (sourceOfBom.Rows[0]["DEV_COLORWAY_ID"].ToString() == "")
             {
-                MessageBox.Show("Dev Colorway ID is required to request order.");
+                Common.ShowMessageBox("Dev Colorway ID is required to request order.", "E");
                 this.Close();
             }
 
-            ActiveControlOfBOM.DataSource = sourceOfBom;
-            ActiveControlOfPMC.DataSource = GetDataSourceOfPurchase("PMC");
-            ActiveControlOf3P.DataSource = GetDataSourceOfPurchase("THREE_P");
+            ActiveControlBOM.DataSource = sourceOfBom;
+            ActiveControlPMC.DataSource = GetDataSourceOfPurchase("PMC");
+            ActiveControl3P.DataSource = GetDataSourceOfPurchase("THREE_P");
         }
 
         #region 버튼 이벤트
@@ -202,16 +200,17 @@ namespace CSI.PCC.PCX
         /// <param name="e"></param>
         private void btnMove_Click(object sender, EventArgs e)
         {
-            ArrayList arrayList = new ArrayList();
-            
-            Func<GridControl, bool> func = (control) =>
+            ArrayList list = new ArrayList();
+            List<DataRow> listDataRow = new List<DataRow>();
+            bool isCheckedPMC;
+            bool isChecked3P;
+
+            Func<GridControl, bool> haveAllRowSaved = (control) =>
             {
                 if ((control.DataSource as DataTable).AsEnumerable().Where(
                     x => x["ROW_STATUS"].ToString().Equals("U")).Count() > 0)
                 {
-                    MessageBox.Show("Please save data first.", "",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
-
+                    Common.ShowMessageBox("Please save first.", "W");
                     return false;
                 }
                 else
@@ -219,47 +218,42 @@ namespace CSI.PCC.PCX
             };
 
             // Validate that changed data was saved.
-            if (func(ActiveControlOfPMC) == false) return;
-            if (func(ActiveControlOf3P) == false) return;
+            if (!haveAllRowSaved(ActiveControlPMC)) return;
+            if (!haveAllRowSaved(ActiveControl3P)) return;
 
             // Make purchase check status to 'Y' to create temporary order data.
-            for (int rowHandle = 0; rowHandle < ActiveViewOfBOM.RowCount; rowHandle++)
+            for (int rowHandle = 0; rowHandle < ActiveViewBOM.RowCount; rowHandle++)
             {
                 // Get each check status.
-                bool isCheckedOnPMC = ActiveViewOfBOM.GetRowCellValue(rowHandle, "PMC_CHK").ToString().Equals("Y");
-                bool isCheckedOn3P = ActiveViewOfBOM.GetRowCellValue(rowHandle, "THREE_P_CHK").ToString().Equals("Y");
+                isCheckedPMC = ActiveViewBOM.GetRowCellValue(rowHandle, "PMC_CHK").ToString().Equals("Y");
+                isChecked3P = ActiveViewBOM.GetRowCellValue(rowHandle, "THREE_P_CHK").ToString().Equals("Y");
 
                 // There are no materials that can be ordered to two locations at the same time.
-                if (isCheckedOnPMC && isCheckedOn3P)
+                if (isCheckedPMC && isChecked3P)
                 {
-                    MessageBox.Show("Please select only one place to order.", "",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-
-                    Common.FocusCell(ActiveViewOfBOM, rowHandle, "PART_NAME", false);
+                    Common.ShowMessageBox("Please select only one place to order.", "E");
+                    Common.FocusCell(ActiveViewBOM, rowHandle, "PART_NAME", false);
                     return;
                 }
-                else if (isCheckedOnPMC != isCheckedOn3P)
+                else if (isCheckedPMC != isChecked3P)
                 {
                     // In case of 3P, Skip overseas factory .
-                    if (isCheckedOn3P)
-                    {
-                        if (ActiveViewOfBOM.GetRowCellValue(rowHandle, "FACTORY").ToString() != "DS")
-                            continue;
-                    }
+                    if (isChecked3P && !ActiveViewBOM.GetRowCellValue(rowHandle, "FACTORY").ToString().Equals("DS"))
+                        continue;
 
                     PKG_INTG_BOM_PURCHASE.UPDATE_PUR_CHK_TO_Y pkgUpdate = new PKG_INTG_BOM_PURCHASE.UPDATE_PUR_CHK_TO_Y();
-                    pkgUpdate.ARG_FACTORY = ActiveViewOfBOM.GetRowCellValue(rowHandle, "FACTORY").ToString();
-                    pkgUpdate.ARG_WS_NO = ActiveViewOfBOM.GetRowCellValue(rowHandle, "WS_NO").ToString();
-                    pkgUpdate.ARG_PART_SEQ = ActiveViewOfBOM.GetRowCellValue(rowHandle, "PART_SEQ").ToString();
-                    pkgUpdate.ARG_TYPE = isCheckedOnPMC ? "PMC" : "THREE_P";
+                    pkgUpdate.ARG_FACTORY = ActiveViewBOM.GetRowCellValue(rowHandle, "FACTORY").ToString();
+                    pkgUpdate.ARG_WS_NO = ActiveViewBOM.GetRowCellValue(rowHandle, "WS_NO").ToString();
+                    pkgUpdate.ARG_PART_SEQ = ActiveViewBOM.GetRowCellValue(rowHandle, "PART_SEQ").ToString();
+                    pkgUpdate.ARG_TYPE = isCheckedPMC ? "PMC" : "THREE_P";
 
-                    arrayList.Add(pkgUpdate);
+                    list.Add(pkgUpdate);
                 }
             }
 
-            if (arrayList.Count > 0)
+            if (list.Count > 0)
             {
-                if (projectBaseForm.Exe_Modify_PKG(arrayList) == null)
+                if (Common.projectBaseForm.Exe_Modify_PKG(list) == null)
                     return;
             }
 
@@ -269,22 +263,25 @@ namespace CSI.PCC.PCX
             pkgInsertReq.ARG_CONCAT_WS_NO = this.WorksheetNumbers;
             pkgInsertReq.ARG_DEVELOPER = Common.sessionID;
 
-            arrayList.Clear();
-            arrayList.Add(pkgInsertReq);
+            list.Clear();
+            list.Add(pkgInsertReq);
 
-            if (projectBaseForm.Exe_Modify_PKG(arrayList) == null)
+            if (Common.projectBaseForm.Exe_Modify_PKG(list) == null)
             {
-                MessageBox.Show("Failed to create temporary order data.", "",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-
+                Common.ShowMessageBox("Failed to create temporary order data.", "E");
                 return;
             }
 
-            // Make purchase check status of the grid view to 'N'.
-            for (int rowHandle = 0; rowHandle < ActiveViewOfBOM.RowCount; rowHandle++)
+            // Change checked status from 'Y' to 'N'.
+            listDataRow = (ActiveControlBOM.DataSource as DataTable).AsEnumerable().Where(
+                x => x["PMC_CHK"].ToString().Equals("Y") || x["THREE_P_CHK"].ToString().Equals("Y")).ToList();
+
+            foreach (DataRow row in listDataRow)
             {
-                ActiveViewOfBOM.SetRowCellValue(rowHandle, "PMC_CHK", "N");
-                ActiveViewOfBOM.SetRowCellValue(rowHandle, "THREE_P_CHK", "N");
+                if (row["PMC_CHK"].ToString().Equals("Y"))
+                    row["PMC_CHK"] = "N";
+                else
+                    row["THREE_P_CHK"] = "N";
             }
 
             // Make purchase check status in the database to 'N'.
@@ -292,20 +289,18 @@ namespace CSI.PCC.PCX
             pkgUpdatePurChk_N.ARG_FACTORY = this.Factory;
             pkgUpdatePurChk_N.ARG_CONCAT_WS_NO = this.WorksheetNumbers;
 
-            arrayList.Clear();
-            arrayList.Add(pkgUpdatePurChk_N);
+            list.Clear();
+            list.Add(pkgUpdatePurChk_N);
 
-            if (projectBaseForm.Exe_Modify_PKG(arrayList) == null)
+            if (Common.projectBaseForm.Exe_Modify_PKG(list) == null)
             {
-                MessageBox.Show("Failed to return purchase check status.", "",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-                
+                Common.ShowMessageBox("Failed to return purchase check status.", "E");
                 return;
             }
 
             // Re-bind datasource into each gridview.
-            ActiveControlOfPMC.DataSource = GetDataSourceOfPurchase("PMC");
-            ActiveControlOf3P.DataSource = GetDataSourceOfPurchase("THREE_P");
+            ActiveControlPMC.DataSource = GetDataSourceOfPurchase("PMC");
+            ActiveControl3P.DataSource = GetDataSourceOfPurchase("THREE_P");
         }
 
         /// <summary>
@@ -315,7 +310,7 @@ namespace CSI.PCC.PCX
         /// <param name="e"></param>
         private void btnPmcEmpty_Click(object sender, EventArgs e)
         {
-            ClearRowsOnTheGridView(ActiveViewOfPMC, ActiveControlOfPMC, "PMC");
+            ClearRowsOnTheGridView(ActiveViewPMC, ActiveControlPMC, "PMC");
         }
 
         /// <summary>
@@ -325,7 +320,7 @@ namespace CSI.PCC.PCX
         /// <param name="e"></param>
         private void btn3PEmpty_Click(object sender, EventArgs e)
         {
-            ClearRowsOnTheGridView(ActiveViewOf3P, ActiveControlOf3P, "THREE_P");
+            ClearRowsOnTheGridView(ActiveView3P, ActiveControl3P, "THREE_P");
         }
 
         /// <summary>
@@ -335,7 +330,7 @@ namespace CSI.PCC.PCX
         /// <param name="e"></param>
         private void btnPmcAdd_Click(object sender, EventArgs e)
         {
-            AddNewRowToPurchase(ActiveControlOfPMC);
+            AddNewRowToPurchase(ActiveControlPMC);
         }
 
         /// <summary>
@@ -345,7 +340,7 @@ namespace CSI.PCC.PCX
         /// <param name="e"></param>
         private void btn3PAdd_Click(object sender, EventArgs e)
         {
-            AddNewRowToPurchase(ActiveControlOf3P);
+            AddNewRowToPurchase(ActiveControl3P);
         }
 
         /// <summary>
@@ -358,8 +353,8 @@ namespace CSI.PCC.PCX
             ArrayList arrList = new ArrayList();
 
             // Requried Validation.
-            if (ValidateExisting() == false) return;
-            if (ValidateEnrolled() == false) return;
+            if (!IsRowExisting()) return;
+            if (!AreAllEnrolled()) return;
 
             // Add an item to the list to update database.
             Action<GridView> action = (view) =>
@@ -392,18 +387,18 @@ namespace CSI.PCC.PCX
                 }
             };
             
-            action(ActiveViewOfPMC);
-            action(ActiveViewOf3P);
+            action(ActiveViewPMC);
+            action(ActiveView3P);
 
-            if (projectBaseForm.Exe_Modify_PKG(arrList) == null)
+            if (Common.projectBaseForm.Exe_Modify_PKG(arrList) == null)
             {
-                MessageBox.Show("Failed to save.");
+                Common.ShowMessageBox("Failed to save.", "E");
                 return;
             }
 
             // Re-bind dataSource to gridView.
-            ActiveControlOfPMC.DataSource = GetDataSourceOfPurchase("PMC");
-            ActiveControlOf3P.DataSource = GetDataSourceOfPurchase("THREE_P");
+            ActiveControlPMC.DataSource = GetDataSourceOfPurchase("PMC");
+            ActiveControl3P.DataSource = GetDataSourceOfPurchase("THREE_P");
             
             MessageBox.Show("Complete.");
         }
@@ -415,25 +410,78 @@ namespace CSI.PCC.PCX
         /// <param name="e"></param>
         private void btnPurchase_Click(object sender, EventArgs e)
         {
+            ArrayList list = new ArrayList();
+
             // Essential Validation.
-            if (ValidateExisting() == false) return;
-            if (ValidateEnrolled() == false) return;
+            if (!IsRowExisting()) return;
+            if (!AreAllEnrolled()) return;
+            if (!AreAllSaved()) return;
             if (ValidateFields() == false) return;
-            if (ValidateSaved() == false) return;
-            
-            if (MatchWithBOM() == false) return;
-            if (PurchaseOrders() == false) return;
+
+            // Apply the changed data to the BOM.
+            Action<GridView> action = (view) =>
+            {
+                for (int rowHandle = 0; rowHandle < view.RowCount; rowHandle++)
+                {
+                    if (view.GetRowCellValue(rowHandle, "MANUAL_ADD").ToString().Equals("Y"))
+                        continue;
+
+                    PKG_INTG_BOM_PURCHASE.UPDATE_BOM pkgUpdate = new PKG_INTG_BOM_PURCHASE.UPDATE_BOM();
+                    pkgUpdate.ARG_WORK_TYPE = "BOM";
+                    pkgUpdate.ARG_FACTORY = view.GetRowCellValue(rowHandle, "FACTORY").ToString();
+                    pkgUpdate.ARG_WS_NO = view.GetRowCellValue(rowHandle, "WS_NO").ToString();
+                    pkgUpdate.ARG_PART_SEQ = view.GetRowCellValue(rowHandle, "PART_SEQ").ToString();
+                    pkgUpdate.ARG_PART_NAME = "";
+                    pkgUpdate.ARG_PART_TYPE = "";
+                    pkgUpdate.ARG_MXSXL_NUMBER = view.GetRowCellValue(rowHandle, "MXSXL_NUMBER").ToString();
+                    pkgUpdate.ARG_PCX_SUPP_MAT_ID = view.GetRowCellValue(rowHandle, "PCX_SUPP_MAT_ID").ToString();
+                    pkgUpdate.ARG_MAT_CD = view.GetRowCellValue(rowHandle, "MAT_CD").ToString();
+                    pkgUpdate.ARG_MAT_NAME = view.GetRowCellValue(rowHandle, "MAT_NAME").ToString();
+                    pkgUpdate.ARG_MAT_COMMENT = view.GetRowCellValue(rowHandle, "MAT_COMMENT").ToString();
+                    pkgUpdate.ARG_PCX_COLOR_ID = view.GetRowCellValue(rowHandle, "PCX_COLOR_ID").ToString();
+                    pkgUpdate.ARG_COLOR_CD = view.GetRowCellValue(rowHandle, "COLOR_CD").ToString();
+                    pkgUpdate.ARG_COLOR_NAME = view.GetRowCellValue(rowHandle, "COLOR_NAME").ToString();
+                    pkgUpdate.ARG_COLOR_COMMENT = view.GetRowCellValue(rowHandle, "COLOR_COMMENT").ToString();
+                    pkgUpdate.ARG_PCX_MAT_ID = view.GetRowCellValue(rowHandle, "PCX_MAT_ID").ToString();
+                    pkgUpdate.ARG_CS_CD = view.GetRowCellValue(rowHandle, "CS_CD").ToString();
+                    pkgUpdate.ARG_VENDOR_NAME = view.GetRowCellValue(rowHandle, "VENDOR_NAME").ToString();
+                    pkgUpdate.ARG_UPD_USER = Common.sessionID;
+                    pkgUpdate.ARG_ENCODED_CMT = view.GetRowCellValue(rowHandle, "ENCODED_CMT").ToString();
+
+                    list.Add(pkgUpdate);
+                }
+            };
+
+            action(ActiveViewPMC);
+            action(ActiveView3P);
+
+            if (Common.projectBaseForm.Exe_Modify_PKG(list) == null)
+            {
+                MessageBox.Show("Failed to match changed data with this BOM.");
+                return;
+            }
+
+            // Purchase orders.
+            PKG_INTG_BOM_PURCHASE.REQUEST_PURCHASE_ORDER pkgInsert = new PKG_INTG_BOM_PURCHASE.REQUEST_PURCHASE_ORDER();
+            pkgInsert.ARG_FACTORY = this.Factory;
+            pkgInsert.ARG_CONCAT_WS_NO = this.WorksheetNumbers;
+            pkgInsert.ARG_PUR_USER = Common.sessionID;
+
+            list.Clear();
+            list.Add(pkgInsert);
+
+            if (Common.projectBaseForm.Exe_Modify_PKG(list) == null)
+            {
+                Common.ShowMessageBox("Failed to purchase.", "E");
+                return;
+            }
 
             // Clear all rows of each gridview.
-            (ActiveControlOfPMC.DataSource as DataTable).Rows.Clear();
-            (ActiveControlOf3P.DataSource as DataTable).Rows.Clear();
+            (ActiveControlPMC.DataSource as DataTable).Rows.Clear();
+            (ActiveControl3P.DataSource as DataTable).Rows.Clear();
 
-            ActiveControlOfBOM.DataSource = GetDataSourceOfBom();
-
-            //// BOM HEAD 상태값 변경
-            //if (UpdateBOMHeadInformation() == false)
-            //    return;
-
+            ActiveControlBOM.DataSource = GetDataSourceOfBom();
+            
             MessageBox.Show("Complete.");
         }
 
@@ -576,19 +624,19 @@ namespace CSI.PCC.PCX
                 #region Delete
 
                 case "DeleteRow_PMC_Single":
-                    DeleteMaterialsToPurchase(gvwPMCSingle, grdPMCSingle, "PMC");
+                    DeleteMaterialsToPurchase(gvwPMCSingle, grdPMCSingle);
                     break;
 
                 case "DeleteRow_PMC_Multiple":
-                    DeleteMaterialsToPurchase(gvwPMCMultiple, grdPMCMultiple, "PMC");
+                    DeleteMaterialsToPurchase(gvwPMCMultiple, grdPMCMultiple);
                     break;
 
                 case "DeleteRow_3P_Single":
-                    DeleteMaterialsToPurchase(gvw3PSingle, grd3PSingle, "THREE_P");
+                    DeleteMaterialsToPurchase(gvw3PSingle, grd3PSingle);
                     break;
 
                 case "DeleteRow_3P_Multiple":
-                    DeleteMaterialsToPurchase(gvw3PMultiple, grd3PMultiple, "THREE_P");
+                    DeleteMaterialsToPurchase(gvw3PMultiple, grd3PMultiple);
                     break;
 
                 #endregion
@@ -816,7 +864,7 @@ namespace CSI.PCC.PCX
                 pkgSelectPartSeq.ARG_WS_NO = view.GetRowCellValue(rowHandle, "WS_NO").ToString();
                 pkgSelectPartSeq.OUT_CURSOR = string.Empty;
 
-                DataTable result = projectBaseForm.Exe_Select_PKG(pkgSelectPartSeq).Tables[0];
+                DataTable result = Common.projectBaseForm.Exe_Select_PKG(pkgSelectPartSeq).Tables[0];
                 string partSeq = result.Rows[0]["PART_SEQ"].ToString();
 
                 ArrayList arrayList = new ArrayList();
@@ -846,7 +894,7 @@ namespace CSI.PCC.PCX
                 arrayList.Add(pkgInsert);
 
                 // Call line by line to create a new part sequence in real time.
-                if (projectBaseForm.Exe_Modify_PKG(arrayList) == null)
+                if (Common.projectBaseForm.Exe_Modify_PKG(arrayList) == null)
                 {
                     MessageBox.Show("Failed to enroll.", "",
                         MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
@@ -913,7 +961,7 @@ namespace CSI.PCC.PCX
                     view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
                 }
 
-                projectBaseForm.Exe_Modify_PKG(arrayList);
+                Common.projectBaseForm.Exe_Modify_PKG(arrayList);
                 view.RefreshData();
             }
             catch (Exception ex)
@@ -926,40 +974,33 @@ namespace CSI.PCC.PCX
         /// <summary>
         /// 등록된 자재 중 선택한 자재를 삭제한다.
         /// </summary>
-        private void DeleteMaterialsToPurchase(GridView _view, GridControl _control, string _location)
+        private void DeleteMaterialsToPurchase(GridView view, GridControl control)
         {
-            try
-            {
-                int[] rowHandles = _view.GetSelectedRows();
-                ArrayList tempList = new ArrayList();
-                int numOfDeletedRows = 0;   // 로우핸들을 보정해줄 임시 변수 - 한 칸씩 밀리면서 엉뚱한 행이 삭제됨
-                
-                // 선택된 행의 개수만큼 반복
-                foreach (int rowHandle in rowHandles)
-                {
-                    // 삭제 조건 데이터
-                    string factory = _view.GetRowCellValue(rowHandle - numOfDeletedRows, "FACTORY").ToString();
-                    string wsNo = _view.GetRowCellValue(rowHandle - numOfDeletedRows, "WS_NO").ToString();
-                    string partSeq = _view.GetRowCellValue(rowHandle - numOfDeletedRows, "PART_SEQ").ToString();
+            ArrayList list = new ArrayList();
+            int numDeletedRows = 0;
 
-                    PKG_INTG_BOM_PURCHASE.RELEASE_MANUAL_MATERIALS pkgDelete = new PKG_INTG_BOM_PURCHASE.RELEASE_MANUAL_MATERIALS();
-                    pkgDelete.ARG_FACTORY = factory;
-                    pkgDelete.ARG_WS_NO = wsNo;
-                    pkgDelete.ARG_PART_SEQ = partSeq;
-                    
-                    tempList.Add(pkgDelete);
-                    
-                    // 그리드 뷰에서 해당 행 삭제
-                    _view.DeleteRow(rowHandle - numOfDeletedRows);
-                    numOfDeletedRows++;
-                }
-                // 패키지 호출
-                projectBaseForm.Exe_Modify_PKG(tempList);
-            }
-            catch (Exception ex)
+            foreach (int rowHandle in view.GetSelectedRows())
             {
-                MessageBox.Show(ex.ToString());
-                return;
+                PKG_INTG_BOM_PURCHASE.RELEASE_MANUAL_MATERIALS pkgDelete = new PKG_INTG_BOM_PURCHASE.RELEASE_MANUAL_MATERIALS();
+                pkgDelete.ARG_FACTORY = view.GetRowCellValue(rowHandle - numDeletedRows, "FACTORY").ToString();
+                pkgDelete.ARG_WS_NO = view.GetRowCellValue(rowHandle - numDeletedRows, "WS_NO").ToString();
+                pkgDelete.ARG_PART_SEQ = view.GetRowCellValue(rowHandle - numDeletedRows, "PART_SEQ").ToString();
+
+                list.Add(pkgDelete);
+
+                view.DeleteRow(rowHandle - numDeletedRows);
+                numDeletedRows++;
+            }
+
+            if (list.Count > 0)
+            {
+                if (Common.projectBaseForm.Exe_Modify_PKG(list) == null)
+                {
+                    Common.ShowMessageBox("Failed to delete.", "E");
+                    return;
+                }
+
+                (control.DataSource as DataTable).AcceptChanges();
             }
         }
 
@@ -969,7 +1010,7 @@ namespace CSI.PCC.PCX
         private void ShowCommentForm(GridView view)
         {
             PCXComment form = new PCXComment("EDIT");
-            form.BaseForm = projectBaseForm;
+            form.BaseForm = Common.projectBaseForm;
             form.EncodedComment = view.GetRowCellValue(view.FocusedRowHandle, "ENCODED_CMT").ToString();
 
             if (form.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -1010,7 +1051,7 @@ namespace CSI.PCC.PCX
             pkgSelect.ARG_CONCAT_WS_NO = this.WorksheetNumbers;
             pkgSelect.OUT_CURSOR = string.Empty;
 
-            return projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
+            return Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
         }
 
         /// <summary>
@@ -1024,7 +1065,7 @@ namespace CSI.PCC.PCX
             pkgSelect.ARG_LOCATION = location;
             pkgSelect.OUT_CURSOR = string.Empty;
 
-            DataTable dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
+            DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
             dataSource.Columns["PART_SEQ"].AllowDBNull = true;
             
             return dataSource;
@@ -1058,7 +1099,7 @@ namespace CSI.PCC.PCX
 
                 arrayList.Add(pkgDelete);
 
-                if (projectBaseForm.Exe_Modify_PKG(arrayList) == null)
+                if (Common.projectBaseForm.Exe_Modify_PKG(arrayList) == null)
                 {
                     MessageBox.Show("Failed to empty.", "",
                         MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
@@ -1152,13 +1193,11 @@ namespace CSI.PCC.PCX
         /// </summary>
         /// <param name="editType"></param>
         /// <returns></returns>
-        private bool ValidateExisting()
+        private bool IsRowExisting()
         {
-            if (ActiveViewOfPMC.RowCount == 0 && ActiveViewOf3P.RowCount == 0)
+            if (ActiveViewPMC.RowCount == 0 && ActiveView3P.RowCount == 0)
             {
-                MessageBox.Show("There are no materials to order.", "",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
-
+                Common.ShowMessageBox("There are no materials to order.", "W");
                 return false;
             }
             else
@@ -1170,29 +1209,22 @@ namespace CSI.PCC.PCX
         /// </summary>
         /// <param name="editType"></param>
         /// <returns></returns>
-        private bool ValidateEnrolled()
+        private bool AreAllEnrolled()
         {
-            Func<GridView, bool> action = (view) =>
+            Func<GridControl, bool> hasNotEnrolled = (control) =>
             {
-                bool hasEnrolled = true;
-
-                for (int rowHandle = 0; rowHandle < view.RowCount; rowHandle++)
+                if ((control.DataSource as DataTable).AsEnumerable().Where(
+                    x => x["COLOR_VER"].ToString().Equals("Manual")).Count() > 0)
                 {
-                    if (view.GetRowCellValue(rowHandle, "COLOR_VER").ToString().Equals("Manual"))
-                    {
-                        MessageBox.Show("There are materials which haven't been enrolled yet. Please check it.", "",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-                        
-                        hasEnrolled = false;
-                        break;
-                    }
+                    Common.ShowMessageBox("There are materials which have not been enrolled yet. Please enroll first.", "E");
+                    return true;
                 }
-
-                return hasEnrolled;
+                else
+                    return false;
             };
 
-            if (action(ActiveViewOfPMC) == false) return false;
-            if (action(ActiveViewOf3P) == false) return false;
+            if (hasNotEnrolled(ActiveControlPMC)) return false;
+            if (hasNotEnrolled(ActiveControl3P)) return false;
 
             return true;
         }
@@ -1209,47 +1241,47 @@ namespace CSI.PCC.PCX
             bool isPass = true;
 
             // Validate from gridview of PMC.
-            for (int rowHandle = 0; rowHandle < ActiveViewOfPMC.RowCount; rowHandle++)
+            for (int rowHandle = 0; rowHandle < ActiveViewPMC.RowCount; rowHandle++)
             {
-                string partName = ActiveViewOfPMC.GetRowCellValue(rowHandle, "PART_NAME").ToString();
+                string partName = ActiveViewPMC.GetRowCellValue(rowHandle, "PART_NAME").ToString();
 
                 if (partName == "")
                 {
                     MessageBox.Show("Part Name is required.", "",
                         MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
 
-                    FocusOnSelectedCell(rowHandle, "PART_NAME", ActiveViewOfPMC);
+                    FocusOnSelectedCell(rowHandle, "PART_NAME", ActiveViewPMC);
                     isPass = false;
 
                     return isPass;
                 }
-                else if (ActiveViewOfPMC.GetRowCellValue(rowHandle, "PART_TYPE").ToString() == "")
+                else if (ActiveViewPMC.GetRowCellValue(rowHandle, "PART_TYPE").ToString() == "")
                 {
                     MessageBox.Show("Part Type is required.", "",
                         MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
 
-                    FocusOnSelectedCell(rowHandle, "PART_TYPE", ActiveViewOfPMC);
+                    FocusOnSelectedCell(rowHandle, "PART_TYPE", ActiveViewPMC);
                     isPass = false;
 
                     return isPass;
                 }
-                else if (ActiveViewOfPMC.GetRowCellValue(rowHandle, "MAT_NAME").ToString() == "")
+                else if (ActiveViewPMC.GetRowCellValue(rowHandle, "MAT_NAME").ToString() == "")
                 {
                     MessageBox.Show("Material Name is required.", "",
                         MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
 
-                    FocusOnSelectedCell(rowHandle, "MAT_NAME", ActiveViewOfPMC);
+                    FocusOnSelectedCell(rowHandle, "MAT_NAME", ActiveViewPMC);
                     isPass = false;
 
                     return isPass;
                 }
-                else if (ActiveViewOfPMC.GetRowCellValue(rowHandle, "COLOR_NAME").ToString() == ""
+                else if (ActiveViewPMC.GetRowCellValue(rowHandle, "COLOR_NAME").ToString() == ""
                     && listOfExceptionPart.Contains(partName) == false)
                 {
                     MessageBox.Show("Color Name is required.", "",
                         MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
 
-                    FocusOnSelectedCell(rowHandle, "COLOR_NAME", ActiveViewOfPMC);
+                    FocusOnSelectedCell(rowHandle, "COLOR_NAME", ActiveViewPMC);
                     isPass = false;
 
                     return isPass;
@@ -1257,24 +1289,24 @@ namespace CSI.PCC.PCX
             }
 
             // Validate from gridview of 3P.
-            for (int rowHandle = 0; rowHandle < ActiveViewOf3P.RowCount; rowHandle++)
+            for (int rowHandle = 0; rowHandle < ActiveView3P.RowCount; rowHandle++)
             {
-                if (ActiveViewOf3P.GetRowCellValue(rowHandle, "MAT_NAME").ToString() == "")
+                if (ActiveView3P.GetRowCellValue(rowHandle, "MAT_NAME").ToString() == "")
                 {
                     MessageBox.Show("Material Name is required.", "",
                         MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
                     
-                    FocusOnSelectedCell(rowHandle, "MAT_NAME", ActiveViewOf3P);
+                    FocusOnSelectedCell(rowHandle, "MAT_NAME", ActiveView3P);
                     isPass = false;
 
                     return isPass;
                 }
-                else if (ActiveViewOf3P.GetRowCellValue(rowHandle, "COLOR_NAME").ToString() == "")
+                else if (ActiveView3P.GetRowCellValue(rowHandle, "COLOR_NAME").ToString() == "")
                 {
                     MessageBox.Show("Color Name is requried.", "",
                         MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
                     
-                    FocusOnSelectedCell(rowHandle, "COLOR_NAME", ActiveViewOf3P);
+                    FocusOnSelectedCell(rowHandle, "COLOR_NAME", ActiveView3P);
                     isPass = false;
 
                     return isPass;
@@ -1289,29 +1321,22 @@ namespace CSI.PCC.PCX
         /// </summary>
         /// <param name="editType"></param>
         /// <returns></returns>
-        private bool ValidateSaved()
+        private bool AreAllSaved()
         {
-            Func<GridView, bool> func = (view) =>
+            Func<GridControl, bool> hasUnsaved = (control) =>
             {
-                bool isPass = true;
-
-                for (int rowHandle = 0; rowHandle < view.RowCount; rowHandle++)
+                if ((control.DataSource as DataTable).AsEnumerable().Where(
+                    x => !x["ROW_STATUS"].ToString().Equals("N")).Count() > 0)
                 {
-                    if (view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString() != "N")
-                    {
-                        MessageBox.Show("You must save the changed data first", "",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-
-                        isPass = false;
-                        break;
-                    }
+                    Common.ShowMessageBox("You must save the data changed first.", "E");
+                    return true;
                 }
-
-                return isPass;
+                else
+                    return false;
             };
 
-            if (func(ActiveViewOfPMC) == false) return false;
-            if (func(ActiveViewOf3P) == false) return false;
+            if (hasUnsaved(ActiveControlPMC)) return false;
+            if (hasUnsaved(ActiveControl3P)) return false;
 
             return true;
         }
@@ -1331,91 +1356,6 @@ namespace CSI.PCC.PCX
         }
 
         /// <summary>
-        /// Confirm temporary order data to be sent to PMC.
-        /// </summary>
-        /// <returns></returns>
-        private bool PurchaseOrders()
-        {
-            try
-            {
-                ArrayList arrayList = new ArrayList();
-
-                PKG_INTG_BOM_PURCHASE.REQUEST_PURCHASE_ORDER pkgInsertMtl = new PKG_INTG_BOM_PURCHASE.REQUEST_PURCHASE_ORDER();
-                pkgInsertMtl.ARG_FACTORY = this.Factory;
-                pkgInsertMtl.ARG_CONCAT_WS_NO = this.WorksheetNumbers;
-                pkgInsertMtl.ARG_PUR_USER = Common.sessionID;
-                
-                arrayList.Add(pkgInsertMtl);
-                
-                if (projectBaseForm.Exe_Modify_PKG(arrayList) == null)
-                {
-                    MessageBox.Show("Failed to purchase.");
-                    return false;
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Match changed data made by user with BOM data.
-        /// </summary>
-        /// <returns></returns>
-        private bool MatchWithBOM()
-        {
-            ArrayList arrList = new ArrayList();
-
-            Action<GridView> action = (view) =>
-            {
-                for (int rowHandle = 0; rowHandle < view.RowCount; rowHandle++)
-                {
-                    if (view.GetRowCellValue(rowHandle, "MANUAL_ADD").ToString() == "Y")
-                        continue;
-
-                    PKG_INTG_BOM_PURCHASE.UPDATE_BOM pkgUpdate = new PKG_INTG_BOM_PURCHASE.UPDATE_BOM();
-                    pkgUpdate.ARG_WORK_TYPE = "BOM";
-                    pkgUpdate.ARG_FACTORY = view.GetRowCellValue(rowHandle, "FACTORY").ToString();
-                    pkgUpdate.ARG_WS_NO = view.GetRowCellValue(rowHandle, "WS_NO").ToString();
-                    pkgUpdate.ARG_PART_SEQ = view.GetRowCellValue(rowHandle, "PART_SEQ").ToString();
-                    pkgUpdate.ARG_PART_NAME = "";
-                    pkgUpdate.ARG_PART_TYPE = "";
-                    pkgUpdate.ARG_MXSXL_NUMBER = view.GetRowCellValue(rowHandle, "MXSXL_NUMBER").ToString();
-                    pkgUpdate.ARG_PCX_SUPP_MAT_ID = view.GetRowCellValue(rowHandle, "PCX_SUPP_MAT_ID").ToString();
-                    pkgUpdate.ARG_MAT_CD = view.GetRowCellValue(rowHandle, "MAT_CD").ToString();
-                    pkgUpdate.ARG_MAT_NAME = view.GetRowCellValue(rowHandle, "MAT_NAME").ToString();
-                    pkgUpdate.ARG_MAT_COMMENT = view.GetRowCellValue(rowHandle, "MAT_COMMENT").ToString();
-                    pkgUpdate.ARG_PCX_COLOR_ID = view.GetRowCellValue(rowHandle, "PCX_COLOR_ID").ToString();
-                    pkgUpdate.ARG_COLOR_CD = view.GetRowCellValue(rowHandle, "COLOR_CD").ToString();
-                    pkgUpdate.ARG_COLOR_NAME = view.GetRowCellValue(rowHandle, "COLOR_NAME").ToString();
-                    pkgUpdate.ARG_COLOR_COMMENT = view.GetRowCellValue(rowHandle, "COLOR_COMMENT").ToString();
-                    pkgUpdate.ARG_PCX_MAT_ID = view.GetRowCellValue(rowHandle, "PCX_MAT_ID").ToString();
-                    pkgUpdate.ARG_CS_CD = view.GetRowCellValue(rowHandle, "CS_CD").ToString();
-                    pkgUpdate.ARG_VENDOR_NAME = view.GetRowCellValue(rowHandle, "VENDOR_NAME").ToString();
-                    pkgUpdate.ARG_UPD_USER = Common.sessionID;
-                    pkgUpdate.ARG_ENCODED_CMT = view.GetRowCellValue(rowHandle, "ENCODED_CMT").ToString();
-
-                    arrList.Add(pkgUpdate);
-                }
-            };
-
-            action(ActiveViewOfPMC);
-            action(ActiveViewOf3P);
-
-            if (projectBaseForm.Exe_Modify_PKG(arrList) == null)
-            {
-                MessageBox.Show("Failed to match changed data with this BOM.");
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
         /// Be deleted function.
         /// </summary>
         /// <returns></returns>
@@ -1431,8 +1371,8 @@ namespace CSI.PCC.PCX
                 pkgUpdate.ARG_UPD_USER = Common.sessionID;
                 
                 arrayList.Add(pkgUpdate);
-                
-                if (projectBaseForm.Exe_Modify_PKG(arrayList) == null)
+
+                if (Common.projectBaseForm.Exe_Modify_PKG(arrayList) == null)
                 {
                     MessageBox.Show("Failed to change purhcase status");
                     return false;
@@ -1446,7 +1386,7 @@ namespace CSI.PCC.PCX
                 return false;
             }
         }
-
+        
         #endregion
 
         #region  그리드뷰 이벤트
@@ -1983,7 +1923,7 @@ namespace CSI.PCC.PCX
                         pkgSelect.ARG_NAME = "";
                         pkgSelect.OUT_CURSOR = string.Empty;
                         // 패키지 호출하여 PCX Color 정보를 가져옴
-                        DataTable dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
+                        DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
                         if (dataSource.Rows.Count > 0)
                         {
                             pdmColorCode = dataSource.Rows[0][0].ToString();
@@ -2011,7 +1951,7 @@ namespace CSI.PCC.PCX
                         pkgSelect.ARG_NAME = value;
                         pkgSelect.OUT_CURSOR = string.Empty;
                         // 패키지 호출하여 PCX Color 정보를 가져옴
-                        DataTable dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
+                        DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
                         if (dataSource.Rows.Count > 0)
                         {
                             pdmColorCode = dataSource.Rows[0][0].ToString();
@@ -2040,8 +1980,8 @@ namespace CSI.PCC.PCX
                             pkgSelect.ARG_CODE = value;
                             pkgSelect.ARG_NAME = "";
                             pkgSelect.OUT_CURSOR = string.Empty;
-                            
-                            DataTable dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
+
+                            DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
                             if (dataSource.Rows.Count > 0)
                             {
                                 //partCode = dataSource.Rows[0][0].ToString();
@@ -2076,7 +2016,7 @@ namespace CSI.PCC.PCX
                         pkgSelect.ARG_NAME = "";
                         pkgSelect.OUT_CURSOR = string.Empty;
 
-                        DataTable dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
+                        DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
 
                         if (dataSource.Rows.Count == 1)
                         {
@@ -2119,8 +2059,8 @@ namespace CSI.PCC.PCX
                             pkgSelect.ARG_CODE = "";
                             pkgSelect.ARG_NAME = value.ToUpper();
                             pkgSelect.OUT_CURSOR = string.Empty;
-                            
-                            DataTable dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
+
+                            DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
 
                             if (dataSource.Rows.Count == 1)
                             {
@@ -2330,16 +2270,33 @@ namespace CSI.PCC.PCX
         private void CustomShowingEditor(object sender, CancelEventArgs e)
         {
             GridView view = sender as GridView;
+            string[] uneditableFieldName = new string[] { "PART_NAME", "PART_TYPE" };
+            bool isManual = view.GetRowCellValue(view.FocusedRowHandle, "MANUAL_ADD").ToString().Equals("Y");
+            bool isEnrolled = view.GetRowCellValue(view.FocusedRowHandle, "COLOR_VER").ToString().Equals("Enrolled");
 
-            string focusedFieldName = view.FocusedColumn.FieldName;
-            string modifiable = view.GetRowCellValue(view.FocusedRowHandle, "MANUAL_ADD").ToString();
-            string colorVersion = view.GetRowCellValue(view.FocusedRowHandle, "COLOR_VER").ToString();
-            
-            if ((focusedFieldName == "PART_NAME" || focusedFieldName == "PART_TYPE") && modifiable == "N")
-                e.Cancel = true;
+            switch (HasLockedBOM)
+            {
+                case true:
 
-            if (colorVersion == "Enrolled")
-                e.Cancel = true;
+                    if (!isManual)
+                        e.Cancel = true;
+                    else if (isEnrolled)
+                        e.Cancel = true;
+
+                    break;
+
+                case false:
+
+                    if (!isManual)
+                    {
+                        if (uneditableFieldName.Contains(view.FocusedColumn.FieldName))
+                            e.Cancel = true;
+                    }
+                    else if (isEnrolled)
+                        e.Cancel = true;
+
+                    break;
+            }
         }
 
         /// <summary>

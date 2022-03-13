@@ -24,7 +24,6 @@ namespace CSI.PCC.PCX
     {
         public string Factory { get; set; }
         public string WSNumber { get; set; }
-        public ProjectBaseForm projectBaseForm = Common.projectBaseForm;
 
         public BOMHeadUpdater()
         {
@@ -35,104 +34,97 @@ namespace CSI.PCC.PCX
         {
             base.OnLoad(e);
 
-            try
-            {
-                // 해외는 GEL 관리 X
-                if (Common.sessionFactory != "DS")
-                    gvwHeadData.Columns["GEL_YN"].Visible = false;
+            // 해외는 GEL 관리 X
+            if (!Common.sessionFactory.Equals("DS"))
+                gvwHeadData.Columns["GEL_YN"].Visible = false;
 
-                #region Bind dataSource to LookUpEdit.
+            #region Bind dataSource to LookUpEdit.
 
-                DataTable resultValue = null;
+            DataTable resultValue = null;
 
-                // Season
-                PKG_INTG_BOM_COMMON.SELECT_COMMON_CODE pkgSelectSeason = new PKG_INTG_BOM_COMMON.SELECT_COMMON_CODE();
-                pkgSelectSeason.ARG_TYPE = "SEASON";
-                pkgSelectSeason.ARG_SORT_TYPE = "DESC";
-                pkgSelectSeason.OUT_CURSOR = string.Empty;
+            // Season
+            PKG_INTG_BOM_COMMON.SELECT_COMMON_CODE pkgSelectSeason = new PKG_INTG_BOM_COMMON.SELECT_COMMON_CODE();
+            pkgSelectSeason.ARG_TYPE = "SEASON";
+            pkgSelectSeason.ARG_SORT_TYPE = "DESC";
+            pkgSelectSeason.OUT_CURSOR = string.Empty;
 
-                resultValue = projectBaseForm.Exe_Select_PKG(pkgSelectSeason).Tables[0];
-                lookUpSeason.DataSource = resultValue;
+            resultValue = Common.projectBaseForm.Exe_Select_PKG(pkgSelectSeason).Tables[0];
+            lookUpSeason.DataSource = resultValue;
 
-                // Sample Type
-                PKG_INTG_BOM_COMMON.SELECT_SAMPLE_TYPE pkgSelectSampleType = new PKG_INTG_BOM_COMMON.SELECT_SAMPLE_TYPE();
-                pkgSelectSampleType.ARG_FACTORY = this.Factory;
-                pkgSelectSampleType.ARG_ST_DIV = "B";
-                pkgSelectSampleType.ARG_USE_YN = "Y";
-                pkgSelectSampleType.OUT_CURSOR = string.Empty;
+            // Sample Type
+            PKG_INTG_BOM_COMMON.SELECT_SAMPLE_TYPE pkgSelectSampleType = new PKG_INTG_BOM_COMMON.SELECT_SAMPLE_TYPE();
+            pkgSelectSampleType.ARG_FACTORY = this.Factory;
+            pkgSelectSampleType.ARG_ST_DIV = "B";
+            pkgSelectSampleType.ARG_USE_YN = "Y";
+            pkgSelectSampleType.OUT_CURSOR = string.Empty;
 
-                resultValue = projectBaseForm.Exe_Select_PKG(pkgSelectSampleType).Tables[0];
-                lookUpSampleType.DataSource = resultValue;
+            resultValue = Common.projectBaseForm.Exe_Select_PKG(pkgSelectSampleType).Tables[0];
+            lookUpSampleType.DataSource = resultValue;
 
-                // Sub Type
-                PKG_INTG_BOM_COMMON.SELECT_SUB_SAMPLE_TYPE pkgSelectSubType = new PKG_INTG_BOM_COMMON.SELECT_SUB_SAMPLE_TYPE();
-                pkgSelectSubType.ARG_ST_DIV = "S";
-                pkgSelectSubType.OUT_CURSOR = string.Empty;
+            // Sub Type
+            PKG_INTG_BOM_COMMON.SELECT_SUB_SAMPLE_TYPE pkgSelectSubType = new PKG_INTG_BOM_COMMON.SELECT_SUB_SAMPLE_TYPE();
+            pkgSelectSubType.ARG_ST_DIV = "S";
+            pkgSelectSubType.OUT_CURSOR = string.Empty;
 
-                resultValue = projectBaseForm.Exe_Select_PKG(pkgSelectSubType).Tables[0];
-                lookUpSubType.DataSource = resultValue;
+            resultValue = Common.projectBaseForm.Exe_Select_PKG(pkgSelectSubType).Tables[0];
+            lookUpSubType.DataSource = resultValue;
 
-                //// PCC Org
-                //PKG_INTG_BOM_COMMON.SELECT_COMMON_CODE pkgSelectOrg = new PKG_INTG_BOM_COMMON.SELECT_COMMON_CODE();
-                //pkgSelectOrg.ARG_TYPE = "PCC_ORG";
-                //pkgSelectOrg.ARG_SORT_TYPE = "ASC";
-                //pkgSelectOrg.OUT_CURSOR = string.Empty;
+            //// PCC Org
+            //PKG_INTG_BOM_COMMON.SELECT_COMMON_CODE pkgSelectOrg = new PKG_INTG_BOM_COMMON.SELECT_COMMON_CODE();
+            //pkgSelectOrg.ARG_TYPE = "PCC_ORG";
+            //pkgSelectOrg.ARG_SORT_TYPE = "ASC";
+            //pkgSelectOrg.OUT_CURSOR = string.Empty;
 
-                //resultValue = projectBaseForm.Exe_Select_PKG(pkgSelectOrg).Tables[0];
-                //lookUpOrg.DataSource = resultValue;
+            //resultValue = projectBaseForm.Exe_Select_PKG(pkgSelectOrg).Tables[0];
+            //lookUpOrg.DataSource = resultValue;
 
-                // PCC Category
-                PKG_INTG_BOM_COMMON.SELECT_CATEGORY pkgSelectCategory = new PKG_INTG_BOM_COMMON.SELECT_CATEGORY();
-                pkgSelectCategory.ARG_GROUP_CODE = "BOM_CAT";
-                pkgSelectCategory.ARG_CODE_VALUE = "WMT";
-                pkgSelectCategory.OUT_CURSOR = string.Empty;
+            // PCC Category
+            PKG_INTG_BOM_COMMON.SELECT_CATEGORY pkgSelectCategory = new PKG_INTG_BOM_COMMON.SELECT_CATEGORY();
+            pkgSelectCategory.ARG_GROUP_CODE = "BOM_CAT";
+            pkgSelectCategory.ARG_CODE_VALUE = "WMT";
+            pkgSelectCategory.OUT_CURSOR = string.Empty;
 
-                resultValue = projectBaseForm.Exe_Select_PKG(pkgSelectCategory).Tables[0];
-                lookUpCategory.DataSource = resultValue;
+            resultValue = Common.projectBaseForm.Exe_Select_PKG(pkgSelectCategory).Tables[0];
+            lookUpCategory.DataSource = resultValue;
 
-                // GENDER
-                PKG_INTG_BOM_COMMON.SELECT_GENDER pkgSelectGender = new PKG_INTG_BOM_COMMON.SELECT_GENDER();
-                pkgSelectGender.ARG_ATTRIBUTE_NAME = "Gender";
-                pkgSelectGender.OUT_CURSOR = string.Empty;
+            // GENDER
+            PKG_INTG_BOM_COMMON.SELECT_GENDER pkgSelectGender = new PKG_INTG_BOM_COMMON.SELECT_GENDER();
+            pkgSelectGender.ARG_ATTRIBUTE_NAME = "Gender";
+            pkgSelectGender.OUT_CURSOR = string.Empty;
 
-                resultValue = projectBaseForm.Exe_Select_PKG(pkgSelectGender).Tables[0];
-                lookUpGender.DataSource = resultValue;
+            resultValue = Common.projectBaseForm.Exe_Select_PKG(pkgSelectGender).Tables[0];
+            lookUpGender.DataSource = resultValue;
 
-                // TD
-                PKG_INTG_BOM_COMMON.SELECT_COMMON_CODE pksgSelectTd = new PKG_INTG_BOM_COMMON.SELECT_COMMON_CODE();
-                pksgSelectTd.ARG_TYPE = "TD";
-                pksgSelectTd.ARG_SORT_TYPE = "ASC";
-                pksgSelectTd.OUT_CURSOR = string.Empty;
+            // TD
+            PKG_INTG_BOM_COMMON.SELECT_COMMON_CODE pksgSelectTd = new PKG_INTG_BOM_COMMON.SELECT_COMMON_CODE();
+            pksgSelectTd.ARG_TYPE = "TD";
+            pksgSelectTd.ARG_SORT_TYPE = "ASC";
+            pksgSelectTd.OUT_CURSOR = string.Empty;
 
-                resultValue = projectBaseForm.Exe_Select_PKG(pksgSelectTd).Tables[0];
-                lookUpTd.DataSource = resultValue;
+            resultValue = Common.projectBaseForm.Exe_Select_PKG(pksgSelectTd).Tables[0];
+            lookUpTd.DataSource = resultValue;
 
-                // PCC PM
-                PKG_INTG_BOM_COMMON.SELECT_DEVELOPER pkgSelectDeveloper = new PKG_INTG_BOM_COMMON.SELECT_DEVELOPER();
-                pkgSelectDeveloper.ARG_FACTORY = this.Factory;
-                pkgSelectDeveloper.OUT_CURSOR = string.Empty;
+            // PCC PM
+            PKG_INTG_BOM_COMMON.SELECT_DEVELOPER pkgSelectDeveloper = new PKG_INTG_BOM_COMMON.SELECT_DEVELOPER();
+            pkgSelectDeveloper.ARG_FACTORY = this.Factory;
+            pkgSelectDeveloper.OUT_CURSOR = string.Empty;
 
-                resultValue = projectBaseForm.Exe_Select_PKG(pkgSelectDeveloper).Tables[0];
-                lookUpDeveloper.DataSource = resultValue;
+            resultValue = Common.projectBaseForm.Exe_Select_PKG(pkgSelectDeveloper).Tables[0];
+            lookUpDeveloper.DataSource = resultValue;
 
-                #endregion
+            #endregion
 
-                PKG_INTG_BOM.SELECT_BOM_HEAD_DATA pkgSelectHeadData = new PKG_INTG_BOM.SELECT_BOM_HEAD_DATA();
-                pkgSelectHeadData.ARG_FACTORY = this.Factory;
-                pkgSelectHeadData.ARG_CONCAT_WS_NO = this.WSNumber;
-                pkgSelectHeadData.OUT_CURSOR = string.Empty;
+            PKG_INTG_BOM.SELECT_BOM_HEAD_DATA pkgSelectHeadData = new PKG_INTG_BOM.SELECT_BOM_HEAD_DATA();
+            pkgSelectHeadData.ARG_FACTORY = this.Factory;
+            pkgSelectHeadData.ARG_CONCAT_WS_NO = this.WSNumber;
+            pkgSelectHeadData.OUT_CURSOR = string.Empty;
 
-                DataTable bomHeadData = projectBaseForm.Exe_Select_PKG(pkgSelectHeadData).Tables[0];
-                bomHeadData.Columns["STYLE_CD"].MaxLength = 10;
-                bomHeadData.Columns["SUB_TYPE_REMARK"].MaxLength = 200;
-                
-                grdHeadData.DataSource = bomHeadData;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return;
-            }
+            DataTable bomHeadData = Common.projectBaseForm.Exe_Select_PKG(pkgSelectHeadData).Tables[0];
+            bomHeadData.Columns["STYLE_CD"].MaxLength = 10;
+            bomHeadData.Columns["SUB_TYPE_REMARK"].MaxLength = 200;
+
+            grdHeadData.DataSource = bomHeadData;
+
         }
 
         #region 버튼 이벤트
@@ -144,50 +136,25 @@ namespace CSI.PCC.PCX
         /// <param name="e"></param>
         private void btnSave_Click(object sender, EventArgs e)
         {
-            try
+            ArrayList arrayList = new ArrayList();
+
+            AutoReplaceCharacter();
+
+            for (int rowHandle = 0; rowHandle < gvwHeadData.RowCount; rowHandle++)
             {
-                ChangeInvalidData();
+                #region GEL 확인
 
-                ArrayList arrayList = new ArrayList();
+                bool isGel = gvwHeadData.GetRowCellValue(rowHandle, "GEL_YN").ToString().Equals("Y") ? true : false;
+                string sampleType = gvwHeadData.GetRowCellValue(rowHandle, "ST_CD").ToString();
+                string sampleQTY = gvwHeadData.GetRowCellValue(rowHandle, "SAMPLE_QTY").ToString();
 
-                for (int rowHandle = 0; rowHandle < gvwHeadData.RowCount; rowHandle++)
+                // GEL 모델인 경우 
+                if (isGel)
                 {
-                    #region GEL 확인
-
-                    bool isGel = gvwHeadData.GetRowCellValue(rowHandle, "GEL_YN").ToString().Equals("Y") ? true : false;
-                    string sampleType = gvwHeadData.GetRowCellValue(rowHandle, "ST_CD").ToString();
-                    string sampleQTY = gvwHeadData.GetRowCellValue(rowHandle, "SAMPLE_QTY").ToString();
-
-                    // GEL 모델인 경우 
-                    if (isGel)
+                    // 선택 가능한 라운드 입력 여부 확인
+                    if (new string[] { "FRST", "SCND", "THRD", "PRDC" }.Contains(sampleType) == false)
                     {
-                        // 선택 가능한 라운드 입력 여부 확인
-                        if (new string[] { "FRST", "SCND", "THRD", "PRDC" }.Contains(sampleType) == false)
-                        {
-                            if (MessageBox.Show("The Sample Type doesn't match the GEL.\nDo you want to proceed?", "Warning",
-                                MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Cancel)
-                            {
-                                Common.FocusCell(gvwHeadData, rowHandle, "ST_CD", true);
-                                return;
-                            }
-                        }
-
-                        // 적정 수량 입력 여부 확인
-                        if (Convert.ToDouble(sampleQTY) < 10)
-                        {
-                            if (MessageBox.Show("Is the Sample QTY correct? normally more than 10.", "Warning",
-                                MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Cancel)
-                            {
-                                Common.FocusCell(gvwHeadData, rowHandle, "ST_CD", true);
-                                return;
-                            }
-                        }
-                    }
-
-                    // GEL이 아닌데 GEL 라운드를 선택한 경우
-                    if ((isGel == false) && (new string[] { "FRST", "SCND", "THRD" }.Contains(sampleType)))
-                    {
-                        if (MessageBox.Show("Is The Sample Type you selected correct? it's for GEL.", "Warning",
+                        if (MessageBox.Show("The Sample Type doesn't match the GEL.\nDo you want to proceed?", "Warning",
                             MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Cancel)
                         {
                             Common.FocusCell(gvwHeadData, rowHandle, "ST_CD", true);
@@ -195,127 +162,135 @@ namespace CSI.PCC.PCX
                         }
                     }
 
-                    #endregion
-
-                    #region BOM Unique 여부 확인
-
-                    /****************************************************************************************
-                     * BOM Unique 기준 : Factory, Season, Sample Type, Sub Type, Colorway ID, Sub Type Remark
-                    ****************************************************************************************/
-
-                    PKG_INTG_BOM.SELECT_IS_EXISTING_BOM pkgSelect = new PKG_INTG_BOM.SELECT_IS_EXISTING_BOM();
-                    pkgSelect.ARG_FACTORY = gvwHeadData.GetRowCellValue(rowHandle, "FACTORY").ToString();
-                    pkgSelect.ARG_WS_NO = gvwHeadData.GetRowCellValue(rowHandle, "WS_NO").ToString();
-                    pkgSelect.ARG_SEASON_CD = gvwHeadData.GetRowCellValue(rowHandle, "SEASON_CD").ToString();
-                    pkgSelect.ARG_DEV_COLORWAY_ID = gvwHeadData.GetRowCellValue(rowHandle, "DEV_COLORWAY_ID").ToString();
-                    pkgSelect.ARG_SAMPLE_TYPE = gvwHeadData.GetRowCellValue(rowHandle, "ST_CD").ToString();
-                    pkgSelect.ARG_SUB_TYPE = gvwHeadData.GetRowCellValue(rowHandle, "SUB_ST_CD").ToString();
-                    pkgSelect.ARG_SUB_TYPE_REMARK = gvwHeadData.GetRowCellValue(rowHandle, "SUB_TYPE_REMARK").ToString(); ;
-                    //pkgSelect.ARG_SAMPLE_SIZE = gvwHeadData.GetRowCellValue(i, "SAMPLE_SIZE").ToString();
-                    //pkgSelect.ARG_DEV_SR_ID = gvwHeadData.GetRowCellValue(i, "DEV_SAMPLE_REQ_ID").ToString();
-                    pkgSelect.OUT_CURSOR = string.Empty;
-
-                    DataTable returnValue = projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
-
-                    int rowCount = Convert.ToInt32(returnValue.Rows[0]["ROW_COUNT"]);   // 동일한 BOM의 개수
-                    bool isAlreadyExisting = (rowCount == 0) ? false : true;    // 동일한 BOM 존재 여부
-
-                    #endregion
-
-                    if (isAlreadyExisting == false)
+                    // 적정 수량 입력 여부 확인
+                    if (Convert.ToDouble(sampleQTY) < 10)
                     {
-                        #region 패키지 매개변수 입력
-
-                        PKG_INTG_BOM.INSERT_BOM_RECORD_HEAD pkgInsert = new PKG_INTG_BOM.INSERT_BOM_RECORD_HEAD();
-                        pkgInsert.ARG_FACTORY = gvwHeadData.GetRowCellValue(rowHandle, "FACTORY").ToString();
-                        pkgInsert.ARG_WS_NO = gvwHeadData.GetRowCellValue(rowHandle, "WS_NO").ToString();
-                        pkgInsert.ARG_DPA = gvwHeadData.GetRowCellValue(rowHandle, "DPA").ToString();
-                        pkgInsert.ARG_BOM_ID = gvwHeadData.GetRowCellValue(rowHandle, "BOM_ID").ToString();
-                        pkgInsert.ARG_ST_CD = gvwHeadData.GetRowCellValue(rowHandle, "ST_CD").ToString();
-                        pkgInsert.ARG_SEASON_CD = gvwHeadData.GetRowCellValue(rowHandle, "SEASON_CD").ToString();
-                        //pkgInsert.ARG_PCC_ORG = gvwHeadData.GetRowCellValue(rowHandle, "PCC_ORG").ToString();
-                        pkgInsert.ARG_CATEGORY = gvwHeadData.GetRowCellValue(rowHandle, "CATEGORY").ToString();
-                        pkgInsert.ARG_DEV_NAME = gvwHeadData.GetRowCellValue(rowHandle, "DEV_NAME").ToString();
-                        pkgInsert.ARG_STYLE_CD = gvwHeadData.GetRowCellValue(rowHandle, "STYLE_CD").ToString();
-                        pkgInsert.ARG_SAMPLE_ETS = gvwHeadData.GetRowCellValue(rowHandle, "SAMPLE_ETS").ToString();
-                        pkgInsert.ARG_SAMPLE_QTY = gvwHeadData.GetRowCellValue(rowHandle, "SAMPLE_QTY").ToString();
-                        pkgInsert.ARG_SAMPLE_SIZE = gvwHeadData.GetRowCellValue(rowHandle, "SAMPLE_SIZE").ToString();
-                        pkgInsert.ARG_SUB_TYPE_REMARK = gvwHeadData.GetRowCellValue(rowHandle, "SUB_TYPE_REMARK").ToString();
-                        pkgInsert.ARG_GENDER = gvwHeadData.GetRowCellValue(rowHandle, "GENDER").ToString();
-                        pkgInsert.ARG_TD = gvwHeadData.GetRowCellValue(rowHandle, "TD").ToString();
-                        pkgInsert.ARG_COLOR_VER = gvwHeadData.GetRowCellValue(rowHandle, "COLOR_VER").ToString();
-                        pkgInsert.ARG_MODEL_ID = gvwHeadData.GetRowCellValue(rowHandle, "MODEL_ID").ToString();
-                        pkgInsert.ARG_PCC_PM = gvwHeadData.GetRowCellValue(rowHandle, "PCC_PM").ToString();
-                        pkgInsert.ARG_PRODUCT_ID = gvwHeadData.GetRowCellValue(rowHandle, "PRODUCT_ID").ToString();
-                        pkgInsert.ARG_DEV_COLORWAY_ID = gvwHeadData.GetRowCellValue(rowHandle, "DEV_COLORWAY_ID").ToString();
-                        pkgInsert.ARG_DEV_STYLE_NUMBER = gvwHeadData.GetRowCellValue(rowHandle, "DEV_STYLE_NUMBER").ToString();
-                        pkgInsert.ARG_DEV_SAMPLE_REQ_ID = gvwHeadData.GetRowCellValue(rowHandle, "DEV_SAMPLE_REQ_ID").ToString();
-                        pkgInsert.ARG_UPD_USER = Common.sessionID;
-                        pkgInsert.ARG_GEL_YN = gvwHeadData.GetRowCellValue(rowHandle, "GEL_YN").ToString();
-
-                        arrayList.Add(pkgInsert);
-
-                        #endregion
+                        if (MessageBox.Show("Is the Sample QTY correct? normally more than 10.", "Warning",
+                            MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Cancel)
+                        {
+                            Common.FocusCell(gvwHeadData, rowHandle, "ST_CD", true);
+                            return;
+                        }
                     }
-                    else
+                }
+
+                // GEL이 아닌데 GEL 라운드를 선택한 경우
+                if (!isGel && (new string[] { "FRST", "SCND", "THRD" }.Contains(sampleType)))
+                {
+                    if (MessageBox.Show("Is The Sample Type you selected correct? it's for GEL.", "Warning",
+                        MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Cancel)
                     {
-                        MessageBox.Show("A BOM with the same information already exists.\nPlease check the criteria of unique.",
-                               "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
-
-                        Common.FocusCell(gvwHeadData, rowHandle, "SUB_TYPE_REMARK", true);
-
+                        Common.FocusCell(gvwHeadData, rowHandle, "ST_CD", true);
                         return;
                     }
                 }
-                
-                if (projectBaseForm.Exe_Modify_PKG(arrayList) == null)
+
+                #endregion
+
+                #region BOM Unique 여부 확인
+
+                /********************************************************************************************
+                     * BOM Unique 기준 : Factory, Season, Sample Type, Sub Type, Colorway ID, Sub Type Remark
+                *********************************************************************************************/
+
+                PKG_INTG_BOM.SELECT_IS_EXISTING_BOM pkgSelect = new PKG_INTG_BOM.SELECT_IS_EXISTING_BOM();
+                pkgSelect.ARG_FACTORY = gvwHeadData.GetRowCellValue(rowHandle, "FACTORY").ToString();
+                pkgSelect.ARG_WS_NO = gvwHeadData.GetRowCellValue(rowHandle, "WS_NO").ToString();
+                pkgSelect.ARG_SEASON_CD = gvwHeadData.GetRowCellValue(rowHandle, "SEASON_CD").ToString();
+                pkgSelect.ARG_DEV_COLORWAY_ID = gvwHeadData.GetRowCellValue(rowHandle, "DEV_COLORWAY_ID").ToString();
+                pkgSelect.ARG_SAMPLE_TYPE = gvwHeadData.GetRowCellValue(rowHandle, "ST_CD").ToString();
+                pkgSelect.ARG_SUB_TYPE = gvwHeadData.GetRowCellValue(rowHandle, "SUB_ST_CD").ToString();
+                pkgSelect.ARG_SUB_TYPE_REMARK = gvwHeadData.GetRowCellValue(rowHandle, "SUB_TYPE_REMARK").ToString(); ;
+                pkgSelect.OUT_CURSOR = string.Empty;
+
+                DataTable returnValue = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
+
+                int rowCount = Convert.ToInt32(returnValue.Rows[0]["ROW_COUNT"]);   // 동일한 BOM의 개수
+                bool isExisting = (rowCount == 0) ? false : true;                   // 동일한 BOM 존재 여부
+
+                #endregion
+
+                if (!isExisting)
                 {
-                    MessageBox.Show("Failed to save", "Error",  MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                    PKG_INTG_BOM.INSERT_BOM_RECORD_HEAD pkgInsert = new PKG_INTG_BOM.INSERT_BOM_RECORD_HEAD();
+                    pkgInsert.ARG_FACTORY = gvwHeadData.GetRowCellValue(rowHandle, "FACTORY").ToString();
+                    pkgInsert.ARG_WS_NO = gvwHeadData.GetRowCellValue(rowHandle, "WS_NO").ToString();
+                    pkgInsert.ARG_DPA = gvwHeadData.GetRowCellValue(rowHandle, "DPA").ToString();
+                    pkgInsert.ARG_BOM_ID = gvwHeadData.GetRowCellValue(rowHandle, "BOM_ID").ToString();
+                    pkgInsert.ARG_ST_CD = gvwHeadData.GetRowCellValue(rowHandle, "ST_CD").ToString();
+                    pkgInsert.ARG_SEASON_CD = gvwHeadData.GetRowCellValue(rowHandle, "SEASON_CD").ToString();
+                    //pkgInsert.ARG_PCC_ORG = gvwHeadData.GetRowCellValue(rowHandle, "PCC_ORG").ToString();
+                    pkgInsert.ARG_CATEGORY = gvwHeadData.GetRowCellValue(rowHandle, "CATEGORY").ToString();
+                    pkgInsert.ARG_DEV_NAME = gvwHeadData.GetRowCellValue(rowHandle, "DEV_NAME").ToString();
+                    pkgInsert.ARG_STYLE_CD = gvwHeadData.GetRowCellValue(rowHandle, "STYLE_CD").ToString();
+                    pkgInsert.ARG_SAMPLE_ETS = gvwHeadData.GetRowCellValue(rowHandle, "SAMPLE_ETS").ToString();
+                    pkgInsert.ARG_SAMPLE_QTY = gvwHeadData.GetRowCellValue(rowHandle, "SAMPLE_QTY").ToString();
+                    pkgInsert.ARG_SAMPLE_SIZE = gvwHeadData.GetRowCellValue(rowHandle, "SAMPLE_SIZE").ToString();
+                    pkgInsert.ARG_SUB_TYPE_REMARK = gvwHeadData.GetRowCellValue(rowHandle, "SUB_TYPE_REMARK").ToString();
+                    pkgInsert.ARG_GENDER = gvwHeadData.GetRowCellValue(rowHandle, "GENDER").ToString();
+                    pkgInsert.ARG_TD = gvwHeadData.GetRowCellValue(rowHandle, "TD").ToString();
+                    pkgInsert.ARG_COLOR_VER = gvwHeadData.GetRowCellValue(rowHandle, "COLOR_VER").ToString();
+                    pkgInsert.ARG_MODEL_ID = gvwHeadData.GetRowCellValue(rowHandle, "MODEL_ID").ToString();
+                    pkgInsert.ARG_PCC_PM = gvwHeadData.GetRowCellValue(rowHandle, "PCC_PM").ToString();
+                    pkgInsert.ARG_PRODUCT_ID = gvwHeadData.GetRowCellValue(rowHandle, "PRODUCT_ID").ToString();
+                    pkgInsert.ARG_DEV_COLORWAY_ID = gvwHeadData.GetRowCellValue(rowHandle, "DEV_COLORWAY_ID").ToString();
+                    pkgInsert.ARG_DEV_STYLE_NUMBER = gvwHeadData.GetRowCellValue(rowHandle, "DEV_STYLE_NUMBER").ToString();
+                    pkgInsert.ARG_DEV_SAMPLE_REQ_ID = gvwHeadData.GetRowCellValue(rowHandle, "DEV_SAMPLE_REQ_ID").ToString();
+                    pkgInsert.ARG_UPD_USER = Common.sessionID;
+                    pkgInsert.ARG_GEL_YN = gvwHeadData.GetRowCellValue(rowHandle, "GEL_YN").ToString();
+
+                    arrayList.Add(pkgInsert);
+                }
+                else
+                {
+                    Common.ShowMessageBox("A BOM with the same information already exists.\nPlease check the criteria of unique", "W");
+                    Common.FocusCell(gvwHeadData, rowHandle, "SUB_TYPE_REMARK", true);
                     return;
                 }
-
-                this.DialogResult = System.Windows.Forms.DialogResult.OK;
-                this.Close();
             }
-            catch (Exception ex)
+
+            if (Common.projectBaseForm.Exe_Modify_PKG(arrayList) == null)
             {
-                MessageBox.Show(ex.ToString());
+                Common.ShowMessageBox("Failed to save.", "E");
                 return;
             }
+
+            this.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.Close();
         }
 
         /// <summary>
-        /// Product Code 또는 DPA에 '-' 기호가 포함되어 있을 경우 자동 수정
+        /// Replace the character '-' to ''.
         /// </summary>
-        private void ChangeInvalidData()
+        private void AutoReplaceCharacter()
         {
+            string val = string.Empty;
+
+            Action<int, string> action = (i, fieldName) =>
+            {
+                val = gvwHeadData.GetRowCellValue(i, fieldName).ToString();
+
+                if (val.Contains("-"))
+                {
+                    val = val.Replace("-", "");
+                    gvwHeadData.SetRowCellValue(i, fieldName, val.Trim());
+                }
+            };
+
             try
             {
+
                 gvwHeadData.CellValueChanged -= new CellValueChangedEventHandler(gvwHeadData_CellValueChanged);
 
                 for (int rowHandle = 0; rowHandle < gvwHeadData.RowCount; rowHandle++)
                 {
-                    string styleCode = gvwHeadData.GetRowCellValue(rowHandle, "STYLE_CD").ToString();
-                    if (styleCode.Contains("-"))
-                    {
-                        styleCode = styleCode.Replace("-", "");
-                        gvwHeadData.SetRowCellValue(rowHandle, "STYLE_CD", styleCode.Trim());
-                    }
-
-                    string DPA = gvwHeadData.GetRowCellValue(rowHandle, "DPA").ToString();
-                    if (DPA.Contains("-"))
-                    {
-                        DPA = DPA.Replace("-", "");
-                        gvwHeadData.SetRowCellValue(rowHandle, "DPA", DPA.Trim());
-                    }
+                    action(rowHandle, "STYLE_CD");
+                    action(rowHandle, "DPA");
                 }
-
-                gvwHeadData.CellValueChanged += new CellValueChangedEventHandler(gvwHeadData_CellValueChanged);
             }
-            catch (Exception ex)
+            finally
             {
-                MessageBox.Show(ex.ToString());
-                return;
+                gvwHeadData.CellValueChanged += new CellValueChangedEventHandler(gvwHeadData_CellValueChanged);
             }
         }
 
@@ -333,7 +308,7 @@ namespace CSI.PCC.PCX
             try
             {
                 gvwHeadData.CellValueChanged -= new DevExpress.XtraGrid.Views.Base.CellValueChangedEventHandler(gvwHeadData_CellValueChanged);
-                
+
                 GridView view = sender as GridView;
                 // 데이터를 변경한 컬럼
                 string fcsdColumnName = gvwHeadData.FocusedColumn.FieldName;

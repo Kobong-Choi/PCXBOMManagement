@@ -256,6 +256,7 @@ namespace CSI.PCC.PCX
                     break;
 
                 case "FindCode_Single":
+                case "FindCode_Multiple":
 
                     if (isLocked)
                         break;
@@ -263,33 +264,17 @@ namespace CSI.PCC.PCX
                     FindCodeFromLibrary();
                     break;
 
-                case "FindCode_Multiple":
-
-                    FindCodeFromLibrary();
-                    break;
-
                 case "FindProcess_Single":
-
-                    FindProcessFromMaster();
-                    break;
-
                 case "FindProcess_Multiple":
 
                     FindProcessFromMaster();
                     break;
 
                 case "BindPtrnTop_Single":
-
-                    if (Common.IsFilterApplied(view))
-                        break;
+                case "BindPtrnTop_Multiple":
 
                     if (isLocked)
                         break;
-
-                    BindPtrnPartName("Top");
-                    break;
-
-                case "BindPtrnTop_Multiple":
 
                     if (Common.IsFilterApplied(view))
                         break;
@@ -298,17 +283,10 @@ namespace CSI.PCC.PCX
                     break;
 
                 case "BindPtrnEach_Single":
-
-                    if (Common.IsFilterApplied(view))
-                        break;
+                case "BindPtrnEach_Multiple":
 
                     if (isLocked)
                         break;
-
-                    BindPtrnPartName("Each");
-                    break;
-
-                case "BindPtrnEach_Multiple":
 
                     if (Common.IsFilterApplied(view))
                         break;
@@ -317,115 +295,87 @@ namespace CSI.PCC.PCX
                     break;
 
                 case "MulChkComb_Single":
+                case "MulChkComb_Multiple":
 
                     if (isLocked)
                         break;
 
-                    MultiCheckCombine(gvwSingleEdit);
+                    MultiCheck("COMBINE_YN");
                     break;
 
                 case "MulChkStc_Single":
+                case "MulChkStc_Multiple":
 
                     if (isLocked)
                         break;
 
-                    MultiCheckSticker(gvwSingleEdit);
-                    break;
-
-                case "MulChkComb_Multiple":
-
-                    MultiCheckCombine(gvwMultipleEdit);
-                    break;
-
-                case "MulChkStc_Multiple":
-
-                    MultiCheckSticker(gvwMultipleEdit);
+                    MultiCheck("STICKER_YN");
                     break;
 
                 case "MulChkCode_Single":
-
-                    MultiCheckCodemaker(gvwSingleEdit);
-                    break;
-
                 case "MulChkCode_Multiple":
 
-                    MultiCheckCodemaker(gvwMultipleEdit);
+                    if (view.Columns["CDMKR_YN"].FilterInfo.FilterString != "")
+                    {
+                        Common.ShowMessageBox("Please try again after releasing filter for 'Code' column.", "W");
+                        return;
+                    }
+
+                    MultiCheck("CDMKR_YN");
                     break;
 
                 case "Transfer_Single":
-
-                    TransferToCodemaker(gvwSingleEdit);
-                    break;
-
                 case "Transfer_Multiple":
 
-                    TransferToCodemaker(gvwMultipleEdit);
+                    if (Common.IsFilterApplied(view))
+                        return;
+
+                    if (Common.HasLineitemUnsaved(view))
+                        return;
+
+                    TransferToCodemaker();
                     break;
 
                 case "trnsRecord_Single":
-
-                    ShowRecordOfTransfer();
-                    break;
-
                 case "trnsRecord_Multiple":
 
-                    ShowRecordOfTransfer();
+                    ShowTransferRecord();
                     break;
 
                 case "MatInfo_Single":
-
-                    ShowMaterialInfomation(gvwSingleEdit);
-                    break;
-
                 case "MatInfo_Multiple":
 
-                    ShowMaterialInfomation(gvwMultipleEdit);
+                    ShowMaterialInfomation();
                     break;
 
                 case "ShowFocusedRow_Single":
-
-                    ShowFocusedRow(gvwSingleEdit);
-                    break;
-
                 case "ShowFocusedRow_Multiple":
 
-                    ShowFocusedRow(gvwMultipleEdit);
+                    ShowFocusedRow();
                     break;
 
                 case "MDMPartAdd_Single":
-
-                    OpenPartMDM();
-                    break;
-
                 case "MDMPartAdd_Multiple":
 
                     OpenPartMDM();
                     break;
 
                 case "MulChkMdsl_Single":
+                case "MulChkMdsl_Multiple":
 
                     if (isLocked)
                         break;
 
-                    MultiCheckMidsole(gvwSingleEdit);
-                    break;
-
-                case "MulChkMdsl_Multiple":
-
-                    MultiCheckMidsole(gvwMultipleEdit);
+                    MultiCheck("MDSL_CHK");
                     break;
 
                 case "MulChkOtsl_Single":
+                case "MulChkOtsl_Multiple":
 
                     if (isLocked)
                         break;
 
-                    MultiCheckOutsole(gvwSingleEdit);
-                    break;
-
-                case "MulChkOtsl_Multiple":
-
-                    MultiCheckOutsole(gvwMultipleEdit);
+                    MultiCheck("OTSL_CHK");
                     break;
 
                 case "AddAggregate_Single":
@@ -442,14 +392,9 @@ namespace CSI.PCC.PCX
                     break;
 
                 case "FillColor_Single":
-
-                    //Common.FillColorInCell(gvwSingleEdit);
-                    FillColorInCell(gvwSingleEdit);
-                    break;
-
                 case "FillColor_Multiple":
 
-                    FillColorInCell(gvwMultipleEdit);
+                    HighlightCell();
                     break;
 
                 case "CopyPtrnV1N4_Single":
@@ -457,7 +402,7 @@ namespace CSI.PCC.PCX
                     if (isLocked)
                         break;
 
-                    CopyFromCSPatternPart(gvwSingleEdit, "New");
+                    CopyFromCSPatternPart("New");
                     break;
 
                 case "CopyPtrnF1F4_Single":
@@ -465,27 +410,23 @@ namespace CSI.PCC.PCX
                     if (isLocked)
                         break;
 
-                    CopyFromCSPatternPart(gvwSingleEdit, "Old");
+                    CopyFromCSPatternPart("Old");
                     break;
 
                 case "CopyPtrnV1N4_Multiple":
 
-                    CopyFromCSPatternPart(gvwMultipleEdit, "New");
+                    CopyFromCSPatternPart("New");
                     break;
 
                 case "CopyPtrnF1F4_Multiple":
 
-                    CopyFromCSPatternPart(gvwMultipleEdit, "Old");
+                    CopyFromCSPatternPart("Old");
                     break;
 
                 case "BlackList_Single":
-
-                    ShowBlackListMaterialInfo(gvwSingleEdit);
-                    break;
-
                 case "BlackList_Multiple":
 
-                    ShowBlackListMaterialInfo(gvwMultipleEdit);
+                    ShowBlackListMaterialInfo();
                     break;
 
                 case "exportToExcel":
@@ -494,11 +435,9 @@ namespace CSI.PCC.PCX
                     break;
 
                 case "genComment_Single":
-                    ShowCommentForm(gvwSingleEdit);
-                    break;
-
                 case "genComment_Multiple":
-                    ShowCommentForm(gvwMultipleEdit);
+
+                    ShowCommentForm();
                     break;
 
                 default:
@@ -1543,124 +1482,34 @@ namespace CSI.PCC.PCX
         /// 여러 셀 선택 후 한 번에 Combine 체크 표기
         /// </summary>
         /// <param name="view"></param>
-        private void MultiCheckCombine(GridView view)
+        private void MultiCheck(string fieldName)
         {
+            string rowStatus = string.Empty;
+
             try
             {
-                // 이벤트 꼬임을 방지하기 위해 CellValueChanged 이벤트 끊음
-                view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
-
-                int[] rowHandles = view.GetSelectedRows();
-
-                foreach (int rowHandle in rowHandles)
-                {
-                    string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-
-                    if (rowStatus != "D")
-                    {
-                        string currentRowValue = view.GetRowCellValue(rowHandle, "COMBINE_YN").ToString();
-
-                        if (currentRowValue == "Y")
-                            view.SetRowCellValue(rowHandle, "COMBINE_YN", "N");
-                        else
-                            view.SetRowCellValue(rowHandle, "COMBINE_YN", "Y");
-                    }
-
-                    // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
-                    if (rowStatus != "I" && rowStatus != "D")
-                        view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
-                }
-
-                // 스타일을 새로 적용하기 위해 DataSource Refresh
-                view.RefreshData();
-
-                // 이벤트 다시 연결
-                view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return;
-            }
-        }
-
-        /// <summary>
-        /// 여러 셀 선택 후 한 번에 Sticker 체크 표기
-        /// </summary>
-        /// <param name="view"></param>
-        private void MultiCheckSticker(GridView view)
-        {
-            try
-            {
-                // 이벤트 꼬임을 방지하기 위해 CellValueChanged 이벤트 끊음
-                view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
-
-                int[] rowHandles = view.GetSelectedRows();
-
-                foreach (int rowHandle in rowHandles)
-                {
-                    string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-                    if (rowStatus != "D")
-                    {
-                        string currentRowValue = view.GetRowCellValue(rowHandle, "STICKER_YN").ToString();
-                        if (currentRowValue == "Y")
-                            view.SetRowCellValue(rowHandle, "STICKER_YN", "N");
-                        else
-                            view.SetRowCellValue(rowHandle, "STICKER_YN", "Y");
-                    }
-                    // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
-                    if (rowStatus != "I" && rowStatus != "D")
-                        view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
-                }
-
-                // 스타일을 새로 적용하기 위해 DataSource Refresh
-                view.RefreshData();
-                // 이벤트 다시 연결
-                view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return;
-            }
-        }
-
-        /// <summary>
-        /// Mark checkbox of multiple rows to send to codemaker.
-        /// </summary>
-        /// <param name="view"></param>
-        private void MultiCheckCodemaker(GridView view)
-        {
-            try
-            {
-                // Prevent object reference error.
-                if (view.Columns["CDMKR_YN"].FilterInfo.FilterString != "")
-                {
-                    MessageBox.Show("Please try again after releasing filter of 'Code' column.", "Warning",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
-                    return;
-                }
-
-                // Prevent infinite loop.
                 view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
 
                 foreach (int rowHandle in view.GetSelectedRows())
                 {
-                    string currentRowValue = view.GetRowCellValue(rowHandle, "CDMKR_YN").ToString();
+                    rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
 
-                    if (currentRowValue == "Y")
-                        view.SetRowCellValue(rowHandle, "CDMKR_YN", "N");
-                    else
-                        view.SetRowCellValue(rowHandle, "CDMKR_YN", "Y");
+                    if (!rowStatus.Equals("D"))
+                    {
+                        if (view.GetRowCellValue(rowHandle, fieldName).ToString().Equals("Y"))
+                            view.SetRowCellValue(rowHandle, fieldName, "N");
+                        else
+                            view.SetRowCellValue(rowHandle, fieldName, "Y");
+
+                        if (!rowStatus.Equals("I") && !fieldName.Equals("CDMKR_YN"))
+                            view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
+                    }
                 }
-
-                // Re-connect event.
-                view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
             }
-            catch (Exception ex)
+            finally
             {
-                MessageBox.Show(ex.ToString());
-                return;
+                view.RefreshData();
+                view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
             }
         }
 
@@ -1668,18 +1517,11 @@ namespace CSI.PCC.PCX
         /// Transfer data selected by user to codemaker.
         /// </summary>
         /// <param name="view"></param>
-        private void TransferToCodemaker(GridView view)
+        private void TransferToCodemaker()
         {
-            if (Common.IsFilterApplied(view))
-                return;
-
-            if (Common.HasLineitemUnsaved(view))
-                return;
-
-            DataTable dataSource = (view == gvwSingleEdit) ? grdSingleEdit.DataSource as DataTable : grdMultipleEdit.DataSource as DataTable;
+            ArrayList list = new ArrayList();
+            DataTable dataSource = ((view.Equals(gvwSingleEdit)) ? grdSingleEdit.DataSource : grdMultipleEdit.DataSource) as DataTable;
             List<DataRow> rows = dataSource.AsEnumerable().Where(r => r["CDMKR_YN"].ToString().Equals("Y")).ToList();
-
-            ArrayList listToSend = new ArrayList();
 
             foreach (DataRow row in rows)
             {
@@ -1699,22 +1541,22 @@ namespace CSI.PCC.PCX
                 pkgInsert.ARG_WS_NO = row["WS_NO"].ToString();
                 pkgInsert.ARG_PART_SEQ = row["PART_SEQ"].ToString();
 
-                listToSend.Add(pkgInsert);
+                list.Add(pkgInsert);
             }
 
-            if (Common.projectBaseForm.Exe_Modify_PKG(listToSend) == null)
+            if (Common.projectBaseForm.Exe_Modify_PKG(list) == null)
             {
-                MessageBox.Show("Failed to transfer data.");
+                Common.ShowMessageBox("Failed to transfer data.", "E");
                 return;
             }
 
-            MessageBox.Show("Complete");
+            MessageBox.Show("Complete.");
         }
 
         /// <summary>
         /// Show records of data transferred to codemaker.
         /// </summary>
-        private void ShowRecordOfTransfer()
+        private void ShowTransferRecord()
         {
             TransferRecord formRecord = new TransferRecord();
 
@@ -1727,36 +1569,24 @@ namespace CSI.PCC.PCX
         /// <summary>
         /// 
         /// </summary>
-        private void ShowMaterialInfomation(GridView view)
+        private void ShowMaterialInfomation()
         {
-            try
-            {
-                string PDMSuppMatNumber = view.GetRowCellValue(view.FocusedRowHandle, "MXSXL_NUMBER").ToString();
+            string PDMSuppMatNumber = view.GetRowCellValue(view.FocusedRowHandle, "MXSXL_NUMBER").ToString();
 
-                if (PDMSuppMatNumber == "")
-                    return;
-
-                string[] splitPDMSuppMatNum = PDMSuppMatNumber.Split('.');
-
-                if (splitPDMSuppMatNum.Length != 3)
-                    return;
-
-                string materialCode = splitPDMSuppMatNum[0];
-
-                Dictionary<string, string> dic = new Dictionary<string, string>();
-                dic.Add("MXSXL_NUMBER", PDMSuppMatNumber);
-                dic.Add("MAT_CD", materialCode);
-
-                MaterialInformation form = new MaterialInformation();
-                form.SOURCE_OF_MAT_INFO = dic;
-
-                form.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
+            if (PDMSuppMatNumber == "")
                 return;
-            }
+
+            string[] splitPDMSuppMatNum = PDMSuppMatNumber.Split('.');
+
+            if (splitPDMSuppMatNum.Length != 3)
+                return;
+
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            dic.Add("MXSXL_NUMBER", PDMSuppMatNumber);
+            dic.Add("MAT_CD", splitPDMSuppMatNum[0]);
+
+            MaterialInformation form = new MaterialInformation() { MaterialInfo = dic };
+            form.ShowDialog();
         }
 
         /// <summary>
@@ -1777,20 +1607,18 @@ namespace CSI.PCC.PCX
         /// <summary>
         /// 
         /// </summary>
-        private void ShowFocusedRow(GridView view)
+        private void ShowFocusedRow()
         {
-            // 포커스된 행의 개수
-            int[] selectedRowHandles = view.GetSelectedRows();
+            int[] rowHandles = view.GetSelectedRows();
 
-            if (selectedRowHandles.Length == 0)
+            if (rowHandles.Length == 0)
             {
-                // 0개일 경우 포커스된 행 전체 선택
                 view.SelectRow(view.FocusedRowHandle);
             }
-            else if (selectedRowHandles.Length == 1)
+            else if (rowHandles.Length == 1)
             {
                 // 1개일 경우 선택인지 취소인지 구분
-                if (CheckRowIsSelected(view, view.FocusedRowHandle))
+                if (IsSelected(view.FocusedRowHandle))
                     view.UnselectRow(view.FocusedRowHandle);
                 else
                     view.SelectRow(view.FocusedRowHandle);
@@ -1809,9 +1637,9 @@ namespace CSI.PCC.PCX
                 if (type == "Select")
                 {
                     // 선택한 행 모두 전체 선택
-                    foreach (int rowHandle in selectedRowHandles)
+                    foreach (int rowHandle in rowHandles)
                     {
-                        if (CheckRowIsSelected(view, rowHandle))
+                        if (IsSelected(rowHandle))
                             view.UnselectRow(rowHandle);
                         else
                             view.SelectRow(rowHandle);
@@ -1820,7 +1648,7 @@ namespace CSI.PCC.PCX
                 else if (type == "Cancel")
                 {
                     // 포커스된 행만 전체 선택 취소
-                    if (CheckRowIsSelected(view, view.FocusedRowHandle))
+                    if (IsSelected(view.FocusedRowHandle))
                         view.UnselectRow(view.FocusedRowHandle);
                     else
                         view.SelectRow(view.FocusedRowHandle);
@@ -1834,7 +1662,7 @@ namespace CSI.PCC.PCX
         /// <param name="view"></param>
         /// <param name="targetRowHandle"></param>
         /// <returns></returns>
-        private bool CheckRowIsSelected(GridView view, int targetRowHandle)
+        private bool IsSelected(int targetRowHandle)
         {
             GridCell[] cells = view.GetSelectedCells();
             int count = 0;
@@ -1873,46 +1701,6 @@ namespace CSI.PCC.PCX
             else
             {
                 MessageBox.Show("MDM connection object acquisition failed.");
-                return;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private void MultiCheckMidsole(GridView view)
-        {
-            try
-            {
-                // 이벤트 꼬임을 방지하기 위해 CellValueChanged 이벤트 끊음
-                view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
-
-                int[] rowHandles = view.GetSelectedRows();
-
-                foreach (int rowHandle in rowHandles)
-                {
-                    string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-                    if (rowStatus != "D")
-                    {
-                        string currentRowValue = view.GetRowCellValue(rowHandle, "MDSL_CHK").ToString();
-                        if (currentRowValue == "Y")
-                            view.SetRowCellValue(rowHandle, "MDSL_CHK", "N");
-                        else
-                            view.SetRowCellValue(rowHandle, "MDSL_CHK", "Y");
-                    }
-                    // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
-                    if (rowStatus != "I" && rowStatus != "D")
-                        view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
-                }
-
-                // 스타일을 새로 적용하기 위해 DataSource Refresh
-                view.RefreshData();
-                // 이벤트 다시 연결
-                view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
                 return;
             }
         }
@@ -2230,7 +2018,7 @@ namespace CSI.PCC.PCX
         /// 셀에 유저가 입력한 컬러를 배경색으로 표기한다.
         /// </summary>
         /// <param name="view"></param>
-        private void FillColorInCell(GridView view)
+        private void HighlightCell()
         {
             // 새 컬러 선택
             ColorDialog dialog = new ColorDialog();
@@ -2241,9 +2029,7 @@ namespace CSI.PCC.PCX
 
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                GridCell[] cells = view.GetSelectedCells();
-
-                foreach (GridCell cell in cells)
+                foreach (GridCell cell in view.GetSelectedCells())
                 {
                     Dictionary<string, string> colorList = new Dictionary<string, string>();
 
@@ -2272,7 +2058,7 @@ namespace CSI.PCC.PCX
                             colorList.Add(_columnName, _colorName);
                         }
 
-                        if (colorList.ContainsKey(columnName) == true)  // 현 컬럼에 이미 등록된 컬러가 있는 경우 기존 것 삭제
+                        if (colorList.ContainsKey(columnName))  // 현 컬럼에 이미 등록된 컬러가 있는 경우 기존 것 삭제
                             colorList.Remove(columnName);
                     }
 
@@ -2301,7 +2087,7 @@ namespace CSI.PCC.PCX
         /// <summary>
         /// 입력된 CS 패턴 파트와 동일하게 Nike 패턴 파트에 자동 입력한다.
         /// </summary>
-        private void CopyFromCSPatternPart(GridView view, string type)
+        private void CopyFromCSPatternPart(string type)
         {
             DataTable dataSource = (view == gvwSingleEdit) ? grdSingleEdit.DataSource as DataTable : grdMultipleEdit.DataSource as DataTable;
 
@@ -2413,7 +2199,7 @@ namespace CSI.PCC.PCX
         /// BlackList 자재 정보 확인을 위한 신규 팝업 표기
         /// </summary>
         /// <param name="view"></param>
-        private void ShowBlackListMaterialInfo(GridView view)
+        private void ShowBlackListMaterialInfo()
         {
             object returnObj = Common.projectBaseForm.OpenChildForm(@"\POPUP\CSI.PCC.PMM.P_BlackList.dll",
                 view.GetFocusedRowCellValue("MAT_CD").ToString(), JPlatform.Client.Library.interFace.OpenType.Modal);
@@ -2448,10 +2234,8 @@ namespace CSI.PCC.PCX
         /// <summary>
         /// 
         /// </summary>
-        private void ShowCommentForm(GridView view)
+        private void ShowCommentForm()
         {
-            //List<string> listColumnCode = new List<string>();
-
             PCXComment form = new PCXComment("EDIT");
             form.BaseForm = Common.projectBaseForm;
             form.EncodedComment = view.GetRowCellValue(view.FocusedRowHandle, "ENCODED_CMT").ToString();
@@ -4069,6 +3853,8 @@ namespace CSI.PCC.PCX
         /// <param name="e"></param>
         private void btnWSConfirm_Click(object sender, EventArgs e)
         {
+            ArrayList list = new ArrayList();
+            
             if (CSBOMStatus.Equals("C"))
             {
                 Common.ShowMessageBox("Already confirmed BOM.", "E");
@@ -4088,7 +3874,6 @@ namespace CSI.PCC.PCX
                 pkgUpdate.ARG_CBD_YN = btnCBDChk.Checked ? "Y" : "N";
                 pkgUpdate.ARG_UPD_USER = Common.sessionID;
 
-                ArrayList list = new ArrayList();
                 list.Add(pkgUpdate);
 
                 if (Common.projectBaseForm.Exe_Modify_PKG(list) == null)

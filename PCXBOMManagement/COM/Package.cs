@@ -636,22 +636,6 @@ namespace CSI.PCC.PCX.PACKAGE
                 set { _ARG_SUB_TYPE_REMARK = value; }
             }
 
-            //private string _ARG_SAMPLE_SIZE;
-            //[DataType(Value = "VARCHAR2")]
-            //public string ARG_SAMPLE_SIZE
-            //{
-            //    get { return _ARG_SAMPLE_SIZE; }
-            //    set { _ARG_SAMPLE_SIZE = value; }
-            //}
-
-            //private string _ARG_DEV_SR_ID;
-            //[DataType(Value = "VARCHAR2")]
-            //public string ARG_DEV_SR_ID
-            //{
-            //    get { return _ARG_DEV_SR_ID; }
-            //    set { _ARG_DEV_SR_ID = value; }
-            //}
-
             private string _OUT_CURSOR;
             [DataType(Value = "REF CURSOR")]
             public string OUT_CURSOR

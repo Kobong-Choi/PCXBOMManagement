@@ -630,9 +630,7 @@ namespace CSI.PCC.PCX
                 dic.Add("MXSXL_NUMBER", PDMSuppMatNumber);
                 dic.Add("MAT_CD", materialCode);
 
-                MaterialInformation form = new MaterialInformation();
-                form.SOURCE_OF_MAT_INFO = dic;
-
+                MaterialInformation form = new MaterialInformation() { MaterialInfo = dic };
                 form.ShowDialog();
             }
             catch (Exception ex)

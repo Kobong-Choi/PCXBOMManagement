@@ -778,6 +778,7 @@ namespace CSI.PCC.PCX
                         pkgInsertOrgHead.ARG_FACTORY = Factory;
                         pkgInsertOrgHead.ARG_WS_NO = WorksheetNumbers;
                         pkgInsertOrgHead.ARG_OBJ_ID = headerValues["objectId"].ToString();
+                        pkgInsertOrgHead.ARG_BOM_PART_UUID = "";
                         pkgInsertOrgHead.ARG_OBJ_TYPE = headerValues["objectType"].ToString();
                         pkgInsertOrgHead.ARG_BOM_CONTRACT_VER = headerValues["bomContractVersion"].ToString();
                         pkgInsertOrgHead.ARG_DEV_STYLE_ID = headerValues["developmentStyleIdentifier"].ToString();
@@ -785,6 +786,7 @@ namespace CSI.PCC.PCX
                         pkgInsertOrgHead.ARG_COLORWAY_NAME = headerValues["colorwayName"].ToString();
                         pkgInsertOrgHead.ARG_SRC_CONFIG_ID = headerValues["sourcingConfigurationIdentifier"].ToString();
                         pkgInsertOrgHead.ARG_SRC_CONFIG_NAME = headerValues["sourcingConfigurationName"].ToString();
+                        pkgInsertOrgHead.ARG_SEASON_ID = "";
                         pkgInsertOrgHead.ARG_BOM_ID = headerValues["logicBomIdentifier"].ToString();
                         pkgInsertOrgHead.ARG_BOM_NAME = headerValues["logicBOMName"].ToString();
                         pkgInsertOrgHead.ARG_BOM_VERSION_NUM = headerValues["logicBOMVersion"].ToString();
@@ -1676,9 +1678,7 @@ namespace CSI.PCC.PCX
                 dic.Add("MXSXL_NUMBER", PDMSuppMatNumber);
                 dic.Add("MAT_CD", materialCode);
 
-                MaterialInformation form = new MaterialInformation();
-                form.SOURCE_OF_MAT_INFO = dic;
-
+                MaterialInformation form = new MaterialInformation() { MaterialInfo = dic };
                 form.ShowDialog();
             }
             catch (Exception ex)

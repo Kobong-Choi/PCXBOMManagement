@@ -184,8 +184,7 @@ namespace CSI.PCC.PCX
             {
                 if (gvwBomList.GetSelectedRows().Length < 2)
                 {
-                    MessageBox.Show("Please select more than one row.", "",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+                    Common.ShowMessageBox("Please select more than one row.", "I");
                     return false;
                 }
                 else
@@ -196,11 +195,9 @@ namespace CSI.PCC.PCX
             {
                 foreach (int rowHandle in gvwBomList.GetSelectedRows())
                 {
-                    if (gvwBomList.GetRowCellValue(rowHandle, "LOGIC_BOM_YN").ToString() == "Y")
+                    if (gvwBomList.GetRowCellValue(rowHandle, "LOGIC_BOM_YN").ToString().Equals("Y"))
                     {
-                        MessageBox.Show("You can't use this function for logic BOM.", "",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-
+                        Common.ShowMessageBox("You can't use this function for logic BOM.", "E");
                         return true;
                     }
                 }
@@ -215,7 +212,7 @@ namespace CSI.PCC.PCX
                     if (!AreRowsSelected())
                         return;
 
-                    if (Common.HasBOMLocked(gvwBomList))
+                    if (Common.HasBOMLocked(gvwBomList, true))
                         return;
 
                     if (hasLogicBOM())
@@ -252,6 +249,9 @@ namespace CSI.PCC.PCX
                     if (hasLogicBOM())
                         return;
 
+                    if (Common.HasBOMLocked(gvwBomList, true))
+                        return;
+
                     MakeStatusReadyOnSite();
                     break;
 
@@ -286,7 +286,7 @@ namespace CSI.PCC.PCX
                     if (!AreRowsSelected())
                         return;
 
-                    if (Common.HasBOMLocked(gvwBomList))
+                    if (Common.HasBOMLocked(gvwBomList, true))
                         return;
 
                     if (hasLogicBOM())
@@ -296,6 +296,9 @@ namespace CSI.PCC.PCX
                     break;
 
                 case "cancelBOM":
+
+                    if (Common.HasBOMLocked(gvwBomList, true))
+                        return;
 
                     CancelBOM();
                     break;
@@ -425,7 +428,7 @@ namespace CSI.PCC.PCX
                 Factory = gvwBomList.GetFocusedRowCellValue("FACTORY").ToString(),
                 WorksheetNumbers = Common.ChainValues(gvwBomList, "WS_NO"),
                 EditType = "Multiple",
-                HasLockedBOM = Common.HasBOMLocked(gvwBomList)
+                HasLockedBOM = Common.HasBOMLocked(gvwBomList, false)
             };
 
             if (form.ShowDialog() == DialogResult.OK)
@@ -551,7 +554,7 @@ namespace CSI.PCC.PCX
             ArrayList list = new ArrayList();
             string worksheetNumbers = Common.ChainValues(gvwBomList, "WS_NO");
 
-            // Validate part codes and CS pattern part codes for all lineitems are entered.
+            // Validate whether part codes and CS pattern part codes of all lineitems are entered.
             PKG_INTG_BOM.SELECT_BOM_CONFIRM_VLDTN pkgValidate = new PKG_INTG_BOM.SELECT_BOM_CONFIRM_VLDTN();
             pkgValidate.ARG_WORK_TYPE = "NullPartExisting";
             pkgValidate.ARG_FACTORY = gvwBomList.GetFocusedRowCellValue("FACTORY").ToString();
@@ -562,8 +565,7 @@ namespace CSI.PCC.PCX
 
             if (ds.Tables[0].Rows.Count > 0)
             {
-                MessageBox.Show("Please make sure all of parts & CS pattern's are input.", "",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                Common.ShowMessageBox("Please make sure all of parts & CS pattern's are input.", "E");
                 return;
             }
 
@@ -595,8 +597,7 @@ namespace CSI.PCC.PCX
 
             if (Exe_Modify_PKG(list) == null)
             {
-                MessageBox.Show("Failed to change BOM status.", "",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                Common.ShowMessageBox("Failed to change BOM status.", "E");
                 return;
             }
 
@@ -606,7 +607,7 @@ namespace CSI.PCC.PCX
                 gvwBomList.SetRowCellValue(rowHandle, "CS_BOM_CFM", "W");
             }
 
-            MessageBox.Show("Complete");
+            MessageBox.Show("Complete.");
         }
 
         /// <summary>
@@ -759,7 +760,7 @@ namespace CSI.PCC.PCX
                 #endregion
 
                 #region Confirm required fields have been entered.
-                
+
                 PKG_INTG_BOM_WORKSHEET.LOAD_WORKSHEET_CONTENTS pkgSelect4 = new PKG_INTG_BOM_WORKSHEET.LOAD_WORKSHEET_CONTENTS();
                 pkgSelect4.ARG_WORK_TYPE = "Validation";
                 pkgSelect4.ARG_FACTORY = factory;
@@ -786,7 +787,7 @@ namespace CSI.PCC.PCX
                 #endregion
 
                 #region Confirm the promo cover page have been made.
-                
+
                 if (gvwBomList.GetRowCellValue(rowHandle, "SAMPLE_TYPE").ToString() == "PROMO")
                 {
                     PKG_INTG_BOM.SELECT_REQ_ON_SITE pkgSelect5 = new PKG_INTG_BOM.SELECT_REQ_ON_SITE();
@@ -939,7 +940,7 @@ namespace CSI.PCC.PCX
                 //    FocusCellInWork(rowHandle, "SAMPLE_ETS");
                 //    return;
                 //}
-                
+
                 #endregion
             }
         }
@@ -1319,7 +1320,7 @@ namespace CSI.PCC.PCX
             pkgInsert.ARG_KEY_VALUE = season + "-" + styleNumber;
             pkgInsert.ARG_FACTORY = gvwBomList.GetFocusedRowCellValue("FACTORY").ToString();
             pkgInsert.ARG_WS_NO = gvwBomList.GetFocusedRowCellValue("WS_NO").ToString();
-            
+
             list.Add(pkgInsert);
 
             if (Exe_Modify_PKG(list) == null)
@@ -1365,7 +1366,7 @@ namespace CSI.PCC.PCX
                     default:
                         break;
                 }
-                
+
                 list.Add(gvwBomList.GetRowCellValue(rowHandle, "WS_NO").ToString());
             }
 
@@ -1408,7 +1409,7 @@ namespace CSI.PCC.PCX
             }
 
             largestWSNo = ds.Tables[0].Rows[0]["WS_NO"].ToString();
-            
+
             // Except the BOM which has the largest number of line items.
             list.Remove(largestWSNo);
 
@@ -1441,8 +1442,7 @@ namespace CSI.PCC.PCX
             string factory = string.Empty;
             string wsNo = string.Empty;
 
-            if (MessageBox.Show("Do you really want to proceed?", "",
-                MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Cancel)
+            if (MessageBox.Show("Do you really want to proceed?", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Cancel)
                 return;
 
             foreach (int rowHandle in gvwBomList.GetSelectedRows())
@@ -1509,8 +1509,7 @@ namespace CSI.PCC.PCX
             {
                 if (Exe_Modify_PKG(list) == null)
                 {
-                    MessageBox.Show("Failed to cancel or release BOM", "",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                    Common.ShowMessageBox("Failed to cancel/release a BOM.", "E");
                     return;
                 }
             }
@@ -1533,7 +1532,8 @@ namespace CSI.PCC.PCX
             }
             else if (numSelectedRows == 1)
             {
-                PartListForPE form = new PartListForPE() {
+                PartListForPE form = new PartListForPE()
+                {
                     Factory = gvwBomList.GetFocusedRowCellValue("FACTORY").ToString(),
                     WorksheetNumber = gvwBomList.GetFocusedRowCellValue("WS_NO").ToString()
                 };
@@ -1669,7 +1669,7 @@ namespace CSI.PCC.PCX
                     foreach (DataTable dt in dtList)
                     {
                         // To avoid runtime error of System.InvalidOperationException.
-                        dt.TableName = "Name";  
+                        dt.TableName = "Name";
 
                         Common.projectBaseForm.SendEmailUnlock(Common.sessionID, dt.Rows[0]["COSTING_PIC"].ToString(), "TD", dt);
                     }
@@ -2110,8 +2110,7 @@ namespace CSI.PCC.PCX
 
             if (view.FocusedRowHandle < 0)
             {
-                MessageBox.Show("Please search a BOM.", "",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
+                Common.ShowMessageBox("Please search a BOM.", "W");
                 return;
             }
 
@@ -2152,8 +2151,7 @@ namespace CSI.PCC.PCX
 
                     if (isLogicBOM)
                     {
-                        MessageBox.Show("You can't request ordering materials from logic BOM.", "",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                        Common.ShowMessageBox("You can't order materials from logic BOM.", "E");
                         return;
                     }
                     else
@@ -2165,7 +2163,7 @@ namespace CSI.PCC.PCX
                             CSBOMStatus = view.GetFocusedRowCellValue("CS_BOM_CFM").ToString(),
                             ParentRowhandle = view.FocusedRowHandle,
                             EditType = "Single",
-                            HasLockedBOM = Common.HasBOMLocked(view)
+                            HasLockedBOM = Common.HasBOMLocked(view, false)
                         };
 
                         form.Show();
@@ -2177,10 +2175,8 @@ namespace CSI.PCC.PCX
 
                     if (isLogicBOM)
                     {
-                        MessageBox.Show("You can't request making sample shoes from logic BOM.", "",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                        Common.ShowMessageBox("You can't request making sample shoes from logic BOM.", "E");
                         return;
-
                     }
                     else
                     {
@@ -4219,6 +4215,8 @@ namespace CSI.PCC.PCX
                             pkgInsertOrgHead.ARG_LOGIC_BOM_STATE_ID = headerValues["logicBOMStateIdentifier"].ToString();
                             pkgInsertOrgHead.ARG_LOGIC_BOM_GATE_ID = headerValues["logicBOMGateIdentifier"].ToString();
                             pkgInsertOrgHead.ARG_CYCLE_YEAR = cycleYear;
+                            pkgInsertOrgHead.ARG_BOM_PART_UUID = "";
+                            pkgInsertOrgHead.ARG_SEASON_ID = "";
 
                             ArrayList listHeader = new ArrayList();
 
@@ -4313,6 +4311,8 @@ namespace CSI.PCC.PCX
                             pkgInsertHead.ARG_LOGIC_BOM_GATE_ID = headerValues["logicBOMGateIdentifier"].ToString();
                             pkgInsertHead.ARG_CYCLE_YEAR = cycleYear;
                             pkgInsertHead.ARG_LOGIC_BOM_YN = "Y";
+                            pkgInsertHead.ARG_BOM_PART_UUID = "";
+                            pkgInsertHead.ARG_SEASON_ID = "";
 
                             ArrayList arrayList = new ArrayList();
 

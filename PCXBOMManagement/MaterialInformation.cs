@@ -15,8 +15,7 @@ namespace CSI.PCC.PCX
 {
     public partial class MaterialInformation : DevExpress.XtraEditors.XtraForm
     {
-        public ProjectBaseForm projectBaseForm = Common.projectBaseForm;
-        public Dictionary<string, string> SOURCE_OF_MAT_INFO = null;
+        public Dictionary<string, string> MaterialInfo { get; set; }
 
         public MaterialInformation()
         {
@@ -27,35 +26,28 @@ namespace CSI.PCC.PCX
         {
             base.OnLoad(e);
 
-            string PDMSuppMatNumber = SOURCE_OF_MAT_INFO["MXSXL_NUMBER"];
-            string materialCode = SOURCE_OF_MAT_INFO["MAT_CD"];
-
-            #region 마스터에서 자재 정보를 가져옴
-            
             PKG_INTG_BOM.SELECT_MATERIAL_INFO pkgSelect = new PKG_INTG_BOM.SELECT_MATERIAL_INFO();
             pkgSelect.ARG_WORK_TYPE = "PCC";
-            pkgSelect.ARG_MXSXL_NUMBER = PDMSuppMatNumber;
-            pkgSelect.ARG_MAT_CD = materialCode;
+            pkgSelect.ARG_MXSXL_NUMBER = MaterialInfo["MXSXL_NUMBER"];
+            pkgSelect.ARG_MAT_CD = MaterialInfo["MAT_CD"];
             pkgSelect.ARG_CS_CD = "";
             pkgSelect.OUT_CURSOR = string.Empty;
             
-            DataTable dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
+            DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
 
-            #endregion
-
-            if (dataSource.Rows.Count == 0) 
+            if (dataSource.Rows.Count == 0)
+            {
                 return;
+            }
             else if (dataSource.Rows.Count == 1)
             {
                 this.Close();
 
-                SOURCE_OF_MAT_INFO = new Dictionary<string, string>();
-                SOURCE_OF_MAT_INFO.Add("MXSXL_NUMBER", dataSource.Rows[0]["MXSXL_NUMBER"].ToString().Trim());
-                SOURCE_OF_MAT_INFO.Add("CS_CD", dataSource.Rows[0]["CS_CD"].ToString().Trim());
+                MaterialInfo.Clear();
+                MaterialInfo.Add("MXSXL_NUMBER", dataSource.Rows[0]["MXSXL_NUMBER"].ToString().Trim());
+                MaterialInfo.Add("CS_CD", dataSource.Rows[0]["CS_CD"].ToString().Trim());
 
-                CSMaterialInformation form = new CSMaterialInformation();
-                form.SOURCE_OF_MAT_INFO = SOURCE_OF_MAT_INFO;
-
+                CSMaterialInformation form = new CSMaterialInformation() { MaterialInfo = this.MaterialInfo };
                 form.ShowDialog();
             }
             else if (dataSource.Rows.Count > 1)
@@ -66,7 +58,7 @@ namespace CSI.PCC.PCX
             else
             {
                 this.Close();
-                MessageBox.Show("There is no material to show information.");
+                Common.ShowMessageBox("There is no material to show information.", "E");
             }
         }
 
@@ -77,22 +69,12 @@ namespace CSI.PCC.PCX
         /// <param name="e"></param>
         private void gvwBase_DoubleClick(object sender, EventArgs e)
         {
-            try
-            {
-                Dictionary<string, string> dic = new Dictionary<string, string>();
-                dic.Add("MXSXL_NUMBER", gvwBase.GetFocusedRowCellValue("MXSXL_NUMBER").ToString());
-                dic.Add("CS_CD", gvwBase.GetFocusedRowCellValue("CS_CD").ToString());
+            MaterialInfo.Clear();
+            MaterialInfo.Add("MXSXL_NUMBER", gvwBase.GetFocusedRowCellValue("MXSXL_NUMBER").ToString());
+            MaterialInfo.Add("CS_CD", gvwBase.GetFocusedRowCellValue("CS_CD").ToString());
 
-                CSMaterialInformation form = new CSMaterialInformation();
-                form.SOURCE_OF_MAT_INFO = dic;
-
-                form.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return;
-            }
+            CSMaterialInformation form = new CSMaterialInformation() { MaterialInfo = this.MaterialInfo };
+            form.ShowDialog();
         }
     }
 }
