@@ -63,6 +63,7 @@
             this.gridColumn41 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn42 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn43 = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.gridColumn44 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.panelControl2 = new DevExpress.XtraEditors.PanelControl();
             this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
             this.grdData = new DevExpress.XtraGrid.GridControl();
@@ -90,7 +91,7 @@
             this.btnExportSRT = new DevExpress.XtraEditors.SimpleButton();
             this.btnMatching = new DevExpress.XtraEditors.SimpleButton();
             this.btnExport = new DevExpress.XtraEditors.SimpleButton();
-            this.gridColumn44 = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.gridColumn47 = new DevExpress.XtraGrid.Columns.GridColumn();
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
             this.panelControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl2)).BeginInit();
@@ -590,6 +591,18 @@
             this.gridColumn43.Name = "gridColumn43";
             this.gridColumn43.OptionsColumn.AllowEdit = false;
             // 
+            // gridColumn44
+            // 
+            this.gridColumn44.AppearanceCell.Options.UseTextOptions = true;
+            this.gridColumn44.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.gridColumn44.AppearanceHeader.Options.UseTextOptions = true;
+            this.gridColumn44.AppearanceHeader.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.gridColumn44.Caption = "Season ID";
+            this.gridColumn44.FieldName = "SEASON_ID";
+            this.gridColumn44.Name = "gridColumn44";
+            this.gridColumn44.OptionsColumn.AllowEdit = false;
+            this.gridColumn44.Width = 50;
+            // 
             // panelControl2
             // 
             this.panelControl2.Controls.Add(this.groupControl1);
@@ -642,7 +655,8 @@
             this.gridColumn13,
             this.gridColumn45,
             this.gridColumn15,
-            this.gridColumn16});
+            this.gridColumn16,
+            this.gridColumn47});
             this.gvwData.GridControl = this.grdData;
             this.gvwData.Name = "gvwData";
             this.gvwData.OptionsBehavior.CopyToClipboardWithColumnHeaders = false;
@@ -956,17 +970,16 @@
             this.btnExport.Text = "Export";
             this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
             // 
-            // gridColumn44
+            // gridColumn47
             // 
-            this.gridColumn44.AppearanceCell.Options.UseTextOptions = true;
-            this.gridColumn44.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            this.gridColumn44.AppearanceHeader.Options.UseTextOptions = true;
-            this.gridColumn44.AppearanceHeader.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            this.gridColumn44.Caption = "Season ID";
-            this.gridColumn44.FieldName = "SEASON_ID";
-            this.gridColumn44.Name = "gridColumn44";
-            this.gridColumn44.OptionsColumn.AllowEdit = false;
-            this.gridColumn44.Width = 50;
+            this.gridColumn47.AppearanceCell.Options.UseTextOptions = true;
+            this.gridColumn47.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.gridColumn47.AppearanceHeader.Options.UseTextOptions = true;
+            this.gridColumn47.AppearanceHeader.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.gridColumn47.Caption = "gridColumn47";
+            this.gridColumn47.FieldName = "LINEITEM_UUID";
+            this.gridColumn47.Name = "gridColumn47";
+            this.gridColumn47.OptionsColumn.AllowEdit = false;
             // 
             // BOMImport
             // 
@@ -1065,5 +1078,6 @@
         private DevExpress.XtraEditors.SimpleButton btnExportSRT;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn8;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn44;
+        private DevExpress.XtraGrid.Columns.GridColumn gridColumn47;
     }
 }

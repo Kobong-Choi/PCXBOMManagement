@@ -2429,6 +2429,14 @@ namespace CSI.PCC.PCX.PACKAGE
                 get { return _ARG_COLOR_FORECAST_PRCNT; }
                 set { _ARG_COLOR_FORECAST_PRCNT = value; }
             }
+
+            private string _ARG_LINEITEM_UUID;
+            [DataType(Value = "VARCHAR2")]
+            public string ARG_LINEITEM_UUID
+            {
+                get { return _ARG_LINEITEM_UUID; }
+                set { _ARG_LINEITEM_UUID = value; }
+            }
         }
 
         public class INSERT_BOM_TAIN_JSON_ORG

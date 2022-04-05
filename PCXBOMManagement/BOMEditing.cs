@@ -160,7 +160,7 @@ namespace CSI.PCC.PCX
             }
         }
         
-        #region Conetext Menu Events.
+        #region Conetext Menu Events
 
         /// <summary>
         /// 컨텍스트 메뉴 아이템 클릭 시, 선택한 아이템에 맞는 함수 호출
@@ -2259,7 +2259,7 @@ namespace CSI.PCC.PCX
 
         #endregion
 
-        #region Grid Events.
+        #region Grid Events
         
         private void CustomKeyDown(object sender, KeyEventArgs e)
         {
@@ -3741,7 +3741,7 @@ namespace CSI.PCC.PCX
 
         #endregion
 
-        #region Button Events.
+        #region Button Events
 
         /// <summary>
         /// 
@@ -5182,7 +5182,7 @@ namespace CSI.PCC.PCX
 
         #endregion
 
-        #region User Defined Functions.
+        #region User Defined Functions
 
         /// <summary>
         /// Hide some columns for fake bom.
@@ -5253,19 +5253,8 @@ namespace CSI.PCC.PCX
             pkgSelect.OUT_CURSOR = string.Empty;
 
             ds = Common.projectBaseForm.Exe_Select_PKG(pkgSelect);
-
-            if (ds.Tables[0].Rows.Count > 0)
-            {
-                // Release the limit of length of the column.
-                ds.Tables[0].Columns["PROCESS"].MaxLength = 500;
-                return ds.Tables[0];
-            }
-            else
-            {
-                MessageBox.Show("Failed to load BOM list.", "",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-                return null;
-            }
+            ds.Tables[0].Columns["PROCESS"].MaxLength = 500;        // Release the limit of length of the column.
+            return ds.Tables[0];                                    // If there is no data in the BOM, just returns schema.
         }
 
         /// <summary>
@@ -5382,7 +5371,7 @@ namespace CSI.PCC.PCX
 
         #endregion
 
-        #region Form Events.
+        #region Form Events
 
         /// <summary>
         /// Release lock status from owner so that others can lock this BOM.

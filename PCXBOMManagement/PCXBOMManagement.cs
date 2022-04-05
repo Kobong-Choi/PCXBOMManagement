@@ -39,7 +39,7 @@ namespace CSI.PCC.PCX
         {
             // Automatically from JSON.
             public string objectId { get; set; }
-            public string bomPartUUID { get; set; }         // new for Gemini.
+            public string bomUUID { get; set; }         // new for Gemini.
             public string objectType { get; set; }
             public string bomContractVersion { get; set; }
             public string developmentStyleIdentifier { get; set; }
@@ -169,7 +169,7 @@ namespace CSI.PCC.PCX
                 gvwBomList.Columns["GEL_YN"].Visible = false;
         }
 
-        #region ContextMenu Events.
+        #region ContextMenu Events
 
         /// <summary>
         /// 
@@ -1696,7 +1696,7 @@ namespace CSI.PCC.PCX
 
         #endregion
 
-        #region Button Events.
+        #region Button Events
 
         /// <summary>
         /// Load data.
@@ -1712,197 +1712,65 @@ namespace CSI.PCC.PCX
         public override void PrintClick()
         {
             string today = DateTime.Now.ToString("yyyyMMdd");
-            int rowCount = gvwBomList.SelectedRowsCount;
-
-            // Create a new folder with the name of today. ex) 20211217
             DirectoryInfo di = new DirectoryInfo(@"C:\PCC_Worksheet\" + today);
 
             try
             {
                 if (!di.Exists)
                     di.Create();
-
-                FileSystemInfo[] infos = di.Parent.GetFileSystemInfos();
-
-                if (infos != null)
-                {
-                    foreach (FileSystemInfo i in infos)
-                    {
-                        if (i.Name != today)
-                        {
-                            // Delete all files in the directory.
-                            if (i is DirectoryInfo)
-                                (i as DirectoryInfo).Delete(true);
-                            else
-                                i.Delete();
-                        }
-                    }
-
-                    if (Common.sessionFactory == "DS")
-                    {
-                        if (rowCount <= 0 || rowCount > 20)
-                        {
-                            MessageBox.Show("Please select rows less than 20 rows.", "",
-                                MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-                            return;
-                        }
-
-                        List<string[]> list = new List<string[]>();
-
-                        foreach (int rowHandle in gvwBomList.GetSelectedRows())
-                        {
-                            list.Add(new string[] {
-                                gvwBomList.GetRowCellValue(rowHandle, "FACTORY").ToString(),
-                                gvwBomList.GetRowCellValue(rowHandle, "WS_NO").ToString()
-                            });
-                        }
-
-                        OpenChildForm(@"\POPUP\CSI.PCC.BOM.P_CSBOMWorksheetPrint.dll", list, OpenType.Modal);
-                    }
-                    else
-                    {
-                        List<string> list = new List<string>();
-
-                        list.Add(gvwBomList.GetFocusedRowCellValue("FACTORY").ToString());
-                        list.Add(gvwBomList.GetFocusedRowCellValue("WS_NO").ToString());
-
-                        OpenChildForm(@"\POPUP\CSI.PCC.PCX.PCX_WORKSHEET_OVERSEAS.dll", list, OpenType.Modal);
-                    }
-                }
             }
-            catch (Exception e)
+            catch (IOException e)
             {
-                MessageBox.Show(e.ToString());
+                Common.ShowMessageBox("Failed to create directory.", "E");
                 return;
             }
 
-            #region Backup
-            //try
-            //{
-            //    if (Common.sessionFactory == "DS")
-            //    {
-            //        int[] rowHandles = gvwBomList.GetSelectedRows();
+            FileSystemInfo[] infos = di.Parent.GetFileSystemInfos();
 
-            //        // 20개 이상 선택 불가
-            //        if (rowHandles.Length > 20)
-            //        {
-            //            MessageBox.Show("You can't choose more than 20 sheets.\n" + "The number of rows you chose : " + rowHandles.Length + ".");
-            //            return;
-            //        }
+            if (infos != null)
+            {
+                foreach (FileSystemInfo i in infos)
+                {
+                    if (i.Name != today)
+                    {
+                        // Delete all files in the directory.
+                        if (i is DirectoryInfo)
+                            (i as DirectoryInfo).Delete(true);
+                        else
+                            i.Delete();
+                    }
+                }
 
-            //        string today = DateTime.Today.ToString("yyyyMMdd");
+                if (Common.sessionFactory.Equals("DS"))
+                {
+                    if (gvwBomList.SelectedRowsCount <= 0 || gvwBomList.SelectedRowsCount > 20)
+                    {
+                        Common.ShowMessageBox("Please select rows less than 20.", "W");
+                        return;
+                    }
 
-            //        // 금일 기준으로 새로운 디렉토리 생성
-            //        string newDirectoryPath = CLIENT_WORKSHEET_PATH + today;
+                    List<string[]> list = new List<string[]>();
 
-            //        // Initializes a new instance of the DirectoryInfo class on the specified path.
-            //        DirectoryInfo dirInfo = new DirectoryInfo(newDirectoryPath);
+                    foreach (int rowHandle in gvwBomList.GetSelectedRows())
+                    {
+                        list.Add(new string[] {
+                                gvwBomList.GetRowCellValue(rowHandle, "FACTORY").ToString(),
+                                gvwBomList.GetRowCellValue(rowHandle, "WS_NO").ToString()
+                            });
+                    }
 
-            //        // 디렉토리가 있는지 확인 후 없으면 새로 생성
-            //        if (!dirInfo.Exists)
-            //            dirInfo.Create();
+                    OpenChildForm(@"\POPUP\CSI.PCC.BOM.P_CSBOMWorksheetPrint.dll", list, OpenType.Modal);
+                }
+                else
+                {
+                    List<string> list = new List<string>();
 
-            //        // Parent : Gets the parent directory of a specified subdirectory.
-            //        // GetFileSystemInfos : Returns an array of strongly typed FileSystemInfo entries representing all the files and subdirectories in a directory.
-            //        FileSystemInfo[] fileSysInfos = dirInfo.Parent.GetFileSystemInfos();
+                    list.Add(gvwBomList.GetFocusedRowCellValue("FACTORY").ToString());
+                    list.Add(gvwBomList.GetFocusedRowCellValue("WS_NO").ToString());
 
-            //        DirectoryInfo dirInfo2 = null;
-
-            //        for (int i = 0; i < fileSysInfos.Length; i++)
-            //        {
-            //            // 이전에 생성된 디렉토리가 존재할 경우 모든 파일 및 디렉토리 삭제
-            //            if (fileSysInfos[i].Name != today)
-            //            {
-            //                dirInfo2 = new DirectoryInfo(fileSysInfos[i].FullName);
-            //                FileSystemInfo[] excelFiles = dirInfo2.GetFileSystemInfos();
-
-            //                for (int j = 0; j < excelFiles.Length; j++)
-            //                    excelFiles[j].Delete();
-
-            //                fileSysInfos[i].Delete();
-            //            }
-            //        }
-
-            //        List<string[]> list = new List<string[]>();
-
-            //        foreach (int rowHandle in rowHandles)
-            //        {
-            //            string factory = gvwBomList.GetRowCellValue(rowHandle, "FACTORY").ToString();
-            //            string wsNo = gvwBomList.GetRowCellValue(rowHandle, "WS_NO").ToString();
-
-            //            list.Add(new string[] { factory, wsNo });
-            //        }
-
-            //        object returnObj = OpenChildForm(@"\POPUP\CSI.PCC.BOM.P_CSBOMWorksheetPrint.dll", list,
-            //            JPlatform.Client.Library.interFace.OpenType.Modal);
-            //    }
-            //    else
-            //    {
-            //        /* In case of overseas factory. */
-
-            //        int[] iRows = gvwBomList.GetSelectedRows();
-
-            //        string today = DateTime.Today.ToString("yyyyMMdd");
-            //        // 금일 기준으로 새로운 디렉토리 생성
-            //        string newDirectoryPath = CLIENT_WORKSHEET_PATH + today;
-
-            //        #region 신규 디렉토리 생성 및 이전 디렉토리 삭제
-
-            //        // Initializes a new instance of the DirectoryInfo class on the specified path.
-            //        DirectoryInfo dirInfo = new DirectoryInfo(newDirectoryPath);
-
-            //        // 디렉토리가 있는지 확인 후 없으면 새로 생성
-            //        if (!dirInfo.Exists)
-            //            dirInfo.Create();
-
-            //        // Parent : Gets the parent directory of a specified subdirectory.
-            //        // GetFileSystemInfos : Returns an array of strongly typed FileSystemInfo entries representing all the files and subdirectories in a directory.
-            //        FileSystemInfo[] fileSysInfos = dirInfo.Parent.GetFileSystemInfos();
-
-            //        DirectoryInfo dirInfo2 = null;
-
-            //        for (int i = 0; i < fileSysInfos.Length; i++)
-            //        {
-            //            // 이전에 생성된 디렉토리가 존재할 경우 모든 파일 및 디렉토리 삭제
-            //            if (fileSysInfos[i].Name != today)
-            //            {
-            //                dirInfo2 = new DirectoryInfo(fileSysInfos[i].FullName);
-            //                FileSystemInfo[] excelFiles = dirInfo2.GetFileSystemInfos();
-
-            //                for (int j = 0; j < excelFiles.Length; j++)
-            //                    excelFiles[j].Delete();
-
-            //                fileSysInfos[i].Delete();
-            //            }
-            //        }
-            //        #endregion
-
-            //        DirectoryInfo di = new DirectoryInfo(newDirectoryPath);       // 생성을 원하는 디렉토리 명시
-
-            //        if (!di.Exists) // 디렉토리가 존재하는지 확인
-            //        {
-            //            di.Create();
-            //        }
-
-            //        List<string> list = new List<string>();
-
-            //        list.Add(Convert.ToString(gvwBomList.GetRowCellValue(iRows[0], "FACTORY")));
-            //        list.Add(Convert.ToString(gvwBomList.GetRowCellValue(iRows[0], "WS_NO")));
-            //        list.Add(Convert.ToString(gvwBomList.GetRowCellValue(iRows[0], "DPA")));
-            //        list.Add(String.IsNullOrEmpty(Convert.ToString(gvwBomList.GetRowCellValue(iRows[0], "WS_STATUS"))) ? "N" : Convert.ToString(gvwBomList.GetRowCellValue(iRows[0], "WS_STATUS")).Trim());
-            //        list.Add(Convert.ToString(gvwBomList.GetRowCellValue(iRows[0], "")));
-            //        list.Add(String.IsNullOrEmpty(Convert.ToString(gvwBomList.GetRowCellValue(iRows[0], "CS_BOM_CFM"))) ? "A" : Convert.ToString(gvwBomList.GetRowCellValue(iRows[0], "CS_BOM_CFM")).Trim());
-
-            //        OpenChildForm(@"\POPUP\CSI.PCC.PCX.PCX_WORKSHEET_OVERSEAS.dll", list, JPlatform.Client.Library.interFace.OpenType.Modal);
-
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show(ex.ToString());
-            //    return;
-            //}
-            #endregion
+                    OpenChildForm(@"\POPUP\CSI.PCC.PCX.PCX_WORKSHEET_OVERSEAS.dll", list, OpenType.Modal);
+                }
+            }
         }
 
         /// <summary>
@@ -1939,7 +1807,7 @@ namespace CSI.PCC.PCX
 
         #endregion
 
-        #region Control Events.
+        #region Control Events
 
         /// <summary>
         /// Search BOM's.
@@ -1965,7 +1833,7 @@ namespace CSI.PCC.PCX
 
         #endregion
 
-        #region Grid Events.
+        #region Grid Events
 
         /// <summary>
         /// 셀에 배경색이 있는 컬럼 중, 선택된 셀은 배경색을 없앰
@@ -2289,7 +2157,7 @@ namespace CSI.PCC.PCX
 
         #endregion
 
-        #region User Defiend Functions.
+        #region User Defiend Functions
 
         ///// <summary>
         ///// Initialize component of the form.
@@ -3153,7 +3021,7 @@ namespace CSI.PCC.PCX
                 pkgInsert.ARG_LOGIC_BOM_STATE_ID = "";      // logic BOM.
                 pkgInsert.ARG_LOGIC_BOM_GATE_ID = "";       // logic BOM.
                 pkgInsert.ARG_CYCLE_YEAR = "";              // logic BOM.
-                pkgInsert.ARG_BOM_PART_UUID = bomHeader.bomPartUUID == null ? "" : bomHeader.bomPartUUID;       // Gemini.
+                pkgInsert.ARG_BOM_PART_UUID = bomHeader.bomUUID == null ? "" : bomHeader.bomUUID;       // Gemini.
                 pkgInsert.ARG_SEASON_ID = bomHeader.seasonIdentifier == null ? "" : bomHeader.seasonIdentifier; // Gemini.
 
                 list.Add(pkgInsert);
@@ -3213,7 +3081,7 @@ namespace CSI.PCC.PCX
                 pkgInsert2.ARG_LOGIC_BOM_GATE_ID = "";
                 pkgInsert2.ARG_CYCLE_YEAR = "";
                 pkgInsert2.ARG_LOGIC_BOM_YN = "N";
-                pkgInsert2.ARG_BOM_PART_UUID = bomHeader.bomPartUUID == null ? "" : bomHeader.bomPartUUID;  // Gemini.
+                pkgInsert2.ARG_BOM_PART_UUID = bomHeader.bomUUID == null ? "" : bomHeader.bomUUID;  // Gemini.
                 pkgInsert2.ARG_SEASON_ID = ConvertSeason(bomHeader.seasonIdentifier);
 
                 list.Add(pkgInsert2);
@@ -3511,6 +3379,7 @@ namespace CSI.PCC.PCX
                     pkgInsert4.ARG_LOGIC_GROUP = "";
                     pkgInsert4.ARG_MAT_FORECAST_PRCNT = 0;
                     pkgInsert4.ARG_COLOR_FORECAST_PRCNT = 0;
+                    pkgInsert4.ARG_LINEITEM_UUID = lineItem.billOfMaterialsLineItemUUID == null ? "" : lineItem.billOfMaterialsLineItemUUID;
 
                     list.Add(pkgInsert4);
                     partSeq++;

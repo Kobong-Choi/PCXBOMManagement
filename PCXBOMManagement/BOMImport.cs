@@ -32,7 +32,7 @@ namespace CSI.PCC.PCX
         private class BOMHeader
         {
             public string objectId { get; set; }
-            public string bomPartUUID { get; set; }         // new for Gemini.
+            public string bomUUID { get; set; }         // new for Gemini.
             public string objectType { get; set; }
             public string bomContractVersion { get; set; }
             public string developmentStyleIdentifier { get; set; }
@@ -376,7 +376,7 @@ namespace CSI.PCC.PCX
                     pkgInsert.ARG_FACTORY = Factory;
                     pkgInsert.ARG_WS_NO = WSNumber;
                     pkgInsert.ARG_OBJ_ID = bomHeader.objectId;
-                    pkgInsert.ARG_BOM_PART_UUID = bomHeader.bomPartUUID == null ? "" : bomHeader.bomPartUUID;
+                    pkgInsert.ARG_BOM_PART_UUID = bomHeader.bomUUID == null ? "" : bomHeader.bomUUID;
                     pkgInsert.ARG_OBJ_TYPE = bomHeader.objectType;
                     pkgInsert.ARG_BOM_CONTRACT_VER = bomHeader.bomContractVersion;
                     pkgInsert.ARG_DEV_STYLE_ID = bomHeader.developmentStyleIdentifier;
@@ -819,7 +819,7 @@ namespace CSI.PCC.PCX
                 var header = new JObject();
 
                 header.Add("objectId", rowHeader["OBJ_ID"].ToString());
-                header.Add("bomPartUUID", rowHeader["BOM_PART_UUID"].ToString());   // Gemini.
+                header.Add("bomUUID", rowHeader["BOM_PART_UUID"].ToString());   // Gemini.
                 header.Add("objectType", rowHeader["OBJ_TYPE"].ToString());
                 header.Add("bomContractVersion", rowHeader["BOM_CONTRACT_VER"].ToString());
                 header.Add("developmentStyleIdentifier", rowHeader["DEV_STYLE_ID"].ToString());
@@ -859,7 +859,7 @@ namespace CSI.PCC.PCX
 
                     lineItem.Add("bomLineSortSequence", row["PCC_SORT_NO"].ToString());
                     lineItem.Add("billOfMaterialsSectionIdentifier", ConvertTypeToID(row["PART_TYPE"].ToString()));
-                    lineItem.Add("billOfMaterialsLineItemUUID", "");
+                    lineItem.Add("billOfMaterialsLineItemUUID", row["LINEITEM_UUID"].ToString());
                     lineItem.Add("partNameIdentifier", row["PART_ID"].ToString());
                     lineItem.Add("patternPartIdentifier", row["PTRN_PART_ID"].ToString());
                     lineItem.Add("suppliedMaterialIdentifier", row["SUPP_MAT_ID"].ToString());
