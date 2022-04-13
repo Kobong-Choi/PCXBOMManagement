@@ -44,10 +44,12 @@
             this.CopyPtrnV1N4 = new System.Windows.Forms.ToolStripMenuItem();
             this.CopyPtrnF1F4 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.MulCheckCombine = new System.Windows.Forms.ToolStripMenuItem();
             this.MulCheckSticker = new System.Windows.Forms.ToolStripMenuItem();
             this.MulCheckMidsole = new System.Windows.Forms.ToolStripMenuItem();
             this.MulCheckOutsole = new System.Windows.Forms.ToolStripMenuItem();
+            this.MulCheckCode = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.transfer = new System.Windows.Forms.ToolStripMenuItem();
             this.transferRecord = new System.Windows.Forms.ToolStripMenuItem();
@@ -107,6 +109,7 @@
             this.gridColumn3 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn8 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn5 = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.gridColumn14 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.panelControl2 = new DevExpress.XtraEditors.PanelControl();
             this.btnSave = new DevExpress.XtraEditors.SimpleButton();
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
@@ -179,10 +182,7 @@
             this.CopyPtrnV1N4,
             this.CopyPtrnF1F4,
             this.toolStripSeparator2,
-            this.MulCheckCombine,
-            this.MulCheckSticker,
-            this.MulCheckMidsole,
-            this.MulCheckOutsole,
+            this.toolStripMenuItem1,
             this.toolStripSeparator3,
             this.transfer,
             this.transferRecord,
@@ -191,7 +191,7 @@
             this.FocusRow,
             this.PartAdd});
             this.ctxMenuStrip.Name = "ctxMenuStrip";
-            this.ctxMenuStrip.Size = new System.Drawing.Size(325, 380);
+            this.ctxMenuStrip.Size = new System.Drawing.Size(325, 314);
             // 
             // FindCode
             // 
@@ -257,33 +257,52 @@
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(321, 6);
             // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MulCheckCombine,
+            this.MulCheckSticker,
+            this.MulCheckMidsole,
+            this.MulCheckOutsole,
+            this.MulCheckCode});
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(324, 22);
+            this.toolStripMenuItem1.Text = "Multi Check";
+            // 
             // MulCheckCombine
             // 
             this.MulCheckCombine.Name = "MulCheckCombine";
-            this.MulCheckCombine.Size = new System.Drawing.Size(324, 22);
-            this.MulCheckCombine.Text = "Multi Check - Combine";
+            this.MulCheckCombine.Size = new System.Drawing.Size(135, 22);
+            this.MulCheckCombine.Text = "Combine";
             this.MulCheckCombine.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MulCheckSticker
             // 
             this.MulCheckSticker.Name = "MulCheckSticker";
-            this.MulCheckSticker.Size = new System.Drawing.Size(324, 22);
-            this.MulCheckSticker.Text = "Multi Check - Sticker";
+            this.MulCheckSticker.Size = new System.Drawing.Size(135, 22);
+            this.MulCheckSticker.Text = "Sticker";
             this.MulCheckSticker.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MulCheckMidsole
             // 
             this.MulCheckMidsole.Name = "MulCheckMidsole";
-            this.MulCheckMidsole.Size = new System.Drawing.Size(324, 22);
-            this.MulCheckMidsole.Text = "Multi Check - Midsole";
+            this.MulCheckMidsole.Size = new System.Drawing.Size(135, 22);
+            this.MulCheckMidsole.Text = "Midsole";
             this.MulCheckMidsole.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // MulCheckOutsole
             // 
             this.MulCheckOutsole.Name = "MulCheckOutsole";
-            this.MulCheckOutsole.Size = new System.Drawing.Size(324, 22);
-            this.MulCheckOutsole.Text = "Multi Check - Outsole";
+            this.MulCheckOutsole.Size = new System.Drawing.Size(135, 22);
+            this.MulCheckOutsole.Text = "Outsole";
             this.MulCheckOutsole.Click += new System.EventHandler(this.ContextMenu_Click);
+            // 
+            // MulCheckCode
+            // 
+            this.MulCheckCode.Name = "MulCheckCode";
+            this.MulCheckCode.Size = new System.Drawing.Size(135, 22);
+            this.MulCheckCode.Text = "Codemaker";
+            this.MulCheckCode.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // toolStripSeparator3
             // 
@@ -331,6 +350,7 @@
             this.PartAdd.Name = "PartAdd";
             this.PartAdd.Size = new System.Drawing.Size(324, 22);
             this.PartAdd.Text = "MDM - Part Add";
+            this.PartAdd.Visible = false;
             this.PartAdd.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // gvwMaster
@@ -379,7 +399,8 @@
             this.gridColumn27,
             this.gridColumn3,
             this.gridColumn8,
-            this.gridColumn5});
+            this.gridColumn5,
+            this.gridColumn14});
             styleFormatCondition1.Appearance.BackColor = System.Drawing.Color.Black;
             styleFormatCondition1.Appearance.ForeColor = System.Drawing.Color.White;
             styleFormatCondition1.Appearance.Options.UseBackColor = true;
@@ -1025,6 +1046,17 @@
             this.gridColumn5.Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
             this.gridColumn5.Name = "gridColumn5";
             // 
+            // gridColumn14
+            // 
+            this.gridColumn14.AppearanceCell.Options.UseTextOptions = true;
+            this.gridColumn14.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.gridColumn14.AppearanceHeader.Options.UseTextOptions = true;
+            this.gridColumn14.AppearanceHeader.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.gridColumn14.Caption = "LOCK_YN";
+            this.gridColumn14.FieldName = "LOCK_YN";
+            this.gridColumn14.Name = "gridColumn14";
+            this.gridColumn14.OptionsColumn.AllowEdit = false;
+            // 
             // panelControl2
             // 
             this.panelControl2.Controls.Add(this.btnSave);
@@ -1092,8 +1124,6 @@
         private System.Windows.Forms.ToolStripMenuItem SetPtrnByTop;
         private System.Windows.Forms.ToolStripMenuItem SetPtrnByEach;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripMenuItem MulCheckCombine;
-        private System.Windows.Forms.ToolStripMenuItem MulCheckSticker;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem MatInfo;
         private System.Windows.Forms.ToolStripMenuItem FocusRow;
@@ -1101,8 +1131,6 @@
         private DevExpress.XtraEditors.SimpleButton btnSave;
         private DevExpress.XtraEditors.Repository.RepositoryItemCheckEdit repositoryItemCheckEdit3;
         private DevExpress.XtraEditors.Repository.RepositoryItemCheckEdit repositoryItemCheckEdit4;
-        private System.Windows.Forms.ToolStripMenuItem MulCheckMidsole;
-        private System.Windows.Forms.ToolStripMenuItem MulCheckOutsole;
         private DevExpress.XtraEditors.Repository.RepositoryItemLookUpEdit repositoryItemLookUpEdit1;
         private DevExpress.XtraGrid.Views.Grid.GridView gvwMaster;
         private DevExpress.XtraGrid.Columns.GridColumn colFACTORY;
@@ -1156,5 +1184,12 @@
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn13;
         private System.Windows.Forms.ToolStripMenuItem genComment;
         private System.Windows.Forms.ToolStripMenuItem CopyPtrnF1F4;
+        private DevExpress.XtraGrid.Columns.GridColumn gridColumn14;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem MulCheckCombine;
+        private System.Windows.Forms.ToolStripMenuItem MulCheckSticker;
+        private System.Windows.Forms.ToolStripMenuItem MulCheckMidsole;
+        private System.Windows.Forms.ToolStripMenuItem MulCheckOutsole;
+        private System.Windows.Forms.ToolStripMenuItem MulCheckCode;
     }
 }

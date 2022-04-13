@@ -212,8 +212,8 @@ namespace CSI.PCC.PCX
                     if (!AreRowsSelected())
                         return;
 
-                    if (Common.HasBOMLocked(gvwBomList, true))
-                        return;
+                    //if (Common.HasBOMLocked(gvwBomList, true))
+                    //    return;
 
                     if (hasLogicBOM())
                         return;
@@ -286,8 +286,8 @@ namespace CSI.PCC.PCX
                     if (!AreRowsSelected())
                         return;
 
-                    if (Common.HasBOMLocked(gvwBomList, true))
-                        return;
+                    //if (Common.HasBOMLocked(gvwBomList, true))
+                    //    return;
 
                     if (hasLogicBOM())
                         return;
@@ -337,6 +337,7 @@ namespace CSI.PCC.PCX
 
             foreach (int rowHandle in gvwBomList.GetSelectedRows())
             {
+                // Validate the required field is entered.
                 if (gvwBomList.GetRowCellValue(rowHandle, "DEV_COLORWAY_ID").ToString() == "")
                 {
                     MessageBox.Show("Colorway ID is required for multi-edit.", "",
@@ -345,6 +346,7 @@ namespace CSI.PCC.PCX
                     return;
                 }
 
+                // Validate a logic BOM is included in selection.
                 if (gvwBomList.GetRowCellValue(rowHandle, "LOGIC_BOM_YN").ToString() == "Y")
                 {
                     MessageBox.Show("Logic BOM can not be available for multi function.", "",
@@ -367,6 +369,7 @@ namespace CSI.PCC.PCX
                 styleNumbers.Add(gvwBomList.GetRowCellValue(rowHandle, "DEV_STYLE_NUMBER").ToString());
             }
 
+            // Validate all of the dev style selected are same.
             if (styleNumbers.AsEnumerable().GroupBy(x => x).Count() > 1)
             {
                 if (MessageBox.Show("You selected more than one style. Do you want to proceed?", "",
@@ -375,6 +378,7 @@ namespace CSI.PCC.PCX
                     return;
             }
 
+            // Fake BOM cannot be compared with inline BOM.
             if (bomTypes.Count == 0)
             {
                 MessageBox.Show("Inline BOM cannot be compared to Fake BOM.", "",
@@ -2952,8 +2956,7 @@ namespace CSI.PCC.PCX
 
                     if (objs.GetValue("BOM Header") == null || objs.GetValue("BOM Data") == null)
                     {
-                        MessageBox.Show("Invalid JSON file.", "",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                        Common.ShowMessageBox("This is invalid format.", "E");
                         return;
                     }
 
@@ -3136,7 +3139,7 @@ namespace CSI.PCC.PCX
 
                 #endregion
 
-                // Delegate which chains each value lie value1,value2,value3.
+                // Delegate which chains each value like value1,value2,value3.
                 Func<List<BOMData>, string, string> func = (source, type) =>
                 {
                     IOrderedEnumerable<IGrouping<string, BOMData>> sequence;
@@ -3405,580 +3408,6 @@ namespace CSI.PCC.PCX
 
             if (uploader.ShowDialog() == DialogResult.OK)
                 BindDataSourceGridView();
-
-            #region backup
-
-            //try
-            //{
-            //    // Chained Key List like ,WS_NO_1,WS_NO_2,WS_NO_3,...
-            //    string chainedWsNo = string.Empty;
-
-            //    foreach (string fileName in fileNames)
-            //    {
-            //        using (StreamReader fileStream = File.OpenText(fileName))
-            //        {
-            //            using (JsonTextReader jsonReader = new JsonTextReader(fileStream))
-            //            {
-            //                JObject jObjects = (JObject)JToken.ReadFrom(jsonReader);
-
-            //                DataSet cnvrtObjects = ConvertJson2Xml(jObjects.ToString());
-            //                DataTable BOMHeader = cnvrtObjects.Tables[0];
-            //                DataTable BOMData = cnvrtObjects.Tables[1];
-
-            //                // Create a new Worksheet Number.
-            //                PKG_INTG_BOM.SELECT_NEW_WS_NO pkgSelectWsNo = new PKG_INTG_BOM.SELECT_NEW_WS_NO();
-            //                pkgSelectWsNo.ARG_FACTORY = SessionInfo.Factory;
-            //                pkgSelectWsNo.OUT_CURSOR = string.Empty;
-
-            //                DataTable dataSource = Exe_Select_PKG(pkgSelectWsNo).Tables[0];
-            //                if (dataSource.Rows.Count == 0)
-            //                {
-            //                    MessageBox.Show("Failed to create a new WS_NO");
-            //                    return;
-            //                }
-
-            //                string newWsNo = dataSource.Rows[0]["WS_NO"].ToString();
-
-            //                DataRow headerValues = BOMHeader.Rows[0];
-
-            //                #region Upload BOM header for backup.
-
-            //                PKG_INTG_BOM.INSERT_BOM_HEAD_JSON_ORG pkgInsertOrgHead = new PKG_INTG_BOM.INSERT_BOM_HEAD_JSON_ORG();
-            //                pkgInsertOrgHead.ARG_FACTORY = SessionInfo.Factory;
-            //                pkgInsertOrgHead.ARG_WS_NO = newWsNo;
-            //                pkgInsertOrgHead.ARG_OBJ_ID = headerValues["objectId"].ToString();
-            //                pkgInsertOrgHead.ARG_OBJ_TYPE = headerValues["objectType"].ToString();
-            //                pkgInsertOrgHead.ARG_BOM_CONTRACT_VER = headerValues["bomContractVersion"].ToString();
-            //                pkgInsertOrgHead.ARG_DEV_STYLE_ID = headerValues["developmentStyleIdentifier"].ToString();
-            //                pkgInsertOrgHead.ARG_DEV_COLORWAY_ID = headerValues["developmentColorwayIdentifier"].ToString();
-            //                pkgInsertOrgHead.ARG_COLORWAY_NAME = headerValues["colorwayName"].ToString();
-            //                pkgInsertOrgHead.ARG_SRC_CONFIG_ID = headerValues["sourcingConfigurationIdentifier"].ToString();
-            //                pkgInsertOrgHead.ARG_SRC_CONFIG_NAME = headerValues["sourcingConfigurationName"].ToString();
-            //                pkgInsertOrgHead.ARG_BOM_ID = headerValues["bomIdentifier"].ToString();
-            //                pkgInsertOrgHead.ARG_BOM_NAME = headerValues["bomName"].ToString();
-            //                pkgInsertOrgHead.ARG_BOM_VERSION_NUM = headerValues["bomVersionNumber"].ToString();
-            //                pkgInsertOrgHead.ARG_BOM_DESC = headerValues["bomDescription"].ToString();
-            //                pkgInsertOrgHead.ARG_BOM_COMMENTS = headerValues["bomComments"].ToString();
-            //                pkgInsertOrgHead.ARG_BOM_STATUS_IND = headerValues["billOfMaterialStatusIndicator"].ToString();
-            //                pkgInsertOrgHead.ARG_CREATE_TIME_STAMP = headerValues["createTimestamp"].ToString();
-            //                pkgInsertOrgHead.ARG_CHANGE_TIME_STAMP = headerValues["changeTimestamp"].ToString();
-            //                pkgInsertOrgHead.ARG_CREATED_BY = headerValues["createdBy"].ToString();
-            //                pkgInsertOrgHead.ARG_MODIFIED_BY = headerValues["modifiedBy"].ToString();
-            //                pkgInsertOrgHead.ARG_STYLE_NUMBER = headerValues["styleNumber"].ToString();
-            //                pkgInsertOrgHead.ARG_STYLE_NAME = headerValues["styleName"].ToString();
-            //                pkgInsertOrgHead.ARG_MODEL_ID = headerValues["modelIdentifier"].ToString();
-            //                pkgInsertOrgHead.ARG_GENDER = headerValues["gender"].ToString();
-            //                pkgInsertOrgHead.ARG_AGE = headerValues["age"].ToString();
-            //                pkgInsertOrgHead.ARG_PRODUCT_ID = headerValues["productId"].ToString();
-            //                pkgInsertOrgHead.ARG_PRODUCT_CODE = headerValues["productCode"].ToString();
-            //                pkgInsertOrgHead.ARG_COLORWAY_CODE = headerValues["colorwayCode"].ToString();
-            //                pkgInsertOrgHead.ARG_DEV_STYLE_TYPE_ID = "";
-            //                pkgInsertOrgHead.ARG_LOGIC_BOM_STATE_ID = "";
-            //                pkgInsertOrgHead.ARG_LOGIC_BOM_GATE_ID = "";
-            //                pkgInsertOrgHead.ARG_CYCLE_YEAR = "";
-
-            //                ArrayList listHeader = new ArrayList();
-
-            //                listHeader.Add(pkgInsertOrgHead);
-
-            //                if (Exe_Modify_PKG(listHeader) == null)
-            //                {
-            //                    MessageBox.Show("Failed to save JSON Org. Header Info.");
-            //                    return;
-            //                }
-
-            //                #endregion
-
-            //                #region Upload BOM header for live.
-
-            //                #region Style Name
-
-            //                /* Dev Style Name : Style Name + '-' + Style Number */
-
-            //                string[] devStyleName = new string[2] { "", "" };
-
-            //                if (headerValues["styleName"].ToString().Contains('-'))
-            //                    devStyleName = headerValues["styleName"].ToString().Split('-');
-
-            //                string styleName = devStyleName[0].Trim();
-
-            //                #endregion
-
-            //                #region Color Version
-
-            //                /* Colorway Name : Dev Colorway ID + '-' + Dev Colorway Description + '--' + Initial Season */
-
-            //                // Zero-based
-            //                int idxDelimiter1 = headerValues["colorwayName"].ToString().IndexOf('-');
-            //                int idxDelimiter2 = headerValues["colorwayName"].ToString().LastIndexOf('-');
-
-            //                // Colorway Desc. 길이
-            //                int length = idxDelimiter2 - idxDelimiter1 - 1;
-
-            //                // Colorway Desc.
-            //                string devColorDescription = string.Empty;
-
-            //                if (length < 3)
-            //                    devColorDescription = "";
-            //                else
-            //                    devColorDescription = headerValues["colorwayName"].ToString().Substring(idxDelimiter1 + 1, length);
-
-            //                #endregion
-
-            //                #region Gender
-
-            //                string gender = "";
-
-            //                if (headerValues["gender"].ToString() == "01")
-            //                    gender = "Male";
-            //                else if (headerValues["gender"].ToString() == "02")
-            //                    gender = "Female";
-            //                else if (headerValues["gender"].ToString() == "03")
-            //                    gender = "Unisex";
-            //                else if (headerValues["gender"].ToString() == "04")
-            //                    gender = "Not Applicable";
-
-            //                #endregion
-
-            //                #region Product Code
-
-            //                string productCode = "";
-
-            //                if (headerValues["productCode"].ToString() != "")
-            //                    productCode = headerValues["styleNumber"].ToString() + headerValues["colorwayCode"].ToString();
-
-            //                #endregion
-
-            //                #region Sourcing Factory
-
-            //                string[] prodFactoryOfCS = new string[4] { "VJ", "JJ", "QD", "RJ" };
-            //                string prodFactory = "";
-
-            //                if (headerValues["sourcingConfigurationName"].ToString() != "")
-            //                {
-            //                    prodFactory = headerValues["sourcingConfigurationName"].ToString().Substring(0, 2);
-
-            //                    if (prodFactoryOfCS.Contains(prodFactory) == false)
-            //                        prodFactory = "";
-            //                }
-
-            //                #endregion
-
-            //                PKG_INTG_BOM.INSERT_BOM_HEAD_JSON pkgInsertHead = new PKG_INTG_BOM.INSERT_BOM_HEAD_JSON();
-            //                pkgInsertHead.ARG_FACTORY = SessionInfo.Factory;
-            //                pkgInsertHead.ARG_WS_NO = newWsNo;
-            //                pkgInsertHead.ARG_DEV_NAME = styleName;
-            //                pkgInsertHead.ARG_PRODUCT_CODE = productCode;
-            //                pkgInsertHead.ARG_PROD_FACTORY = prodFactory;
-            //                pkgInsertHead.ARG_GENDER = (gender == "") ? "" : gender;
-            //                pkgInsertHead.ARG_COLOR_VER = devColorDescription;
-            //                pkgInsertHead.ARG_MODEL_ID = headerValues["modelIdentifier"].ToString();
-            //                pkgInsertHead.ARG_PCC_PM = SessionInfo.UserID;
-            //                pkgInsertHead.ARG_DEV_STYLE_ID = headerValues["developmentStyleIdentifier"].ToString();
-            //                pkgInsertHead.ARG_DEV_COLORWAY_ID = headerValues["developmentColorwayIdentifier"].ToString();
-            //                pkgInsertHead.ARG_PRODUCT_ID = headerValues["productId"].ToString();
-            //                pkgInsertHead.ARG_STYLE_NUMBER = headerValues["styleNumber"].ToString();
-            //                pkgInsertHead.ARG_SOURCING_CONFIG_ID = headerValues["sourcingConfigurationIdentifier"].ToString();
-            //                pkgInsertHead.ARG_PCX_BOM_ID = headerValues["bomIdentifier"].ToString();
-            //                pkgInsertHead.ARG_DEV_STYLE_TYPE_ID = "";
-            //                pkgInsertHead.ARG_LOGIC_BOM_STATE_ID = "";
-            //                pkgInsertHead.ARG_LOGIC_BOM_GATE_ID = "";
-            //                pkgInsertHead.ARG_CYCLE_YEAR = "";
-            //                pkgInsertHead.ARG_LOGIC_BOM_YN = "N";
-
-            //                ArrayList arrayList = new ArrayList();
-
-            //                arrayList.Add(pkgInsertHead);
-
-            //                if (Exe_Modify_PKG(arrayList) == null)
-            //                {
-            //                    MessageBox.Show("Failed to save BOM Header");
-            //                    return;
-            //                }
-
-            //                #endregion
-
-            //                #region Upload BOM data for backup.
-
-            //                ArrayList listBOMData = new ArrayList();
-            //                int partSeqOrg = 1;
-
-            //                foreach (DataRow lineItem in BOMData.Rows)
-            //                {
-            //                    PKG_INTG_BOM.INSERT_BOM_TAIN_JSON_ORG pkgInsertOrgData = new PKG_INTG_BOM.INSERT_BOM_TAIN_JSON_ORG();
-            //                    pkgInsertOrgData.ARG_FACTORY = SessionInfo.Factory;
-            //                    pkgInsertOrgData.ARG_WS_NO = newWsNo;
-            //                    pkgInsertOrgData.ARG_BOM_LINE_SORT_SEQ = lineItem["bomLineSortSequence"].ToString();
-            //                    pkgInsertOrgData.ARG_BOM_SECTION_ID = lineItem["billOfMaterialsSectionIdentifier"].ToString();
-            //                    pkgInsertOrgData.ARG_PART_NAME_ID = lineItem["partNameIdentifier"].ToString();
-            //                    pkgInsertOrgData.ARG_PTRN_PART_ID = lineItem["patternPartIdentifier"].ToString();
-            //                    pkgInsertOrgData.ARG_SUPP_MAT_ID = lineItem["suppliedMaterialIdentifier"].ToString();
-            //                    pkgInsertOrgData.ARG_MAT_ITEM_ID = lineItem["materialItemIdentifier"].ToString();
-            //                    pkgInsertOrgData.ARG_MAT_ITEM_PLHDR_DESC = lineItem["materialItemPlaceholderDescription"].ToString();
-            //                    pkgInsertOrgData.ARG_COLOR_ID = lineItem["colorIdentifier"].ToString();
-            //                    pkgInsertOrgData.ARG_COLOR_PLHDR_DESC = lineItem["colorPlaceholderDescription"].ToString();
-            //                    pkgInsertOrgData.ARG_SUPP_MAT_COLOR_IS_MUL = lineItem["suppliedMaterialColorIsMultipleColors"].ToString();
-            //                    pkgInsertOrgData.ARG_SUPP_MAT_COLOR_ID = lineItem["suppliedMaterialColorIdentifier"].ToString();
-            //                    pkgInsertOrgData.ARG_BOM_LINEITEM_COMMENTS = lineItem["bomLineItemComments"].ToString();
-            //                    pkgInsertOrgData.ARG_FAC_IN_HOUSE_IND = lineItem["factoryInHouseIndicator"].ToString();
-            //                    pkgInsertOrgData.ARG_COUNTY_ORG_ID = lineItem["countyOfOriginIdentifier"].ToString();
-            //                    pkgInsertOrgData.ARG_ACTUAL_DIMENSION_DESC = lineItem["actualDimensionDescription"].ToString();
-            //                    pkgInsertOrgData.ARG_ISO_MEASUREMENT_CODE = lineItem["isoMeasurementCode"].ToString();
-            //                    pkgInsertOrgData.ARG_NET_USAGE_NUMBER = lineItem["netUsageNumber"].ToString();
-            //                    pkgInsertOrgData.ARG_WASTE_USAGE_NUMBER = lineItem["wasteUsageNumber"].ToString();
-            //                    pkgInsertOrgData.ARG_PART_YIELD = lineItem["partYield"].ToString();
-            //                    pkgInsertOrgData.ARG_CONSUM_CONVER_RATE = lineItem["consumptionConversionRate"].ToString();
-            //                    pkgInsertOrgData.ARG_LINEITEM_DEFECT_PER_NUM = lineItem["lineItemDefectPercentNumber"].ToString();
-            //                    pkgInsertOrgData.ARG_UNIT_PRICE_ISO_MSR_CODE = lineItem["unitPriceISOMeasurementCode"].ToString();
-            //                    pkgInsertOrgData.ARG_CURRENCY_CODE = lineItem["currencyCode"].ToString();
-            //                    pkgInsertOrgData.ARG_FACTORY_UNIT_PRICE = lineItem["factoryUnitPrice"].ToString();
-            //                    pkgInsertOrgData.ARG_UNIT_PRICE_UPCHARGE_NUM = lineItem["unitPriceUpchargeNumber"].ToString();
-            //                    pkgInsertOrgData.ARG_UNIT_PRICE_UPCHARGE_DESC = lineItem["unitPriceUpchargeDescription"].ToString();
-            //                    pkgInsertOrgData.ARG_FREIGHT_TERM_ID = lineItem["freightTermIdentifier"].ToString();
-            //                    pkgInsertOrgData.ARG_LANDED_COST_PER_NUM = lineItem["landedCostPercentNumber"].ToString();
-            //                    pkgInsertOrgData.ARG_PCC_SORT_ORDER = lineItem["pccSortOrder"].ToString();
-            //                    pkgInsertOrgData.ARG_ROLLUP_VARIATION_LV = lineItem["rollupVariationLevel"].ToString();
-            //                    pkgInsertOrgData.ARG_PART_SEQ = Convert.ToString(partSeqOrg);
-            //                    pkgInsertOrgData.ARG_LOGIC_GROUP = "";
-            //                    pkgInsertOrgData.ARG_MAT_FORECAST_PRCNT = 0;
-            //                    pkgInsertOrgData.ARG_COLOR_FORECAST_PRCNT = 0;
-
-            //                    listBOMData.Add(pkgInsertOrgData);
-            //                    partSeqOrg++;
-            //                }
-
-            //                if (Exe_Modify_PKG(listBOMData) == null)
-            //                {
-            //                    MessageBox.Show("Failed to save JSON Org. Data");
-            //                    return;
-            //                }
-
-            //                #endregion
-
-            //                #region Upload BOM data for live.
-
-            //                // 매칭된 코드를 저장할 신규 테이블 생성
-            //                DataTable mapTable = new DataTable();
-
-            //                // JSON BOM 원본의 스키마를 그대로 복사
-            //                mapTable = BOMData.Clone();
-
-            //                #region 매칭된 코드를 저장할 신규 컬럼 추가
-
-            //                mapTable.Columns.Add("TYPE");
-            //                mapTable.Columns.Add("PART_CD");
-            //                mapTable.Columns.Add("PART_NAME");
-            //                mapTable.Columns.Add("PTRN_PART_CD");
-            //                mapTable.Columns.Add("PTRN_PART_NAME");
-            //                mapTable.Columns.Add("CS_PTRN_CD");
-            //                mapTable.Columns.Add("CS_PTRN_NAME");
-
-            //                mapTable.Columns.Add("PDM_MAT_CD");
-            //                mapTable.Columns.Add("PDM_MAT_NAME");
-            //                mapTable.Columns.Add("MAT_COMMENTS");
-            //                mapTable.Columns.Add("MXSXL_NUMBER");
-            //                mapTable.Columns.Add("MCS_NUMBER");
-
-            //                mapTable.Columns.Add("COLOR_CD");
-            //                mapTable.Columns.Add("COLOR_NAME");
-            //                mapTable.Columns.Add("COLOR_COMMENTS");
-
-            //                mapTable.Columns.Add("VENDOR_NAME");
-            //                mapTable.Columns.Add("CS_CD");
-            //                mapTable.Columns.Add("MDSL_CHK");
-            //                mapTable.Columns.Add("OTSL_CHK");
-
-            //                #endregion
-
-            //                #region Type 매칭 및 라인 아이템 원본 복사
-
-            //                #region Nike Material Section ID Mapping Table을 가져옴
-
-            //                PKG_INTG_BOM.SELECT_COMMON_CODE_MPP_TB pkgSelectCommon = new PKG_INTG_BOM.SELECT_COMMON_CODE_MPP_TB();
-            //                pkgSelectCommon.ARG_COMMON_ID = "PCX001";
-            //                pkgSelectCommon.OUT_CURSOR = string.Empty;
-
-            //                DataTable mapTableForColumn = Exe_Select_PKG(pkgSelectCommon).Tables[0];
-
-            //                #endregion
-
-            //                foreach (DataRow dr in BOMData.Rows)
-            //                {
-            //                    // 원본 행을 하나씩 복사
-            //                    mapTable.ImportRow(dr);
-
-            //                    // 매칭할 섹션 아이디
-            //                    string sectionId = dr["billOfMaterialsSectionIdentifier"].ToString();
-
-            //                    // 매칭된 코드명
-            //                    DataRow[] matchedCode = mapTableForColumn.Select("NIKE_ID = '" + sectionId + "'");
-
-            //                    // 테이블의 행 번호는 0부터 시작
-            //                    int rIdx = mapTable.Rows.Count - 1;
-
-            //                    // TYPE 컬럼에 매칭된 코드를 대문자로 변환하여 입력
-            //                    mapTable.Rows[rIdx]["TYPE"] = matchedCode[0]["LIST_VALUES"].ToString().ToUpper();
-            //                }
-
-            //                #endregion
-
-            //                #region Part, Material, Color Mapping Table을 가져옴
-
-            //                // BOM의 파트,자재,컬러ID 리스트
-            //                DataTable listOfPartID = mapTable.DefaultView.ToTable(true, "partNameIdentifier");
-            //                DataTable listOfPtrnPartID = mapTable.DefaultView.ToTable(true, "patternPartIdentifier");
-            //                DataTable listOfSuppMatID = mapTable.DefaultView.ToTable(true, "suppliedMaterialIdentifier");
-            //                DataTable listOfColorID = mapTable.DefaultView.ToTable(true, "colorIdentifier");
-
-            //                // (코드,코드,코드) 포맷으로 문자열 연결
-            //                string chainedPartID = string.Empty;
-            //                string chainedSuppMatID = string.Empty;
-            //                string chainedColorID = string.Empty;
-
-            //                foreach (DataRow dr in listOfPartID.Rows)
-            //                {
-            //                    chainedPartID += "," + dr["partNameIdentifier"].ToString();
-            //                }
-
-            //                // 패턴 파트는 파트 라이브러리와 동일하게 사용
-            //                foreach (DataRow dr in listOfPtrnPartID.Rows)
-            //                {
-            //                    chainedPartID += "," + dr["patternPartIdentifier"].ToString();
-            //                }
-
-            //                foreach (DataRow dr in listOfSuppMatID.Rows)
-            //                {
-            //                    chainedSuppMatID += "," + dr["suppliedMaterialIdentifier"].ToString();
-            //                }
-
-            //                foreach (DataRow dr in listOfColorID.Rows)
-            //                {
-            //                    chainedColorID += "," + dr["colorIdentifier"].ToString();
-            //                }
-
-            //                PKG_INTG_BOM.SELECT_BOM_CODE_MPP_TB pkgSelectInternal = new PKG_INTG_BOM.SELECT_BOM_CODE_MPP_TB();
-            //                pkgSelectInternal.ARG_CONCAT_PART_ID = chainedPartID;
-            //                pkgSelectInternal.ARG_CONCAT_SUPP_MAT_ID = chainedSuppMatID;
-            //                pkgSelectInternal.ARG_CONCAT_COLOR_ID = chainedColorID;
-            //                pkgSelectInternal.OUT_CURSOR = string.Empty;
-
-            //                DataTable mapTableForBOM = Exe_Select_PKG(pkgSelectInternal).Tables[0];
-
-            //                #endregion
-
-            //                // [0] : Part Library 없음, [1] : Material Library 없음, [2] : Color Library 없음
-            //                bool[] messageCode = new bool[3] { false, false, false };
-
-            //                // PART_SEQ, SORT_NO 채번용 변수
-            //                int partSeq = 1;
-
-            //                ArrayList arrayList2 = new ArrayList();
-
-            //                foreach (DataRow dr in mapTable.Rows)
-            //                {
-            //                    string partType = dr["TYPE"].ToString();
-
-            //                    // 미드솔/아웃솔 툴링은 WHQ에서 직접 관리, BOM 업로드 시 제외
-            //                    if (partType == "MIDSOLE TOOLING" || partType == "OUTSOLE TOOLING")
-            //                        continue;
-
-            //                    #region 파트 매칭
-
-            //                    string partNameID = dr["partNameIdentifier"].ToString();
-
-            //                    if (partNameID.Length > 0)
-            //                    {
-            //                        DataRow[] matchedCode = mapTableForBOM.Select("TYPE = 'PART' AND PCX_PART_ID = '" + partNameID + "'");
-
-            //                        if (matchedCode.Length > 0)
-            //                        {
-            //                            /* 매칭 성공 */
-            //                            dr["PART_NAME"] = matchedCode[0]["PART_NAME"];
-            //                            dr["PART_CD"] = matchedCode[0]["PART_CD"];
-            //                        }
-            //                        else
-            //                        {
-            //                            /* 매칭 실패 */
-            //                            dr["PART_NAME"] = "Failed to match a part with pcx library.";
-            //                        }
-
-            //                        // 나이키 패턴 파트가 없는 경우 CS 패턴 파트는 나이키 파트로 설정
-            //                        if (dr["patternPartIdentifier"].ToString() == "")
-            //                        {
-            //                            dr["CS_PTRN_NAME"] = matchedCode[0]["PART_NAME"];
-            //                            dr["CS_PTRN_CD"] = matchedCode[0]["PART_CD"];
-            //                        }
-            //                    }
-
-            //                    #endregion
-
-            //                    #region 패턴 파트 매칭
-
-            //                    string ptrnPartNameID = dr["patternPartIdentifier"].ToString();
-
-            //                    if (ptrnPartNameID.Length > 0)
-            //                    {
-            //                        DataRow[] matchedCode = mapTableForBOM.Select("TYPE = 'PART' AND PCX_PART_ID = '" + ptrnPartNameID + "'");
-
-            //                        if (matchedCode.Length > 0)
-            //                        {
-            //                            dr["PTRN_PART_NAME"] = matchedCode[0]["PART_NAME"];
-            //                            dr["PTRN_PART_CD"] = matchedCode[0]["PART_CD"];
-
-            //                            // 나이키 패턴 파트가 있는 경우 CS 패턴 파트는 나이키 패턴 파트로 설정
-            //                            dr["CS_PTRN_NAME"] = matchedCode[0]["PART_NAME"];
-            //                            dr["CS_PTRN_CD"] = matchedCode[0]["PART_CD"];
-            //                        }
-            //                        else
-            //                            dr["PART_NAME"] = "Failed to match a pattern part with pcx library.";
-            //                    }
-
-            //                    #endregion
-
-            //                    #region 자재 매칭
-
-            //                    string suppMatID = dr["suppliedMaterialIdentifier"].ToString();
-
-            //                    // No material means "0" in JSON file.
-            //                    if (suppMatID.Length > 1)
-            //                    {
-            //                        DataRow[] matchedCode = mapTableForBOM.Select("TYPE = 'MATERIAL' AND NIKE_SUPP_MTL_CODE = '" + suppMatID + "'");
-
-            //                        if (matchedCode.Length > 0)
-            //                        {
-            //                            // null은 입력 안 함
-            //                            if (matchedCode[0]["PDM_MAT_CD"].ToString() == "null")
-            //                                dr["PDM_MAT_CD"] = "";
-            //                            else
-            //                                dr["PDM_MAT_CD"] = matchedCode[0]["PDM_MAT_CD"];
-
-            //                            dr["PDM_MAT_NAME"] = matchedCode[0]["PDM_MAT_NAME"];
-
-            //                            // null은 입력 안 함
-            //                            if (matchedCode[0]["MXSXL_NUMBER"].ToString() == "null")
-            //                                dr["MXSXL_NUMBER"] = "";
-            //                            else
-            //                                dr["MXSXL_NUMBER"] = matchedCode[0]["MXSXL_NUMBER"];
-
-            //                            dr["MCS_NUMBER"] = matchedCode[0]["MCS_NUMBER"];
-            //                            dr["VENDOR_NAME"] = matchedCode[0]["VENDOR_NAME"];
-            //                            dr["CS_CD"] = matchedCode[0]["CS_CD"];
-
-            //                            //if (matchedCode[0]["NIKE_MS_STATE"].ToString() == "Retired")
-            //                            //    dr["MAT_COMMENTS"] = "The nike status of this material is retired.";
-            //                        }
-            //                        else
-            //                        {
-            //                            /* Matching 실패한 경우 */
-            //                            if (suppMatID != "100")
-            //                                dr["MAT_COMMENTS"] = "Failed to match a material with pcx library.";
-            //                        }
-            //                    }
-
-            //                    #endregion
-
-            //                    #region 칼라 매칭
-
-            //                    string colorID = dr["colorIdentifier"].ToString();
-
-            //                    if (colorID.Length > 0)
-            //                    {
-            //                        DataRow[] matchedCode = mapTableForBOM.Select("TYPE = 'COLOR' AND PCX_COLOR_ID = '" + colorID + "'");
-
-            //                        // 매칭에 성공한 경우
-            //                        if (matchedCode.Length > 0)
-            //                        {
-            //                            /* PCX_COLOR_NAME
-            //                                 * Type 1 : 9NM-LARGENT STEVE-93380
-            //                                 * Type 2 : MC-416 */
-
-            //                            string pcxColorName = matchedCode[0]["PCX_COLOR_NAME"].ToString();
-            //                            string[] pdmCodeNames = pcxColorName.Split('-');
-
-            //                            // 멀티 컬러의 경우 코드는 공백, 네임에만 표기
-            //                            if (pdmCodeNames[0] == "MC")
-            //                            {
-            //                                dr["COLOR_CD"] = matchedCode[0]["LGCY_COLOR_CD"].ToString();
-            //                                dr["COLOR_NAME"] = pcxColorName;
-            //                            }
-            //                            else
-            //                            {
-            //                                dr["COLOR_CD"] = pdmCodeNames[0];
-            //                                dr["COLOR_NAME"] = pdmCodeNames[1];
-            //                            }
-            //                        }
-            //                        else
-            //                            dr["COLOR_COMMENTS"] = "Failed to match a color with pcx library.";
-            //                    }
-
-            //                    #endregion
-
-            //                    PKG_INTG_BOM.INSERT_BOM_TAIN_JSON pkgInsertData = new PKG_INTG_BOM.INSERT_BOM_TAIN_JSON();
-            //                    pkgInsertData.ARG_FACTORY = SessionInfo.Factory;
-            //                    pkgInsertData.ARG_WS_NO = newWsNo;
-            //                    pkgInsertData.ARG_PART_SEQ = partSeq.ToString();
-            //                    pkgInsertData.ARG_PART_NO = dr["bomLineSortSequence"].ToString();
-            //                    pkgInsertData.ARG_PART_CD = dr["PART_CD"].ToString();
-            //                    pkgInsertData.ARG_PART_NAME = dr["PART_NAME"].ToString();
-            //                    pkgInsertData.ARG_PART_TYPE = dr["TYPE"].ToString();
-            //                    pkgInsertData.MXSXL_NUMBER = dr["MXSXL_NUMBER"].ToString();
-            //                    pkgInsertData.ARG_MAT_CD = dr["PDM_MAT_CD"].ToString();
-            //                    pkgInsertData.ARG_MAT_NAME = (dr["suppliedMaterialIdentifier"].ToString() == "100") ? "PLACEHOLDER" : dr["PDM_MAT_NAME"].ToString();
-            //                    pkgInsertData.ARG_MAT_COMMENTS = dr["bomLineItemComments"].ToString() == "" ? dr["MAT_COMMENTS"].ToString() : dr["bomLineItemComments"].ToString();
-            //                    pkgInsertData.ARG_MCS_NUMBER = dr["MCS_NUMBER"].ToString();
-            //                    pkgInsertData.ARG_NIKE_COMMENT = dr["bomLineItemComments"].ToString();
-            //                    pkgInsertData.ARG_COLOR_CD = dr["COLOR_CD"].ToString();
-            //                    pkgInsertData.ARG_COLOR_NAME = dr["COLOR_NAME"].ToString();
-            //                    pkgInsertData.ARG_COLOR_COMMENTS = dr["COLOR_COMMENTS"].ToString();
-            //                    pkgInsertData.ARG_SORT_NO = partSeq.ToString();
-            //                    pkgInsertData.ARG_UPD_USER = SessionInfo.UserID;
-            //                    pkgInsertData.ARG_PTRN_PART_NAME = dr["PTRN_PART_NAME"].ToString();
-            //                    pkgInsertData.ARG_PCX_SUPP_MAT_ID = dr["suppliedMaterialIdentifier"].ToString();
-            //                    pkgInsertData.ARG_PCX_COLOR_ID = dr["colorIdentifier"].ToString();
-            //                    pkgInsertData.ARG_VENDOR_NAME = dr["VENDOR_NAME"].ToString();
-            //                    pkgInsertData.ARG_PCX_MAT_ID = dr["materialItemIdentifier"].ToString();
-            //                    pkgInsertData.ARG_PTRN_PART_CD = dr["PTRN_PART_CD"].ToString();
-            //                    pkgInsertData.ARG_CS_CD = dr["CS_CD"].ToString();
-            //                    pkgInsertData.ARG_MDSL_CHK = (dr["TYPE"].ToString() == "MIDSOLE" || dr["TYPE"].ToString() == "AIRBAG") ? "Y" : "N";
-            //                    pkgInsertData.ARG_OTSL_CHK = (dr["TYPE"].ToString() == "OUTSOLE") ? "Y" : "N";
-            //                    pkgInsertData.ARG_CS_PTRN_NAME = dr["CS_PTRN_NAME"].ToString();
-            //                    pkgInsertData.ARG_CS_PTRN_CD = dr["CS_PTRN_CD"].ToString();
-            //                    pkgInsertData.ARG_LOGIC_GROUP = "";
-            //                    pkgInsertData.ARG_MAT_FORECAST_PRCNT = 0;
-            //                    pkgInsertData.ARG_COLOR_FORECAST_PRCNT = 0;
-
-            //                    // STICKER는 DB에서 처리
-
-            //                    arrayList2.Add(pkgInsertData);
-            //                    partSeq++;
-            //                }
-
-            //                if (Exe_Modify_PKG(arrayList2) == null)
-            //                {
-            //                    MessageBox.Show("Failed to save BOM Data.");
-            //                    return;
-            //                }
-
-            //                #endregion
-
-            //                chainedWsNo += "," + newWsNo;
-            //            }
-            //        }
-            //    }
-
-            //    BOMUploader headUpdater = new BOMUploader();
-            //    headUpdater.CONCAT_WS_NO = chainedWsNo;
-
-            //    if (headUpdater.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            //        BindDataSourceToGridView();
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show(ex.ToString());
-            //    return;
-            //}
-
-            #endregion
         }
 
         /// <summary>

@@ -109,67 +109,71 @@ namespace CSI.PCC.PCX
             switch (menuItem.Name)
             {
                 case "FindCode":
-                    FindCodeFromLibrary(gvwMaster);
+                    FindCodeFromLibrary();
                     break;
 
                 case "FindProcess":
-                    FindProcessFromMaster(gvwMaster);
+                    FindProcessFromMaster();
                     break;
 
                 case "SetPtrnByTop":
-                    BindPtrnPartName("Top", gvwMaster);
+                    BindPtrnPartName("Top");
                     break;
 
                 case "SetPtrnByEach":
-                    BindPtrnPartName("Each", gvwMaster);
+                    BindPtrnPartName("Each");
+                    break;
+
+                case "CopyPtrnV1N4":
+                    CopyFromCSPatternPart("New");
+                    break;
+
+                case "CopyPtrnF1F4":
+                    CopyFromCSPatternPart("Old");
                     break;
 
                 case "MulCheckCombine":
-                    MultiCheckCombine(gvwMaster);
+                    MultiCheck("COMBINE_YN");
                     break;
 
                 case "MulCheckSticker":
-                    MultiCheckSticker(gvwMaster);
-                    break;
-
-                case "MatInfo":
-                    ShowMaterialInfomation(gvwMaster);
-                    break;
-
-                case "FocusRow":
-                    ShowFocusedRow(gvwMaster);
-                    break;
-
-                case "PartAdd":
-                    OpenPartMDM();
+                    MultiCheck("STICKER_YN");
                     break;
 
                 case "MulCheckMidsole":
-                    MultiCheckMidsole(gvwMaster);
+                    MultiCheck("MDSL_CHK");
                     break;
 
                 case "MulCheckOutsole":
-                    MultiCheckOutsole(gvwMaster);
+                    MultiCheck("OTSL_CHK");
+                    break;
+
+                case "MulCheckCode":
+                    MultiCheck("CDMKR_YN");
                     break;
 
                 case "transfer":
-                    TransferToCodemaker(gvwMaster);
+                    TransferToCodemaker();
                     break;
 
                 case "transferRecord":
                     ShowRecordOfTransfer();
                     break;
 
-                case "CopyPtrnV1N4":
-                    CopyFromCSPatternPart(gvwMaster, "New");
+                case "MatInfo":
+                    ShowMaterialInfomation();
                     break;
 
-                case "CopyPtrnF1F4":
-                    CopyFromCSPatternPart(gvwMaster, "Old");
+                case "FocusRow":
+                    ShowFocusedRow();
+                    break;
+
+                case "PartAdd":
+                    OpenPartMDM();
                     break;
 
                 case "genComment":
-                    GenerateComment(gvwMaster);
+                    GenerateComment();
                     break;
 
                 default:
@@ -181,17 +185,18 @@ namespace CSI.PCC.PCX
         /// 라이브러리에서 코드를 찾아 셀에 입력
         /// </summary>
         /// <param name="_type"></param>
-        private void FindCodeFromLibrary(GridView view)
+        private void FindCodeFromLibrary()
         {
-            if (Common.HasLineitemDeleted(view) == true) return;
+            if (Common.HasLineitemDeleted(gvwMaster))
+                return;
 
             // Parameters to send to the childForm.
             int initSearchType = 0;
-            string keyword = view.GetFocusedRowCellValue(view.FocusedColumn).ToString();
+            string keyword = gvwMaster.GetFocusedRowCellValue(gvwMaster.FocusedColumn).ToString();
             string partDelimiter = string.Empty;
 
             // Get the initial search type from the focused column.
-            switch (view.FocusedColumn.FieldName)
+            switch (gvwMaster.FocusedColumn.FieldName)
             {
                 case "PART_NAME":
                 case "PART_TYPE":
@@ -200,7 +205,7 @@ namespace CSI.PCC.PCX
 
                     initSearchType = 0;
 
-                if (view.FocusedColumn.FieldName == "PTRN_PART_NAME")
+                    if (gvwMaster.FocusedColumn.FieldName == "PTRN_PART_NAME")
                         partDelimiter = "Pattern";
                     break;
 
@@ -247,149 +252,152 @@ namespace CSI.PCC.PCX
                 try
                 {
                     // To avoid infinite loop.
-                    view.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
+                    gvwMaster.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
 
-                    foreach (int rowHandle in view.GetSelectedRows())
+                    foreach (int rowHandle in gvwMaster.GetSelectedRows())
                     {
-                        if (results[0] == "Part")
+                        if (gvwMaster.GetRowCellValue(rowHandle, "LOCK_YN").ToString().Equals("N"))
                         {
-                            string oldValue = view.GetRowCellValue(rowHandle, "PART_NAME").ToString();
+                            if (results[0] == "Part")
+                            {
+                                string oldValue = gvwMaster.GetRowCellValue(rowHandle, "PART_NAME").ToString();
 
-                            // When the part name is changed from 'Lamination' to general part.
-                            if (oldValue.Contains("LAMINATION") == true && results[1].Contains("LAMINATION") == false)
+                                // When the part name is changed from 'Lamination' to general part.
+                                if (oldValue.Contains("LAMINATION") == true && results[1].Contains("LAMINATION") == false)
+                                {
+                                    // An user doesn't need to set nike pattern part name for general part.
+                                    gvwMaster.SetRowCellValue(rowHandle, "PTRN_PART_NAME", "");
+                                    gvwMaster.SetRowCellValue(rowHandle, "PTRN_PART_CD", "");
+                                }
+
+                                gvwMaster.SetRowCellValue(rowHandle, "PART_NAME", results[1]);
+                                gvwMaster.SetRowCellValue(rowHandle, "PART_CD", results[3]);
+
+                                // Set part type by each case.
+                                if (results[1].Contains("AIRBAG"))
+                                {
+                                    // If the part name contains 'AIRBAG', fix BOM section to 'AIRBAG'.
+                                    gvwMaster.SetRowCellValue(rowHandle, "PART_TYPE", "AIRBAG");
+                                    gvwMaster.SetRowCellValue(rowHandle, "MDSL_CHK", "Y");
+                                    gvwMaster.SetRowCellValue(rowHandle, "OTSL_CHK", "N");
+                                }
+                                else if (results[1].Contains("LAMINATION"))
+                                {
+                                    // If the part name contains 'AIRBAG', fix BOM section to 'UPPER'.
+                                    gvwMaster.SetRowCellValue(rowHandle, "PART_TYPE", "UPPER");
+                                    gvwMaster.SetRowCellValue(rowHandle, "MDSL_CHK", "N");
+                                    gvwMaster.SetRowCellValue(rowHandle, "OTSL_CHK", "N");
+                                }
+                                else if (results[2] == "MIDSOLE" || results[2] == "OUTSOLE")
+                                {
+                                    // If the part type is 'MIDSOLE' or 'OUTSOLE', fix BOM section to it.
+                                    gvwMaster.SetRowCellValue(rowHandle, "PART_TYPE", results[2]);
+                                    gvwMaster.SetRowCellValue(rowHandle, "MDSL_CHK", (results[2] == "MIDSOLE") ? "Y" : "N");
+                                    gvwMaster.SetRowCellValue(rowHandle, "OTSL_CHK", (results[2] == "OUTSOLE") ? "Y" : "N");
+                                }
+                                else if (results[4] == "3389" || results[4] == "3390")
+                                {
+                                    // Fix BOM section to 'UPPER' for WET CHEMISTRY & WET CHEMISTRY-MULTI parts.
+                                    gvwMaster.SetRowCellValue(rowHandle, "PART_TYPE", "UPPER");
+                                    gvwMaster.SetRowCellValue(rowHandle, "MDSL_CHK", "N");
+                                    gvwMaster.SetRowCellValue(rowHandle, "OTSL_CHK", "N");
+                                }
+                                else
+                                {
+                                    // Follow existing BOM section(When a row is created, the BOM section follows the upper row).
+                                    gvwMaster.SetRowCellValue(rowHandle, "PART_TYPE", results[2]);
+                                    gvwMaster.SetRowCellValue(rowHandle, "MDSL_CHK", "N");
+                                    gvwMaster.SetRowCellValue(rowHandle, "OTSL_CHK", "N");
+                                }
+
+                                gvwMaster.SetRowCellValue(rowHandle, "PCX_PART_ID", results[4]);
+
+                                Common.BindDefaultMaterialByNCFRule(gvwMaster, rowHandle, results[4]);
+                            }
+                            else if (results[0] == "PatternPart")
                             {
-                                // An user doesn't need to set nike pattern part name for general part.
-                                view.SetRowCellValue(rowHandle, "PTRN_PART_NAME", "");
-                                view.SetRowCellValue(rowHandle, "PTRN_PART_CD", "");
+                                gvwMaster.SetRowCellValue(rowHandle, "PTRN_PART_NAME", results[1]);
+                                gvwMaster.SetRowCellValue(rowHandle, "PTRN_PART_CD", results[3]);
+                            }
+                            else if (results[0] == "PCX_Material")
+                            {
+                                // Automatically tick for sticker & combine columns.
+                                if (results[1] == "87031" || results[1] == "78733" || results[1] == "79467")
+                                    gvwMaster.SetRowCellValue(rowHandle, "STICKER_YN", "Y");
+                                else if (results[1] == "54638" || results[1] == "79341")
+                                    gvwMaster.SetRowCellValue(rowHandle, "COMBINE_YN", "Y");
+                                else
+                                    gvwMaster.SetRowCellValue(rowHandle, "STICKER_YN", "N");
+
+                                gvwMaster.SetRowCellValue(rowHandle, "PCX_MAT_ID", results[1]);
+                                gvwMaster.SetRowCellValue(rowHandle, "MAT_CD", results[2]);
+                                gvwMaster.SetRowCellValue(rowHandle, "MAT_NAME", results[3]);
+                                gvwMaster.SetRowCellValue(rowHandle, "MXSXL_NUMBER", results[4]);
+                                gvwMaster.SetRowCellValue(rowHandle, "MCS_NUMBER", results[5]);
+                                gvwMaster.SetRowCellValue(rowHandle, "VENDOR_NAME", results[6]);
+                                gvwMaster.SetRowCellValue(rowHandle, "CS_CD", results[7]);
+                                gvwMaster.SetRowCellValue(rowHandle, "PCX_SUPP_MAT_ID", results[8]);
+                                //gvwMaster.SetRowCellValue(rowHandle, "NIKE_MS_STATE", results[9]);
+                                //gvwMaster.SetRowCellValue(rowHandle, "BLACK_LIST_YN", results[10]);
+                                //gvwMaster.SetRowCellValue(rowHandle, "MDM_NOT_EXST", results[11]);
+
+                                // Automatically tick for 'Code Transfer'.
+                                if (results[11] == "Y")
+                                {
+                                    gvwMaster.SetRowCellValue(rowHandle, "CDMKR_YN", "Y");
+                                    //gvwMaster.SetRowCellValue(rowHandle, "MDM_NOT_EXST", "Y");
+                                }
+                                else
+                                {
+                                    gvwMaster.SetRowCellValue(rowHandle, "CDMKR_YN", "N");
+                                    //gvwMaster.SetRowCellValue(rowHandle, "MDM_NOT_EXST", "N");
+                                }
+                            }
+                            else if (results[0] == "Color")
+                            {
+                                gvwMaster.SetRowCellValue(rowHandle, "PCX_COLOR_ID", results[1]);
+                                gvwMaster.SetRowCellValue(rowHandle, "COLOR_CD", results[2]);
+                                gvwMaster.SetRowCellValue(rowHandle, "COLOR_NAME", results[3]);
+                            }
+                            else if (results[0] == "PCC_Material")
+                            {
+                                // Automatically tick for sticker & combine columns.
+                                if (results[1] == "87031" || results[1] == "78733" || results[1] == "79467")
+                                    gvwMaster.SetRowCellValue(rowHandle, "STICKER_YN", "Y");
+                                else if (results[1] == "54638" || results[1] == "79341")
+                                    gvwMaster.SetRowCellValue(rowHandle, "COMBINE_YN", "Y");
+                                else
+                                    gvwMaster.SetRowCellValue(rowHandle, "STICKER_YN", "N");
+
+                                gvwMaster.SetRowCellValue(rowHandle, "PCX_MAT_ID", results[1]);
+                                gvwMaster.SetRowCellValue(rowHandle, "MAT_CD", results[2]);
+                                gvwMaster.SetRowCellValue(rowHandle, "MAT_NAME", results[3]);
+                                gvwMaster.SetRowCellValue(rowHandle, "MXSXL_NUMBER", results[4]);
+                                gvwMaster.SetRowCellValue(rowHandle, "MCS_NUMBER", results[5]);
+                                gvwMaster.SetRowCellValue(rowHandle, "VENDOR_NAME", results[6]);
+                                gvwMaster.SetRowCellValue(rowHandle, "CS_CD", results[7]);
+                                gvwMaster.SetRowCellValue(rowHandle, "PCX_SUPP_MAT_ID", results[8]);
+                                //gvwMaster.SetRowCellValue(rowHandle, "NIKE_MS_STATE", results[9]);
+                                //gvwMaster.SetRowCellValue(rowHandle, "BLACK_LIST_YN", results[10]);
+
+                                // If an user finds material from 'PCC Material', it means the code of this material was already created.
+                                //gvwMaster.SetRowCellValue(rowHandle, "MDM_NOT_EXST", "N");
+                                gvwMaster.SetRowCellValue(rowHandle, "CDMKR_YN", "N");
+                            }
+                            else if (results[0] == "CS_Material")
+                            {
+                                gvwMaster.SetRowCellValue(rowHandle, "MXSXL_NUMBER", results[1]);
+                                gvwMaster.SetRowCellValue(rowHandle, "MAT_CD", results[2]);
+                                gvwMaster.SetRowCellValue(rowHandle, "MAT_NAME", results[3]);
+                                gvwMaster.SetRowCellValue(rowHandle, "MCS_NUMBER", "");
+                                gvwMaster.SetRowCellValue(rowHandle, "CS_CD", "CS");
+                                gvwMaster.SetRowCellValue(rowHandle, "PCX_SUPP_MAT_ID", "100");
+                                gvwMaster.SetRowCellValue(rowHandle, "PCX_MAT_ID", "100");
                             }
 
-                            view.SetRowCellValue(rowHandle, "PART_NAME", results[1]);
-                            view.SetRowCellValue(rowHandle, "PART_CD", results[3]);
-
-                            // Set part type by each case.
-                            if (results[1].Contains("AIRBAG"))
-                            {
-                                // If the part name contains 'AIRBAG', fix BOM section to 'AIRBAG'.
-                                view.SetRowCellValue(rowHandle, "PART_TYPE", "AIRBAG");
-                                view.SetRowCellValue(rowHandle, "MDSL_CHK", "Y");
-                                view.SetRowCellValue(rowHandle, "OTSL_CHK", "N");
-                            }
-                            else if (results[1].Contains("LAMINATION"))
-                            {
-                                // If the part name contains 'AIRBAG', fix BOM section to 'UPPER'.
-                                view.SetRowCellValue(rowHandle, "PART_TYPE", "UPPER");
-                                view.SetRowCellValue(rowHandle, "MDSL_CHK", "N");
-                                view.SetRowCellValue(rowHandle, "OTSL_CHK", "N");
-                            }
-                            else if (results[2] == "MIDSOLE" || results[2] == "OUTSOLE")
-                            {
-                                // If the part type is 'MIDSOLE' or 'OUTSOLE', fix BOM section to it.
-                                view.SetRowCellValue(rowHandle, "PART_TYPE", results[2]);
-                                view.SetRowCellValue(rowHandle, "MDSL_CHK", (results[2] == "MIDSOLE") ? "Y" : "N");
-                                view.SetRowCellValue(rowHandle, "OTSL_CHK", (results[2] == "OUTSOLE") ? "Y" : "N");
-                            }
-                            else if (results[4] == "3389" || results[4] == "3390")
-                            {
-                                // Fix BOM section to 'UPPER' for WET CHEMISTRY & WET CHEMISTRY-MULTI parts.
-                                view.SetRowCellValue(rowHandle, "PART_TYPE", "UPPER");
-                                view.SetRowCellValue(rowHandle, "MDSL_CHK", "N");
-                                view.SetRowCellValue(rowHandle, "OTSL_CHK", "N");
-                            }
-                            else
-                            {
-                                // Follow existing BOM section(When a row is created, the BOM section follows the upper row).
-                                view.SetRowCellValue(rowHandle, "PART_TYPE", results[2]);
-                                view.SetRowCellValue(rowHandle, "MDSL_CHK", "N");
-                                view.SetRowCellValue(rowHandle, "OTSL_CHK", "N");
-                            }
-
-                            view.SetRowCellValue(rowHandle, "PCX_PART_ID", results[4]);
-
-                            Common.BindDefaultMaterialByNCFRule(view, rowHandle, results[4]);
+                            if (gvwMaster.GetRowCellValue(rowHandle, "ROW_STATUS").ToString() != "I")
+                                gvwMaster.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
                         }
-                        else if (results[0] == "PatternPart")
-                        {
-                            view.SetRowCellValue(rowHandle, "PTRN_PART_NAME", results[1]);
-                            view.SetRowCellValue(rowHandle, "PTRN_PART_CD", results[3]);
-                        }
-                        else if (results[0] == "PCX_Material")
-                        {
-                            // Automatically tick for sticker & combine columns.
-                            if (results[1] == "87031" || results[1] == "78733" || results[1] == "79467")
-                                view.SetRowCellValue(rowHandle, "STICKER_YN", "Y");
-                            else if (results[1] == "54638" || results[1] == "79341")
-                                view.SetRowCellValue(rowHandle, "COMBINE_YN", "Y");
-                            else
-                                view.SetRowCellValue(rowHandle, "STICKER_YN", "N");
-
-                            view.SetRowCellValue(rowHandle, "PCX_MAT_ID", results[1]);
-                            view.SetRowCellValue(rowHandle, "MAT_CD", results[2]);
-                            view.SetRowCellValue(rowHandle, "MAT_NAME", results[3]);
-                            view.SetRowCellValue(rowHandle, "MXSXL_NUMBER", results[4]);
-                            view.SetRowCellValue(rowHandle, "MCS_NUMBER", results[5]);
-                            view.SetRowCellValue(rowHandle, "VENDOR_NAME", results[6]);
-                            view.SetRowCellValue(rowHandle, "CS_CD", results[7]);
-                            view.SetRowCellValue(rowHandle, "PCX_SUPP_MAT_ID", results[8]);
-                            //view.SetRowCellValue(rowHandle, "NIKE_MS_STATE", results[9]);
-                            //view.SetRowCellValue(rowHandle, "BLACK_LIST_YN", results[10]);
-                            //view.SetRowCellValue(rowHandle, "MDM_NOT_EXST", results[11]);
-
-                            // Automatically tick for 'Code Transfer'.
-                            if (results[11] == "Y")
-                            {
-                                view.SetRowCellValue(rowHandle, "CDMKR_YN", "Y");
-                                //view.SetRowCellValue(rowHandle, "MDM_NOT_EXST", "Y");
-                            }
-                            else
-                            {
-                                view.SetRowCellValue(rowHandle, "CDMKR_YN", "N");
-                                //view.SetRowCellValue(rowHandle, "MDM_NOT_EXST", "N");
-                            }
-                        }
-                        else if (results[0] == "Color")
-                        {
-                            view.SetRowCellValue(rowHandle, "PCX_COLOR_ID", results[1]);
-                            view.SetRowCellValue(rowHandle, "COLOR_CD", results[2]);
-                            view.SetRowCellValue(rowHandle, "COLOR_NAME", results[3]);
-                        }
-                        else if (results[0] == "PCC_Material")
-                        {
-                            // Automatically tick for sticker & combine columns.
-                            if (results[1] == "87031" || results[1] == "78733" || results[1] == "79467")
-                                view.SetRowCellValue(rowHandle, "STICKER_YN", "Y");
-                            else if (results[1] == "54638" || results[1] == "79341")
-                                view.SetRowCellValue(rowHandle, "COMBINE_YN", "Y");
-                            else
-                                view.SetRowCellValue(rowHandle, "STICKER_YN", "N");
-
-                            view.SetRowCellValue(rowHandle, "PCX_MAT_ID", results[1]);
-                            view.SetRowCellValue(rowHandle, "MAT_CD", results[2]);
-                            view.SetRowCellValue(rowHandle, "MAT_NAME", results[3]);
-                            view.SetRowCellValue(rowHandle, "MXSXL_NUMBER", results[4]);
-                            view.SetRowCellValue(rowHandle, "MCS_NUMBER", results[5]);
-                            view.SetRowCellValue(rowHandle, "VENDOR_NAME", results[6]);
-                            view.SetRowCellValue(rowHandle, "CS_CD", results[7]);
-                            view.SetRowCellValue(rowHandle, "PCX_SUPP_MAT_ID", results[8]);
-                            //view.SetRowCellValue(rowHandle, "NIKE_MS_STATE", results[9]);
-                            //view.SetRowCellValue(rowHandle, "BLACK_LIST_YN", results[10]);
-
-                            // If an user finds material from 'PCC Material', it means the code of this material was already created.
-                            //view.SetRowCellValue(rowHandle, "MDM_NOT_EXST", "N");
-                            view.SetRowCellValue(rowHandle, "CDMKR_YN", "N");
-                        }
-                        else if (results[0] == "CS_Material")
-                        {
-                            view.SetRowCellValue(rowHandle, "MXSXL_NUMBER", results[1]);
-                            view.SetRowCellValue(rowHandle, "MAT_CD", results[2]);
-                            view.SetRowCellValue(rowHandle, "MAT_NAME", results[3]);
-                            view.SetRowCellValue(rowHandle, "MCS_NUMBER", "");
-                            view.SetRowCellValue(rowHandle, "CS_CD", "CS");
-                            view.SetRowCellValue(rowHandle, "PCX_SUPP_MAT_ID", "100");
-                            view.SetRowCellValue(rowHandle, "PCX_MAT_ID", "100");
-                        }
-
-                        if (view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString() != "I")
-                            view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
                     }
                 }
                 catch (Exception ex)
@@ -399,7 +407,7 @@ namespace CSI.PCC.PCX
                 finally
                 {
                     // Link event again.
-                    view.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
+                    gvwMaster.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
                 }
             }
         }
@@ -407,218 +415,146 @@ namespace CSI.PCC.PCX
         /// <summary>
         /// 프로세스 마스터에서 프로세스를 선택하여 저장
         /// </summary>
-        private void FindProcessFromMaster(GridView view)
+        private void FindProcessFromMaster()
         {
-            // 선택된 행의 로우핸들 배열
-            int[] rowHandles = view.GetSelectedRows();
+            int[] rowHandles = gvwMaster.GetSelectedRows();
 
-            #region 삭제할 행이 포함되었는지 확인
-            // 선택된 행 중 삭제할 행이 포함되었는지 확인
             foreach (int rowHandle in rowHandles)
             {
-                // 선택된 행의 현재 상태 값
-                string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-                if (rowStatus == "D")
+                if (gvwMaster.GetRowCellValue(rowHandle, "ROW_STATUS").ToString().Equals("D"))
                 {
-                    MessageBox.Show("There are rows which have been deleted.");
+                    Common.ShowMessageBox("There are rows which have been deleted.", "E");
                     return;
                 }
             }
 
-            #endregion
-
             FindProcess findForm = new FindProcess()
             {
-                EnteredProcess = view.GetRowCellValue(view.FocusedRowHandle, "PROCESS").ToString().ToUpper()
+                EnteredProcess = gvwMaster.GetRowCellValue(gvwMaster.FocusedRowHandle, "PROCESS").ToString().ToUpper()
             };
 
             if (findForm.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                // 불필요한 이벤트 반복을 피함
-                view.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
-                // 자식폼에게 전달 받은 프로세스 리스트
-                List<string> listOfSelectedProcess = (List<string>)findForm.SelectedProcess;
-                // 프로세스1,프로세스2,프로세스3 형태의 프로세스 나열
-                string process = string.Join(",", listOfSelectedProcess.ToArray());
-                // 선택한 행의 개수만큼 반복
-                foreach (int rowHandle in rowHandles)
+                try
                 {
-                    // 생성된 프로세스를 셀에 바인딩
-                    view.SetRowCellValue(rowHandle, "PROCESS", process);
-                    // 선택한 행의 현재 상태 값
-                    string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-                    // 신규 행은 인디케이터 변경 안 함
-                    if (rowStatus != "I")
-                        view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
+                    gvwMaster.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
+
+                    List<string> listOfSelectedProcess = (List<string>)findForm.SelectedProcess;
+
+                    // Like process1, process2, prcoess3, ...
+                    string process = string.Join(",", listOfSelectedProcess.ToArray());
+
+                    foreach (int rowHandle in rowHandles)
+                    {
+
+                        gvwMaster.SetRowCellValue(rowHandle, "PROCESS", process);
+
+                        if (gvwMaster.GetRowCellValue(rowHandle, "ROW_STATUS").ToString() != "I")
+                            gvwMaster.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
+
+                    }
                 }
-                // 이벤트 다시 연결
-                view.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
+                catch (Exception ex)
+                {
+                    Common.ShowMessageBox(ex.ToString(), "E");
+                    return;
+                }
+                finally
+                {
+                    gvwMaster.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
+                }
             }
         }
 
         /// <summary>
         /// 타입에 맞게 패턴파트 적용
         /// </summary>
-        /// <param name="_type"></param>
-        private void BindPtrnPartName(string _type, GridView view)
+        /// <param name="type"></param>
+        private void BindPtrnPartName(string type)
         {
+            int[] rowHandles = gvwMaster.GetSelectedRows();
+            string partName = string.Empty;
+            string partCode = string.Empty;
+            string rowStatus = string.Empty;
+            string lockYN = string.Empty;
+
             try
             {
-                // 이벤트 꼬임을 방지하기 위해 CellValueChanged 이벤트 끊음
-                view.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
-
-                // 유저가 선택한 행의 로우핸들 배열
-                int[] rowHandles = view.GetSelectedRows();
-
-                if (_type == "Top")
-                {
-                    // 가장 상단의 행으로 일괄 적용
-                    string partName = view.GetRowCellValue(rowHandles[0], "PART_NAME").ToString();
-                    string partCode = view.GetRowCellValue(rowHandles[0], "PART_CD").ToString();
-
-                    // 선택한 행의 개수만큼 반복
-                    foreach (int rowHandle in rowHandles)
-                    {
-                        // 선택한 행의 현재 상태 값
-                        string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-
-                        if (rowStatus != "D")
-                        {
-                            view.SetRowCellValue(rowHandle, "CS_PTRN_NAME", partName);
-                            view.SetRowCellValue(rowHandle, "CS_PTRN_CD", partCode);
-                        }
-
-                        // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
-                        if (rowStatus != "I" && rowStatus != "D")
-                            view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
-                    }
-                }
-                else if (_type == "Each")
-                {
-                    // 각 행의 파트명으로 적용
-                    foreach (int rowHandle in rowHandles)
-                    {
-                        string partName = view.GetRowCellValue(rowHandle, "PART_NAME").ToString();
-                        string partCode = view.GetRowCellValue(rowHandle, "PART_CD").ToString();
-
-                        // 선택한 행의 현재 상태 값
-                        string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-
-                        if (rowStatus != "D")
-                        {
-                            view.SetRowCellValue(rowHandle, "CS_PTRN_NAME", partName);
-                            view.SetRowCellValue(rowHandle, "CS_PTRN_CD", partCode);
-                        }
-
-                        // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
-                        if (rowStatus != "I" && rowStatus != "D")
-                            view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
-                    }
-                }
-
-                // 스타일을 새로 적용하기 위해 DataSource Refresh
-                view.RefreshData();
-
-                // 이벤트 다시 연결
-                view.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return;
-            }
-        }
-
-        /// <summary>
-        /// 여러 셀 선택 후 한 번에 Combine 체크 표기
-        /// </summary>
-        /// <param name="view"></param>
-        private void MultiCheckCombine(GridView view)
-        {
-            try
-            {
-                // 이벤트 꼬임을 방지하기 위해 CellValueChanged 이벤트 끊음
-                view.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
-
-                int[] rowHandles = view.GetSelectedRows();
+                gvwMaster.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
 
                 foreach (int rowHandle in rowHandles)
                 {
-                    string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-                    if (rowStatus != "D")
+                    partName = type.Equals("Top") ? gvwMaster.GetRowCellValue(rowHandles[0], "PART_NAME").ToString()
+                        : gvwMaster.GetRowCellValue(rowHandle, "PART_NAME").ToString();
+
+                    partCode = type.Equals("Top") ? gvwMaster.GetRowCellValue(rowHandles[0], "PART_CD").ToString()
+                        : gvwMaster.GetRowCellValue(rowHandle, "PART_CD").ToString();
+
+                    rowStatus = gvwMaster.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
+                    lockYN = gvwMaster.GetRowCellValue(rowHandle, "LOCK_YN").ToString();
+
+                    if (!rowStatus.Equals("D") && lockYN.Equals("N"))
                     {
-                        string currentRowValue = view.GetRowCellValue(rowHandle, "COMBINE_YN").ToString();
-                        if (currentRowValue == "Y")
-                            view.SetRowCellValue(rowHandle, "COMBINE_YN", "N");
-                        else
-                            view.SetRowCellValue(rowHandle, "COMBINE_YN", "Y");
+                        gvwMaster.SetRowCellValue(rowHandle, "CS_PTRN_NAME", partName);
+                        gvwMaster.SetRowCellValue(rowHandle, "CS_PTRN_CD", partCode);
+
+                        if (!rowStatus.Equals("I"))
+                            gvwMaster.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
                     }
-                    // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
-                    if (rowStatus != "I" && rowStatus != "D")
-                        view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
                 }
-
-                // 스타일을 새로 적용하기 위해 DataSource Refresh
-                view.RefreshData();
-                // 이벤트 다시 연결
-                view.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
             }
-            catch (Exception ex)
+            finally
             {
-                MessageBox.Show(ex.ToString());
-                return;
-            }
-        }
-
-        /// <summary>
-        /// 여러 셀 선택 후 한 번에 Sticker 체크 표기
-        /// </summary>
-        /// <param name="view"></param>
-        private void MultiCheckSticker(GridView view)
-        {
-            try
-            {
-                // 이벤트 꼬임을 방지하기 위해 CellValueChanged 이벤트 끊음
-                view.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
-
-                int[] rowHandles = view.GetSelectedRows();
-
-                foreach (int rowHandle in rowHandles)
-                {
-                    string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-                    if (rowStatus != "D")
-                    {
-                        string currentRowValue = view.GetRowCellValue(rowHandle, "STICKER_YN").ToString();
-                        if (currentRowValue == "Y")
-                            view.SetRowCellValue(rowHandle, "STICKER_YN", "N");
-                        else
-                            view.SetRowCellValue(rowHandle, "STICKER_YN", "Y");
-                    }
-                    // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
-                    if (rowStatus != "I" && rowStatus != "D")
-                        view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
-                }
-
-                // 스타일을 새로 적용하기 위해 DataSource Refresh
-                view.RefreshData();
-                // 이벤트 다시 연결
-                view.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return;
+                gvwMaster.RefreshData();
+                gvwMaster.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
             }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        private void ShowMaterialInfomation(GridView view)
+        /// <param name="fieldName"></param>
+        private void MultiCheck(string fieldName)
+        {
+            string rowStatus = string.Empty;
+            string lockYN = string.Empty;
+
+            try
+            {
+                gvwMaster.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
+
+                foreach (int rowHandle in gvwMaster.GetSelectedRows())
+                {
+                    rowStatus = gvwMaster.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
+                    lockYN = gvwMaster.GetRowCellValue(rowHandle, "LOCK_YN").ToString();
+
+                    if (!rowStatus.Equals("D") && lockYN.Equals("N"))
+                    {
+                        if (gvwMaster.GetRowCellValue(rowHandle, fieldName).ToString().Equals("Y"))
+                            gvwMaster.SetRowCellValue(rowHandle, fieldName, "N");
+                        else
+                            gvwMaster.SetRowCellValue(rowHandle, fieldName, "Y");
+
+                        if (!rowStatus.Equals("I") && !fieldName.Equals("CDMKR_YN"))
+                            gvwMaster.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
+                    }
+                }
+            }
+            finally
+            {
+                gvwMaster.RefreshData();
+                gvwMaster.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void ShowMaterialInfomation()
         {
             try
             {
-                string PDMSuppMatNumber = view.GetRowCellValue(view.FocusedRowHandle, "MXSXL_NUMBER").ToString();
+                string PDMSuppMatNumber = gvwMaster.GetRowCellValue(gvwMaster.FocusedRowHandle, "MXSXL_NUMBER").ToString();
                 if (PDMSuppMatNumber == "") return;
 
                 string[] splitPDMSuppMatNum = PDMSuppMatNumber.Split('.');
@@ -643,30 +579,30 @@ namespace CSI.PCC.PCX
         /// <summary>
         /// 
         /// </summary>
-        private void ShowFocusedRow(GridView view)
+        private void ShowFocusedRow()
         {
             // 포커스된 행의 개수
-            int[] selectedRowHandles = view.GetSelectedRows();
+            int[] selectedRowHandles = gvwMaster.GetSelectedRows();
 
             if (selectedRowHandles.Length == 0)
             {
                 // 0개일 경우 포커스된 행 전체 선택
-                view.SelectRow(view.FocusedRowHandle);
+                gvwMaster.SelectRow(gvwMaster.FocusedRowHandle);
             }
             else if (selectedRowHandles.Length == 1)
             {
                 // 1개일 경우 선택인지 취소인지 구분
-                if (CheckRowIsSelected(view, view.FocusedRowHandle))
-                    view.UnselectRow(view.FocusedRowHandle);
+                if (CheckRowIsSelected(gvwMaster, gvwMaster.FocusedRowHandle))
+                    gvwMaster.UnselectRow(gvwMaster.FocusedRowHandle);
                 else
-                    view.SelectRow(view.FocusedRowHandle);
+                    gvwMaster.SelectRow(gvwMaster.FocusedRowHandle);
             }
             else
             {
                 // 1개 이상일 경우 선택인지 취소인지 구분
                 string type = "Select";
 
-                GridCell[] cells = view.GetSelectedCells();
+                GridCell[] cells = gvwMaster.GetSelectedCells();
                 if (cells.Length > 25)
                     type = "Cancel";
                 else
@@ -677,19 +613,19 @@ namespace CSI.PCC.PCX
                     // 선택한 행 모두 전체 선택
                     foreach (int rowHandle in selectedRowHandles)
                     {
-                        if (CheckRowIsSelected(view, rowHandle))
-                            view.UnselectRow(rowHandle);
+                        if (CheckRowIsSelected(gvwMaster, rowHandle))
+                            gvwMaster.UnselectRow(rowHandle);
                         else
-                            view.SelectRow(rowHandle);
+                            gvwMaster.SelectRow(rowHandle);
                     }
                 }
                 else if (type == "Cancel")
                 {
                     // 포커스된 행만 전체 선택 취소
-                    if (CheckRowIsSelected(view, view.FocusedRowHandle))
-                        view.UnselectRow(view.FocusedRowHandle);
+                    if (CheckRowIsSelected(gvwMaster, gvwMaster.FocusedRowHandle))
+                        gvwMaster.UnselectRow(gvwMaster.FocusedRowHandle);
                     else
-                        view.SelectRow(view.FocusedRowHandle);
+                        gvwMaster.SelectRow(gvwMaster.FocusedRowHandle);
                 }
             }
         }
@@ -744,95 +680,15 @@ namespace CSI.PCC.PCX
         }
 
         /// <summary>
-        /// Midsole을 멀티로 체크함
-        /// </summary>
-        private void MultiCheckMidsole(GridView view)
-        {
-            try
-            {
-                // 이벤트 꼬임을 방지하기 위해 CellValueChanged 이벤트 끊음
-                view.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
-
-                int[] rowHandles = view.GetSelectedRows();
-
-                foreach (int rowHandle in rowHandles)
-                {
-                    string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-                    if (rowStatus != "D")
-                    {
-                        string currentRowValue = view.GetRowCellValue(rowHandle, "MDSL_CHK").ToString();
-                        if (currentRowValue == "Y")
-                            view.SetRowCellValue(rowHandle, "MDSL_CHK", "N");
-                        else
-                            view.SetRowCellValue(rowHandle, "MDSL_CHK", "Y");
-                    }
-                    // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
-                    if (rowStatus != "I" && rowStatus != "D")
-                        view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
-                }
-
-                // 스타일을 새로 적용하기 위해 DataSource Refresh
-                view.RefreshData();
-                // 이벤트 다시 연결
-                view.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return;
-            }
-        }
-
-        /// <summary>
-        /// Outsole을 멀티로 체크함
-        /// </summary>
-        private void MultiCheckOutsole(GridView view)
-        {
-            try
-            {
-                // 이벤트 꼬임을 방지하기 위해 CellValueChanged 이벤트 끊음
-                view.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
-
-                int[] rowHandles = view.GetSelectedRows();
-
-                foreach (int rowHandle in rowHandles)
-                {
-                    string rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
-                    if (rowStatus != "D")
-                    {
-                        string currentRowValue = view.GetRowCellValue(rowHandle, "OTSL_CHK").ToString();
-                        if (currentRowValue == "Y")
-                            view.SetRowCellValue(rowHandle, "OTSL_CHK", "N");
-                        else
-                            view.SetRowCellValue(rowHandle, "OTSL_CHK", "Y");
-                    }
-                    // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
-                    if (rowStatus != "I" && rowStatus != "D")
-                        view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
-                }
-
-                // 스타일을 새로 적용하기 위해 DataSource Refresh
-                view.RefreshData();
-                // 이벤트 다시 연결
-                view.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return;
-            }
-        }
-
-        /// <summary>
         /// Transfer data selected by an user to codemaker.
         /// </summary>
         /// <param name="view"></param>
-        private void TransferToCodemaker(GridView view)
+        private void TransferToCodemaker()
         {
-            if (Common.IsFilterApplied(view))
+            if (Common.IsFilterApplied(gvwMaster))
                 return;
 
-            if (Common.HasLineitemUnsaved(view))
+            if (Common.HasLineitemUnsaved(gvwMaster))
                 return;
 
             DataTable dataSource = grdMaster.DataSource as DataTable;
@@ -877,7 +733,7 @@ namespace CSI.PCC.PCX
         {
             TransferRecord formRecord = new TransferRecord();
 
-            formRecord.INHERITANCE = new string[] { BASE_FACTORY, "," + BASE_WS_NO + SUB_WS_NO};
+            formRecord.INHERITANCE = new string[] { BASE_FACTORY, "," + BASE_WS_NO + SUB_WS_NO };
 
             if (formRecord.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             { }
@@ -886,43 +742,18 @@ namespace CSI.PCC.PCX
         /// <summary>
         /// 입력된 CS 패턴 파트와 동일하게 Nike 패턴 파트에 자동 입력한다.
         /// </summary>
-        private void CopyFromCSPatternPart(GridView view, string type)
+        private void CopyFromCSPatternPart(string type)
         {
             DataTable dataSource = grdMaster.DataSource as DataTable;
 
-            view.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
-
-            //// 파트명에 LAMINATION이 포함된 행만 추출
-            //List<DataRow> list = dataSource.AsEnumerable().Where(x => x["PART_NAME"].ToString().Contains("LAMINATION") == true).ToList();
-
-            //foreach (DataRow row in list)
-            //{
-            //    // 선택한 행의 현재 상태 값
-            //    string rowStatus = row["ROW_STATUS"].ToString();
-
-            //    if (rowStatus != "D")
-            //    {
-            //        string nikePatternPart = row["PTRN_PART_NAME"].ToString();
-            //        string csPatternPart = row["CS_PTRN_NAME"].ToString();
-
-            //        // Nike 패턴파트와 CS 패턴파트가 다른 경우만 업데이트
-            //        if (nikePatternPart != csPatternPart)
-            //        {
-            //            row["PTRN_PART_NAME"] = row["CS_PTRN_NAME"].ToString();
-            //            row["PTRN_PART_CD"] = row["CS_PTRN_CD"].ToString();
-
-            //            // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
-            //            if (rowStatus != "I" && rowStatus != "D")
-            //                row["ROW_STATUS"] = "U";
-            //        }
-            //        else
-            //            continue;
-            //    }
-            //}
+            gvwMaster.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
 
             switch (type)
             {
                 case "New":
+
+                    List<string> exceptionList = new List<string> {
+                        "79341", "54638", "85643", "79158", "85644", "58374", "85406", "175225" };
 
                     // Group by CS Pattern Part Name.
                     var queryByCSPattern =
@@ -938,37 +769,37 @@ namespace CSI.PCC.PCX
                             where rowGroup.Count() > 1
                             select rowGroup;
 
-                    foreach (var rowGroup in queryByCSPattern)
+                    foreach (var package in queryByCSPattern)
                     {
-                        bool hasScreen = false;
+                        bool isExcept = false;
                         bool isEmpty = false;
 
-                        foreach (var row in rowGroup)
+                        foreach (var row in package)
                         {
-                            // Validate that the material for screen process is included.
-                            if (row["PCX_SUPP_MAT_ID"].ToString().Equals("102497"))
-                                hasScreen = true;
-                            // Validate that there is a material with no PCX Supp. Mat. ID.
+                            if (exceptionList.Contains(row["PCX_MAT_ID"].ToString()))
+                                isExcept = true;
                             else if (row["PCX_SUPP_MAT_ID"].ToString().Equals(""))
                                 isEmpty = true;
                         }
 
+                        // There are materials with no PCX Supp. Mat. ID.
                         if (isEmpty)
                             continue;
-                        // General Screen Case.
-                        else if (rowGroup.Count() == 2 && hasScreen)
+                        // General exception case. (in case of combine check)
+                        else if (package.Count() == 2 && isExcept)
                             continue;
                         else
                         {
-                            foreach (var row in rowGroup)
+                            foreach (var row in package)
                             {
                                 string rowStatus = row["ROW_STATUS"].ToString();
+                                string lockYN = row["LOCK_YN"].ToString();
 
-                                // In case of 'Lamination' + 'Screen'.
+                                // In case of 'Lamination' + 'Combine'.
                                 if (row["COMBINE_YN"].ToString().Equals("Y"))
                                     continue;
 
-                                if (rowStatus != "D")
+                                if (rowStatus != "D" && lockYN.Equals("N"))
                                 {
                                     // Update when Nike Pattern Part Name is different from CS Pattern Part Name.
                                     if (row["PTRN_PART_NAME"].ToString() != row["CS_PTRN_NAME"].ToString())
@@ -995,8 +826,9 @@ namespace CSI.PCC.PCX
                     foreach (DataRow row in rows)
                     {
                         string rowStatus = row["ROW_STATUS"].ToString();
+                        string lockYN = row["LOCK_YN"].ToString();
 
-                        if (rowStatus != "D")
+                        if (rowStatus != "D" && lockYN.Equals("N"))
                         {
                             // Do When Nike Pattern Part and CS Pattern Part are different.
                             if (row["PTRN_PART_NAME"].ToString() != row["CS_PTRN_NAME"].ToString())
@@ -1016,33 +848,33 @@ namespace CSI.PCC.PCX
                     break;
             }
 
-            view.RefreshData();
-            view.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
+            gvwMaster.RefreshData();
+            gvwMaster.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
         }
 
         /// <summary>
         /// 
         /// </summary>
-        private void GenerateComment(GridView view)
+        private void GenerateComment()
         {
             PCXComment form = new PCXComment("EDIT");
             form.BaseForm = projectBaseForm;
-            form.EncodedComment = view.GetRowCellValue(view.FocusedRowHandle, "ENCODED_CMT").ToString();
+            form.EncodedComment = gvwMaster.GetRowCellValue(gvwMaster.FocusedRowHandle, "ENCODED_CMT").ToString();
 
             if (form.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                view.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
+                gvwMaster.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
 
-                foreach (int rowHandle in view.GetSelectedRows())
+                foreach (int rowHandle in gvwMaster.GetSelectedRows())
                 {
-                    view.SetRowCellValue(rowHandle, "MAT_COMMENT", form.Comment);
-                    view.SetRowCellValue(rowHandle, "ENCODED_CMT", form.EncodedComment);
+                    gvwMaster.SetRowCellValue(rowHandle, "MAT_COMMENT", form.Comment);
+                    gvwMaster.SetRowCellValue(rowHandle, "ENCODED_CMT", form.EncodedComment);
 
-                    if (view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString() != "I")
-                        view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
+                    if (gvwMaster.GetRowCellValue(rowHandle, "ROW_STATUS").ToString() != "I")
+                        gvwMaster.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
                 }
 
-                view.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
+                gvwMaster.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
             }
         }
 
@@ -1055,23 +887,6 @@ namespace CSI.PCC.PCX
         /// </summary>
         private void BindDataSourceGridView()
         {
-            #region 백업
-            //PKG_INTG_BOM.COMPARE_BOM pkgSelect = new PKG_INTG_BOM.COMPARE_BOM();
-            //pkgSelect.ARG_WORK_TYPE = "Select";
-            //pkgSelect.ARG_UPD_USER = Common.userID;
-            //pkgSelect.ARG_FACTORY = "";
-            //pkgSelect.ARG_WS_NO = "";
-            //pkgSelect.ARG_PART_SEQ = 0;
-            //pkgSelect.OUT_CURSOR = string.Empty;
-
-            //DataTable dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
-            //if (dataSource != null)
-            //{
-            //    dataSource.Columns["BACK_COLOR"].MaxLength = 10;
-            //    grdMaster.DataSource = dataSource;
-            //}
-            #endregion
-
             PKG_INTG_COMPARE_BOM.SELECT_SOURCE_DATA pkgSelect = new PKG_INTG_COMPARE_BOM.SELECT_SOURCE_DATA();
             pkgSelect.ARG_FACTORY = BASE_FACTORY;
             pkgSelect.ARG_BASE_WS_NO = BASE_WS_NO;
@@ -1083,7 +898,7 @@ namespace CSI.PCC.PCX
                 grdMaster.DataSource = dataSource;
             else
             {
-                MessageBox.Show("Failed to load datasource.");
+                Common.ShowMessageBox("Failed to load.", "E");
                 return;
             }
         }
@@ -1205,7 +1020,7 @@ namespace CSI.PCC.PCX
                 List<string> partList = new List<string>();
                 List<string> lamPartList = new List<string>();
                 string chainedWsNo = "," + BASE_WS_NO + SUB_WS_NO;
-                
+
                 // BOM 별 파트 중복 체크
                 string[] listWsNo = chainedWsNo.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -1406,7 +1221,7 @@ namespace CSI.PCC.PCX
                             pkgSelect.ARG_CODE = "";
                             pkgSelect.ARG_NAME = value;
                             pkgSelect.OUT_CURSOR = string.Empty;
-                            
+
                             DataTable dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
                             if (dataSource.Rows.Count > 0)
                             {
@@ -1438,10 +1253,10 @@ namespace CSI.PCC.PCX
                             pkgSelect.ARG_CODE = value;
                             pkgSelect.ARG_NAME = "";
                             pkgSelect.OUT_CURSOR = string.Empty;
-                            
+
                             // 패키지 호출하여 PCX Color 정보를 가져옴
                             DataTable dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
-                            
+
                             if (dataSource.Rows.Count > 0)
                             {
                                 partCode = dataSource.Rows[0][0].ToString();
@@ -1476,7 +1291,7 @@ namespace CSI.PCC.PCX
                             pkgSelect.ARG_CODE = value;
                             pkgSelect.ARG_NAME = "";
                             pkgSelect.OUT_CURSOR = string.Empty;
-                            
+
                             DataTable dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
                             if (dataSource.Rows.Count > 0)
                             {
@@ -1637,13 +1452,13 @@ namespace CSI.PCC.PCX
 
                     #endregion
                 }
-                
+
                 foreach (GridCell cell in cells)
                 {
-                    // 삭제된 행 제외하고 값 업데이트
                     string rowStatus = view.GetRowCellValue(cell.RowHandle, "ROW_STATUS").ToString();
-                    
-                    if (rowStatus != "D")
+                    string lockYN = view.GetRowCellValue(cell.RowHandle, "LOCK_YN").ToString();
+
+                    if (rowStatus != "D" && lockYN.Equals("N"))
                     {
                         if (view.FocusedColumn.FieldName == "COLOR_CD")
                         {
@@ -1705,7 +1520,7 @@ namespace CSI.PCC.PCX
                                 view.SetRowCellValue(cell.RowHandle, "MDSL_CHK", "N");
                                 view.SetRowCellValue(cell.RowHandle, "OTSL_CHK", "N");
                             }
-                            
+
                             view.SetRowCellValue(cell.RowHandle, "PCX_PART_ID", pcxPartId);
 
                             Common.BindDefaultMaterialByNCFRule(view, cell.RowHandle, pcxPartId);
@@ -1811,7 +1626,7 @@ namespace CSI.PCC.PCX
                         {
                             view.SetRowCellValue(cell.RowHandle, "PART_NIKE_COMMENT", value);
                         }
-                        
+
                         // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
                         if (rowStatus != "I")
                             view.SetRowCellValue(cell.RowHandle, "ROW_STATUS", "U");
@@ -1839,126 +1654,6 @@ namespace CSI.PCC.PCX
         private void gvwMaster_RowStyle(object sender, RowStyleEventArgs e)
         {
             GridView view = sender as GridView;
-
-            #region 백업 ver1
-            //if (e.RowHandle >= 0)
-            //{
-            //    string setBackColor = view.GetRowCellValue(e.RowHandle, "SET_BACK_COLOR").ToString();
-            //    if (setBackColor == "")
-            //    {
-            //        string backColor = view.GetRowCellValue(e.RowHandle, "BACK_COLOR").ToString();
-            //        if (backColor == "FIRST")
-            //        {
-            //            CURR_BACK_COLOR = Color.White;
-            //            view.SetRowCellValue(e.RowHandle, "SET_BACK_COLOR", "WHITE");
-            //        }
-            //        else if (backColor == "DIFFER")
-            //        {
-            //            if (CURR_BACK_COLOR == Color.White)
-            //            {
-            //                CURR_BACK_COLOR = Color.Yellow;
-            //                e.Appearance.BackColor = CURR_BACK_COLOR;
-            //                view.SetRowCellValue(e.RowHandle, "SET_BACK_COLOR", "YELLOW");
-            //            }
-            //            else if (CURR_BACK_COLOR == Color.Yellow)
-            //            {
-            //                CURR_BACK_COLOR = Color.White;
-            //                e.Appearance.BackColor = CURR_BACK_COLOR;
-            //                view.SetRowCellValue(e.RowHandle, "SET_BACK_COLOR", "WHITE");
-            //            }
-            //        }
-            //        else if (backColor == "SAME")
-            //        {
-            //            e.Appearance.BackColor = CURR_BACK_COLOR;
-            //            if (CURR_BACK_COLOR == Color.White)
-            //                view.SetRowCellValue(e.RowHandle, "SET_BACK_COLOR", "WHITE");
-            //            else if (CURR_BACK_COLOR == Color.Yellow)
-            //                view.SetRowCellValue(e.RowHandle, "SET_BACK_COLOR", "YELLOW");
-            //        }
-            //    }
-            //    else
-            //    {
-            //        string referColor = view.GetRowCellValue(e.RowHandle, "SET_BACK_COLOR").ToString();
-            //        if (referColor == "WHITE")
-            //            e.Appearance.BackColor = Color.White;
-            //        else
-            //            e.Appearance.BackColor = Color.Yellow;
-            //    }
-            //}
-            #endregion
-
-            #region 백업 ver2
-            //try
-            //{
-            //    gvwMaster.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
-
-            //    if (e.RowHandle >= 0)
-            //    {
-            //        string backColor = view.GetRowCellValue(e.RowHandle, "BACK_COLOR").ToString();
-            //        if (backColor != "")
-            //        {
-            //            if (backColor == "default")
-            //                e.Appearance.BackColor = Color.White;
-            //            else
-            //                e.Appearance.BackColor = Color.LightSalmon;
-            //            return;
-            //        }
-            //        else if (e.RowHandle == 0)
-            //        {
-            //            //CURR_BACK_COLOR = Color.White;
-            //            view.SetRowCellValue(e.RowHandle, "BACK_COLOR", "default");
-            //            e.Appearance.BackColor = Color.White;
-            //        }
-            //        else if (e.RowHandle != 0 && backColor == "")
-            //        {
-            //            bool isFirstSet = view.GetRowCellValue(0, "BACK_COLOR").ToString() != "" ? true : false;
-            //            if (isFirstSet == false)
-            //                return;
-            //            else
-            //            {
-            //                string currPartName = view.GetRowCellValue(e.RowHandle, "PART_NAME").ToString();
-            //                string prvsPartName = view.GetRowCellValue(e.RowHandle - 1, "PART_NAME").ToString();
-            //                string prvsColorType = view.GetRowCellValue(e.RowHandle - 1, "BACK_COLOR").ToString();
-
-            //                if (currPartName != prvsPartName)
-            //                {
-            //                    if (prvsColorType == "default")
-            //                    {
-            //                        view.SetRowCellValue(e.RowHandle, "BACK_COLOR", "highlight");
-            //                        e.Appearance.BackColor = Color.LightSalmon;
-            //                    }
-            //                    else if (prvsColorType == "highlight")
-            //                    {
-            //                        view.SetRowCellValue(e.RowHandle, "BACK_COLOR", "default");
-            //                        e.Appearance.BackColor = Color.White;
-            //                    }
-            //                }
-            //                else
-            //                {
-            //                    if (prvsColorType == "default")
-            //                    {
-            //                        view.SetRowCellValue(e.RowHandle, "BACK_COLOR", "default");
-            //                        e.Appearance.BackColor = Color.White;
-            //                    }
-            //                    else if (prvsColorType == "highlight")
-            //                    {
-            //                        view.SetRowCellValue(e.RowHandle, "BACK_COLOR", "highlight");
-            //                        e.Appearance.BackColor = Color.LightSalmon;
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show(ex.ToString());
-            //}
-            //finally
-            //{
-            //    gvwMaster.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
-            //}
-            #endregion
 
             // 아직 컬러가 부여되지 않은 라인
             if (e.RowHandle >= 0 && !APPLIED_ROWS.ContainsKey(e.RowHandle))
@@ -2047,39 +1742,36 @@ namespace CSI.PCC.PCX
         /// <param name="e"></param>
         private void gvwMaster_KeyDown(object sender, KeyEventArgs e)
         {
-            try
+            if (e.KeyCode == Keys.Delete)
             {
-                if (e.KeyCode == Keys.Delete)
+                GridView view = sender as GridView;
+                GridCell[] cells = view.GetSelectedCells();
+
+                try
                 {
-                    // 이벤트를 발생시킨 뷰
-                    GridView view = sender as GridView;
-
-                    // 이벤트 꼬임을 방지하기 위해 CellValueChanged 이벤트 끊음
                     view.CellValueChanged -= new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
-                    
-                    // 선택된 셀 집합
-                    GridCell[] cells = view.GetSelectedCells();
 
-                    // 선택된 셀의 개수만큼 반복
                     foreach (GridCell cell in cells)
                     {
-                        // 선택된 셀의 컬럼의 필드명
                         string fieldName = cell.Column.FieldName;
-                        
-                        // 각 뷰의 아래 컬럼들은 수정 불가능
+
                         if (fieldName == "PART_NIKE_NO" || fieldName == "UPD_USER" || fieldName == "UPD_YMD")
                             continue;
 
-                        // 선택된 셀을 포함한 행의 상태값
                         string rowStatus = view.GetRowCellValue(cell.RowHandle, "ROW_STATUS").ToString();
-                        
-                        // 삭제된 행이 아니라면 셀의 내용을 지움
-                        if (rowStatus != "D")
+                        string lockYN = view.GetRowCellValue(cell.RowHandle, "LOCK_YN").ToString();
+
+                        if (rowStatus != "D" && lockYN.Equals("N"))
                         {
                             if (fieldName == "PTRN_PART_NAME")
                             {
                                 view.SetRowCellValue(cell.RowHandle, "PTRN_PART_CD", "");
                                 view.SetRowCellValue(cell.RowHandle, "PTRN_PART_NAME", "");
+                            }
+                            else if (fieldName == "CS_PTRN_NAME")
+                            {
+                                view.SetRowCellValue(cell.RowHandle, "CS_PTRN_NAME", "");
+                                view.SetRowCellValue(cell.RowHandle, "CS_PTRN_CD", "");
                             }
                             else if (fieldName == "MAT_COMMENT")
                             {
@@ -2088,24 +1780,22 @@ namespace CSI.PCC.PCX
                             }
                             else
                                 view.SetRowCellValue(cell.RowHandle, cell.Column, "");
-                            
-                            // 인디케이터를 "U"로 변경, 신규 행과 삭제할 행은 제외
+
                             if (rowStatus != "I")
                                 view.SetRowCellValue(cell.RowHandle, "ROW_STATUS", "U");
                         }
                     }
-                    
-                    // 셀 스타일 다시 적용
+
                     view.RefreshData();
-                    
-                    // 이벤트 다시 연결
-                    view.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return;
+                catch (Exception ex)
+                {
+                    Common.ShowMessageBox(ex.ToString(), "E");
+                }
+                finally
+                {
+                    view.CellValueChanged += new CellValueChangedEventHandler(gvwMaster_CellValueChanged);
+                };
             }
         }
 
@@ -2174,14 +1864,10 @@ namespace CSI.PCC.PCX
         /// <param name="e"></param>
         private void gvwMaster_ShowingEditor(object sender, CancelEventArgs e)
         {
-            // 이벤트를 발생 시킨 뷰
             GridView view = sender as GridView;
 
-            // 선택한 셀이 속한 행의 상태값
-            string rowStatus = view.GetRowCellValue(view.FocusedRowHandle, "ROW_STATUS").ToString();
-            
-            // 삭제한 행은 수정 불가
-            if (rowStatus == "D")
+            if (view.GetRowCellValue(view.FocusedRowHandle, "ROW_STATUS").ToString().Equals("D") ||
+                view.GetRowCellValue(view.FocusedRowHandle, "LOCK_YN").ToString().Equals("Y"))
                 e.Cancel = true;
         }
 

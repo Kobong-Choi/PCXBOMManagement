@@ -52,7 +52,8 @@ namespace CSI.PCC.PCX
         public int NumSelectedBOMs { get; set; }
 
         private GridView view;
-        private bool isLocked = false;
+        private bool isLocked = false;  // for single edit.
+        private bool hasLock = false;   // for multi edit.
 
         public BOMEditing()
         {
@@ -75,7 +76,7 @@ namespace CSI.PCC.PCX
             switch (EditType)
             {
                 case "Single":
-                    
+
                     dataSource = ReturnBOMInfo("BOMCaption");
 
                     if (dataSource != null)
@@ -141,6 +142,18 @@ namespace CSI.PCC.PCX
 
                     repositoryItemLookUpEdit2.DataSource = Common.CreatePartTypeLookUpSource();
 
+                    // Change lock status to 'ongoing' to prevent lock from others.
+                    PKG_INTG_BOM.BOM_LOCK pkgSelect2 = new PKG_INTG_BOM.BOM_LOCK();
+                    pkgSelect2.ARG_WORK_TYPE = "OCCUPY";
+                    pkgSelect2.ARG_FACTORY = Factory;
+                    pkgSelect2.ARG_WS_NO = WSNumber;
+                    pkgSelect2.OUT_CURSOR = string.Empty;
+
+                    dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect2).Tables[0];
+
+                    if (dataSource.AsEnumerable().Where(x => x["LOCK_YN"].ToString().Equals("Y")).Count() > 0)
+                        hasLock = true;
+
                     // Hide some buttons to prevent improper actions.
                     btnReplace.Visible = false;
                     btnReset.Visible = false;
@@ -159,7 +172,7 @@ namespace CSI.PCC.PCX
                     break;
             }
         }
-        
+
         #region Conetext Menu Events
 
         /// <summary>
@@ -180,7 +193,7 @@ namespace CSI.PCC.PCX
 
                     if (isLocked)
                         break;
-                    
+
                     MoveRowUp();
                     break;
 
@@ -188,6 +201,12 @@ namespace CSI.PCC.PCX
 
                     if (Common.IsFilterApplied(view))
                         break;
+
+                    if (hasLock)
+                    {
+                        Common.ShowMessageBox("A locked BOM is included in the selection.", "E");
+                        return;
+                    }
 
                     if (!AllowMultiFunction())
                         return;
@@ -202,7 +221,7 @@ namespace CSI.PCC.PCX
 
                     if (isLocked)
                         break;
-                    
+
                     MoveRowDown();
                     break;
 
@@ -210,6 +229,12 @@ namespace CSI.PCC.PCX
 
                     if (Common.IsFilterApplied(view))
                         break;
+
+                    if (hasLock)
+                    {
+                        Common.ShowMessageBox("A locked BOM is included in the selection.", "E");
+                        return;
+                    }
 
                     if (!AllowMultiFunction())
                         return;
@@ -233,6 +258,12 @@ namespace CSI.PCC.PCX
                     if (Common.IsFilterApplied(view))
                         break;
 
+                    if (hasLock)
+                    {
+                        Common.ShowMessageBox("A locked BOM is included in the selection.", "E");
+                        return;
+                    }
+
                     if (!AllowMultiFunction())
                         return;
 
@@ -249,6 +280,12 @@ namespace CSI.PCC.PCX
 
                 case "DeleteRow_Multiple":
 
+                    if (hasLock)
+                    {
+                        Common.ShowMessageBox("A locked BOM is included in the selection.", "E");
+                        return;
+                    }
+
                     if (!AllowMultiFunction())
                         return;
 
@@ -258,9 +295,6 @@ namespace CSI.PCC.PCX
                 case "FindCode_Single":
                 case "FindCode_Multiple":
 
-                    if (isLocked)
-                        break;
-
                     FindCodeFromLibrary();
                     break;
 
@@ -268,6 +302,18 @@ namespace CSI.PCC.PCX
                 case "FindProcess_Multiple":
 
                     FindProcessFromMaster();
+                    break;
+
+                case "FillColor_Single":
+                case "FillColor_Multiple":
+
+                    HighlightCell();
+                    break;
+
+                case "genComment_Single":
+                case "genComment_Multiple":
+
+                    ShowCommentForm();
                     break;
 
                 case "BindPtrnTop_Single":
@@ -292,6 +338,32 @@ namespace CSI.PCC.PCX
                         break;
 
                     BindPtrnPartName("Each");
+                    break;
+
+                case "CopyPtrnV1N4_Single":
+
+                    if (isLocked)
+                        break;
+
+                    CopyFromCSPatternPart("New");
+                    break;
+
+                case "CopyPtrnF1F4_Single":
+
+                    if (isLocked)
+                        break;
+
+                    CopyFromCSPatternPart("Old");
+                    break;
+
+                case "CopyPtrnV1N4_Multiple":
+
+                    CopyFromCSPatternPart("New");
+                    break;
+
+                case "CopyPtrnF1F4_Multiple":
+
+                    CopyFromCSPatternPart("Old");
                     break;
 
                 case "MulChkComb_Single":
@@ -322,6 +394,24 @@ namespace CSI.PCC.PCX
                     }
 
                     MultiCheck("CDMKR_YN");
+                    break;
+
+                case "MulChkMdsl_Single":
+                case "MulChkMdsl_Multiple":
+
+                    if (isLocked)
+                        break;
+
+                    MultiCheck("MDSL_CHK");
+                    break;
+
+                case "MulChkOtsl_Single":
+                case "MulChkOtsl_Multiple":
+
+                    if (isLocked)
+                        break;
+
+                    MultiCheck("OTSL_CHK");
                     break;
 
                 case "Transfer_Single":
@@ -360,24 +450,6 @@ namespace CSI.PCC.PCX
                     OpenPartMDM();
                     break;
 
-                case "MulChkMdsl_Single":
-                case "MulChkMdsl_Multiple":
-
-                    if (isLocked)
-                        break;
-
-                    MultiCheck("MDSL_CHK");
-                    break;
-
-                case "MulChkOtsl_Single":
-                case "MulChkOtsl_Multiple":
-
-                    if (isLocked)
-                        break;
-
-                    MultiCheck("OTSL_CHK");
-                    break;
-
                 case "AddAggregate_Single":
 
                     if (isLocked)
@@ -391,38 +463,6 @@ namespace CSI.PCC.PCX
                     ShowStockInformation(gvwSingleEdit);
                     break;
 
-                case "FillColor_Single":
-                case "FillColor_Multiple":
-
-                    HighlightCell();
-                    break;
-
-                case "CopyPtrnV1N4_Single":
-
-                    if (isLocked)
-                        break;
-
-                    CopyFromCSPatternPart("New");
-                    break;
-
-                case "CopyPtrnF1F4_Single":
-
-                    if (isLocked)
-                        break;
-
-                    CopyFromCSPatternPart("Old");
-                    break;
-
-                case "CopyPtrnV1N4_Multiple":
-
-                    CopyFromCSPatternPart("New");
-                    break;
-
-                case "CopyPtrnF1F4_Multiple":
-
-                    CopyFromCSPatternPart("Old");
-                    break;
-
                 case "BlackList_Single":
                 case "BlackList_Multiple":
 
@@ -432,12 +472,6 @@ namespace CSI.PCC.PCX
                 case "exportToExcel":
 
                     ExportBOMToExcel();
-                    break;
-
-                case "genComment_Single":
-                case "genComment_Multiple":
-
-                    ShowCommentForm();
                     break;
 
                 default:
@@ -1000,313 +1034,168 @@ namespace CSI.PCC.PCX
                     view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
 
                     List<DataRow> selectedRows = new List<DataRow>();
-                    
+
                     foreach (int rowHandle in view.GetSelectedRows())
                         selectedRows.Add(view.GetDataRow(rowHandle));
 
                     foreach (DataRow row in selectedRows)
                     {
-                        if (results[0] == "Part")
+                        if (!row["LOCK_YN"].ToString().Equals("Y"))
                         {
-                            string oldValue = row["PART_NAME"].ToString();
+                            if (results[0] == "Part")
+                            {
+                                string oldValue = row["PART_NAME"].ToString();
 
-                            // When the part name is changed from 'Lamination' to general part.
-                            if (oldValue.Contains("LAMINATION") == true && results[1].Contains("LAMINATION") == false)
-                            {
-                                // An user doesn't need to set nike pattern part name for general part.
-                                row["PTRN_PART_NAME"] = "";
-                                row["PTRN_PART_CD"] = "";
-                            }
+                                // When the part name is changed from 'Lamination' to general part.
+                                if (oldValue.Contains("LAMINATION") == true && results[1].Contains("LAMINATION") == false)
+                                {
+                                    // An user doesn't need to set nike pattern part name for general part.
+                                    row["PTRN_PART_NAME"] = "";
+                                    row["PTRN_PART_CD"] = "";
+                                }
 
-                            row["PART_NAME"] = results[1];
-                            row["PART_CD"] = results[3];
+                                row["PART_NAME"] = results[1];
+                                row["PART_CD"] = results[3];
 
-                            // Set part type by each case.
-                            if (results[1].Contains("AIRBAG"))
-                            {
-                                // If the part name contains 'AIRBAG', fix BOM section to 'AIRBAG'.
-                                row["PART_TYPE"] = "AIRBAG";
-                                row["MDSL_CHK"] = "Y";
-                                row["OTSL_CHK"] = "N";
-                            }
-                            else if (results[1].Contains("LAMINATION"))
-                            {
-                                // If the part name contains 'AIRBAG', fix BOM section to 'UPPER'.
-                                row["PART_TYPE"] = "UPPER";
-                                row["MDSL_CHK"] = "N";
-                                row["OTSL_CHK"] = "N";
-                            }
-                            else if (results[2] == "MIDSOLE" || results[2] == "OUTSOLE")
-                            {
-                                // If the part type is 'MIDSOLE' or 'OUTSOLE', fix BOM section to it.
-                                row["PART_TYPE"] = results[2];
-                                row["MDSL_CHK"] = (results[2] == "MIDSOLE") ? "Y" : "N";
-                                row["OTSL_CHK"] = (results[2] == "OUTSOLE") ? "Y" : "N";
-                            }
-                            else if (results[4] == "3389" || results[4] == "3390")
-                            {
-                                // Fix BOM section to 'UPPER' for WET CHEMISTRY & WET CHEMISTRY-MULTI parts.
-                                row["PART_TYPE"] = "UPPER";
-                                row["MDSL_CHK"] = "N";
-                                row["OTSL_CHK"] = "N";
-                            }
-                            else
-                            {
-                                // Follow existing BOM section(When a row is created, the BOM section follows the upper row).
-                                row["PART_TYPE"] = results[2];
-                                row["MDSL_CHK"] = "N";
-                                row["OTSL_CHK"] = "N";
-                            }
+                                // Set part type by each case.
+                                if (results[1].Contains("AIRBAG"))
+                                {
+                                    // If the part name contains 'AIRBAG', fix BOM section to 'AIRBAG'.
+                                    row["PART_TYPE"] = "AIRBAG";
+                                    row["MDSL_CHK"] = "Y";
+                                    row["OTSL_CHK"] = "N";
+                                }
+                                else if (results[1].Contains("LAMINATION"))
+                                {
+                                    // If the part name contains 'AIRBAG', fix BOM section to 'UPPER'.
+                                    row["PART_TYPE"] = "UPPER";
+                                    row["MDSL_CHK"] = "N";
+                                    row["OTSL_CHK"] = "N";
+                                }
+                                else if (results[2] == "MIDSOLE" || results[2] == "OUTSOLE")
+                                {
+                                    // If the part type is 'MIDSOLE' or 'OUTSOLE', fix BOM section to it.
+                                    row["PART_TYPE"] = results[2];
+                                    row["MDSL_CHK"] = (results[2] == "MIDSOLE") ? "Y" : "N";
+                                    row["OTSL_CHK"] = (results[2] == "OUTSOLE") ? "Y" : "N";
+                                }
+                                else if (results[4] == "3389" || results[4] == "3390")
+                                {
+                                    // Fix BOM section to 'UPPER' for WET CHEMISTRY & WET CHEMISTRY-MULTI parts.
+                                    row["PART_TYPE"] = "UPPER";
+                                    row["MDSL_CHK"] = "N";
+                                    row["OTSL_CHK"] = "N";
+                                }
+                                else
+                                {
+                                    // Follow existing BOM section(When a row is created, the BOM section follows the upper row).
+                                    row["PART_TYPE"] = results[2];
+                                    row["MDSL_CHK"] = "N";
+                                    row["OTSL_CHK"] = "N";
+                                }
 
-                            row["PCX_PART_ID"] = results[4];
+                                row["PCX_PART_ID"] = results[4];
 
-                            Common.BindDefaultMaterialByNCFRule(view, row, results[4]);
-                        }
-                        else if (results[0] == "PatternPart")
-                        {
-                            row["PTRN_PART_NAME"] = results[1];
-                            row["PTRN_PART_CD"] = results[3];
-                        }
-                        else if (results[0] == "PCX_Material")
-                        {
-                            // Automatically tick for sticker & combine columns.
-                            if (results[1] == "87031" || results[1] == "78733" || results[1] == "79467")
-                            {
-                                row["STICKER_YN"] = "Y";
+                                Common.BindDefaultMaterialByNCFRule(view, row, results[4]);
                             }
-                            else if (results[1] == "54638" || results[1] == "79341")
+                            else if (results[0] == "PatternPart")
                             {
-                                row["COMBINE_YN"] = "Y";
+                                row["PTRN_PART_NAME"] = results[1];
+                                row["PTRN_PART_CD"] = results[3];
                             }
-                            else
+                            else if (results[0] == "PCX_Material")
                             {
-                                row["STICKER_YN"] = "N";
-                            }
+                                // Automatically tick for sticker & combine columns.
+                                if (results[1] == "87031" || results[1] == "78733" || results[1] == "79467")
+                                {
+                                    row["STICKER_YN"] = "Y";
+                                }
+                                else if (results[1] == "54638" || results[1] == "79341")
+                                {
+                                    row["COMBINE_YN"] = "Y";
+                                }
+                                else
+                                {
+                                    row["STICKER_YN"] = "N";
+                                }
 
-                            row["PCX_MAT_ID"] = results[1];
-                            row["MAT_CD"] = results[2];
-                            row["MAT_NAME"] = results[3];
-                            row["MXSXL_NUMBER"] = results[4];
-                            row["MCS_NUMBER"] = results[5];
-                            row["VENDOR_NAME"] = results[6];
-                            row["CS_CD"] = results[7];
-                            row["PCX_SUPP_MAT_ID"] = results[8];
-                            row["NIKE_MS_STATE"] = results[9];
-                            row["BLACK_LIST_YN"] = results[10];
-                            row["MDM_NOT_EXST"] = results[11];
+                                row["PCX_MAT_ID"] = results[1];
+                                row["MAT_CD"] = results[2];
+                                row["MAT_NAME"] = results[3];
+                                row["MXSXL_NUMBER"] = results[4];
+                                row["MCS_NUMBER"] = results[5];
+                                row["VENDOR_NAME"] = results[6];
+                                row["CS_CD"] = results[7];
+                                row["PCX_SUPP_MAT_ID"] = results[8];
+                                row["NIKE_MS_STATE"] = results[9];
+                                row["BLACK_LIST_YN"] = results[10];
+                                row["MDM_NOT_EXST"] = results[11];
 
-                            // Automatically tick for 'Code Transfer'.
-                            if (results[11] == "Y")
-                            {
-                                row["CDMKR_YN"] = "Y";
-                                row["MDM_NOT_EXST"] = "Y";
+                                // Automatically tick for 'Code Transfer'.
+                                if (results[11] == "Y")
+                                {
+                                    row["CDMKR_YN"] = "Y";
+                                    row["MDM_NOT_EXST"] = "Y";
+                                }
+                                else
+                                {
+                                    row["CDMKR_YN"] = "N";
+                                    row["MDM_NOT_EXST"] = "N";
+                                }
                             }
-                            else
+                            else if (results[0] == "Color")
                             {
-                                row["CDMKR_YN"] = "N";
+                                row["PCX_COLOR_ID"] = results[1];
+                                row["COLOR_CD"] = results[2];
+                                row["COLOR_NAME"] = results[3];
+                            }
+                            else if (results[0] == "PCC_Material")
+                            {
+                                // Automatically tick for sticker & combine columns.
+                                if (results[1] == "87031" || results[1] == "78733" || results[1] == "79467")
+                                {
+                                    row["STICKER_YN"] = "Y";
+                                }
+                                else if (results[1] == "54638" || results[1] == "79341")
+                                {
+                                    row["COMBINE_YN"] = "Y";
+                                }
+                                else
+                                {
+                                    row["STICKER_YN"] = "N";
+                                }
+
+                                row["PCX_MAT_ID"] = results[1];
+                                row["MAT_CD"] = results[2];
+                                row["MAT_NAME"] = results[3];
+                                row["MXSXL_NUMBER"] = results[4];
+                                row["MCS_NUMBER"] = results[5];
+                                row["VENDOR_NAME"] = results[6];
+                                row["CS_CD"] = results[7];
+                                row["PCX_SUPP_MAT_ID"] = results[8];
+                                row["NIKE_MS_STATE"] = results[9];
+                                row["BLACK_LIST_YN"] = results[10];
+
+                                // If an user finds material from 'PCC Material', it means the code of this material was already created.
                                 row["MDM_NOT_EXST"] = "N";
+                                row["CDMKR_YN"] = "N";
                             }
-                        }
-                        else if (results[0] == "Color")
-                        {
-                            row["PCX_COLOR_ID"] = results[1];
-                            row["COLOR_CD"] = results[2];
-                            row["COLOR_NAME"] = results[3];
-                        }
-                        else if (results[0] == "PCC_Material")
-                        {
-                            // Automatically tick for sticker & combine columns.
-                            if (results[1] == "87031" || results[1] == "78733" || results[1] == "79467")
+                            else if (results[0] == "CS_Material")
                             {
-                                row["STICKER_YN"] = "Y";
-                            }
-                            else if (results[1] == "54638" || results[1] == "79341")
-                            {
-                                row["COMBINE_YN"] = "Y";
-                            }
-                            else
-                            {
-                                row["STICKER_YN"] = "N";
+                                row["PCX_MAT_ID"] = "100";
+                                row["MAT_CD"] = results[2];
+                                row["MAT_NAME"] = results[3];
+                                row["MXSXL_NUMBER"] = results[1];
+                                row["MCS_NUMBER"] = "";
+                                row["VENDOR_NAME"] = "";
+                                row["CS_CD"] = "CS";
+                                row["PCX_SUPP_MAT_ID"] = "100";
                             }
 
-                            row["PCX_MAT_ID"] = results[1];
-                            row["MAT_CD"] = results[2];
-                            row["MAT_NAME"] = results[3];
-                            row["MXSXL_NUMBER"] = results[4];
-                            row["MCS_NUMBER"] = results[5];
-                            row["VENDOR_NAME"] = results[6];
-                            row["CS_CD"] = results[7];
-                            row["PCX_SUPP_MAT_ID"] = results[8];
-                            row["NIKE_MS_STATE"] = results[9];
-                            row["BLACK_LIST_YN"] = results[10];
-
-                            // If an user finds material from 'PCC Material', it means the code of this material was already created.
-                            row["MDM_NOT_EXST"] = "N";
-                            row["CDMKR_YN"] = "N";
+                            if (row["ROW_STATUS"].ToString() != "I")
+                                row["ROW_STATUS"] = "U";
                         }
-                        else if (results[0] == "CS_Material")
-                        {
-                            row["PCX_MAT_ID"] = "100";
-                            row["MAT_CD"] = results[2];
-                            row["MAT_NAME"] = results[3];
-                            row["MXSXL_NUMBER"] = results[1];
-                            row["MCS_NUMBER"] = "";
-                            row["VENDOR_NAME"] = "";
-                            row["CS_CD"] = "CS";
-                            row["PCX_SUPP_MAT_ID"] = "100";
-                        }
-
-                        if (row["ROW_STATUS"].ToString() != "I")
-                            row["ROW_STATUS"] = "U";
                     }
-
-                    #region Method - RowHandle(Past Version)
-
-                    //foreach (int rowHandle in view.GetSelectedRows())
-                    //{
-                    //    if (results[0] == "Part")
-                    //    {
-                    //        string oldValue = view.GetRowCellValue(rowHandle, "PART_NAME").ToString();
-
-                    //        // When the part name is changed from 'Lamination' to general part.
-                    //        if (oldValue.Contains("LAMINATION") == true && results[1].Contains("LAMINATION") == false)
-                    //        {
-                    //            // An user doesn't need to set nike pattern part name for general part.
-                    //            view.SetRowCellValue(rowHandle, "PTRN_PART_NAME", "");
-                    //            view.SetRowCellValue(rowHandle, "PTRN_PART_CD", "");
-                    //        }
-
-                    //        view.SetRowCellValue(rowHandle, "PART_NAME", results[1]);
-                    //        view.SetRowCellValue(rowHandle, "PART_CD", results[3]);
-
-                    //        // Set part type by each case.
-                    //        if (results[1].Contains("AIRBAG"))
-                    //        {
-                    //            // If the part name contains 'AIRBAG', fix BOM section to 'AIRBAG'.
-                    //            view.SetRowCellValue(rowHandle, "PART_TYPE", "AIRBAG");
-                    //            view.SetRowCellValue(rowHandle, "MDSL_CHK", "Y");
-                    //            view.SetRowCellValue(rowHandle, "OTSL_CHK", "N");
-                    //        }
-                    //        else if (results[1].Contains("LAMINATION"))
-                    //        {
-                    //            // If the part name contains 'AIRBAG', fix BOM section to 'UPPER'.
-                    //            view.SetRowCellValue(rowHandle, "PART_TYPE", "UPPER");
-                    //            view.SetRowCellValue(rowHandle, "MDSL_CHK", "N");
-                    //            view.SetRowCellValue(rowHandle, "OTSL_CHK", "N");
-                    //        }
-                    //        else if (results[2] == "MIDSOLE" || results[2] == "OUTSOLE")
-                    //        {
-                    //            // If the part type is 'MIDSOLE' or 'OUTSOLE', fix BOM section to it.
-                    //            view.SetRowCellValue(rowHandle, "PART_TYPE", results[2]);
-                    //            view.SetRowCellValue(rowHandle, "MDSL_CHK", (results[2] == "MIDSOLE") ? "Y" : "N");
-                    //            view.SetRowCellValue(rowHandle, "OTSL_CHK", (results[2] == "OUTSOLE") ? "Y" : "N");
-                    //        }
-                    //        else if (results[4] == "3389" || results[4] == "3390")
-                    //        {
-                    //            // Fix BOM section to 'UPPER' for WET CHEMISTRY & WET CHEMISTRY-MULTI parts.
-                    //            view.SetRowCellValue(rowHandle, "PART_TYPE", "UPPER");
-                    //            view.SetRowCellValue(rowHandle, "MDSL_CHK", "N");
-                    //            view.SetRowCellValue(rowHandle, "OTSL_CHK", "N");
-                    //        }
-                    //        else
-                    //        {
-                    //            // Follow existing BOM section(When a row is created, the BOM section follows the upper row).
-                    //            view.SetRowCellValue(rowHandle, "PART_TYPE", results[2]);
-                    //            view.SetRowCellValue(rowHandle, "MDSL_CHK", "N");
-                    //            view.SetRowCellValue(rowHandle, "OTSL_CHK", "N");
-                    //        }
-
-                    //        view.SetRowCellValue(rowHandle, "PCX_PART_ID", results[4]);
-
-                    //        Common.BindDefaultMaterialByNCFRule(view, rowHandle, results[4]);
-                    //    }
-                    //    else if (results[0] == "PatternPart")
-                    //    {
-                    //        view.SetRowCellValue(rowHandle, "PTRN_PART_NAME", results[1]);
-                    //        view.SetRowCellValue(rowHandle, "PTRN_PART_CD", results[3]);
-                    //    }
-                    //    else if (results[0] == "PCX_Material")
-                    //    {
-                    //        // Automatically tick for sticker & combine columns.
-                    //        if (results[1] == "87031" || results[1] == "78733" || results[1] == "79467")
-                    //            view.SetRowCellValue(rowHandle, "STICKER_YN", "Y");
-                    //        else if (results[1] == "54638" || results[1] == "79341")
-                    //            view.SetRowCellValue(rowHandle, "COMBINE_YN", "Y");
-                    //        else
-                    //            view.SetRowCellValue(rowHandle, "STICKER_YN", "N");
-
-                    //        view.SetRowCellValue(rowHandle, "PCX_MAT_ID", results[1]);
-                    //        view.SetRowCellValue(rowHandle, "MAT_CD", results[2]);
-                    //        view.SetRowCellValue(rowHandle, "MAT_NAME", results[3]);
-                    //        view.SetRowCellValue(rowHandle, "MXSXL_NUMBER", results[4]);
-                    //        view.SetRowCellValue(rowHandle, "MCS_NUMBER", results[5]);
-                    //        view.SetRowCellValue(rowHandle, "VENDOR_NAME", results[6]);
-                    //        view.SetRowCellValue(rowHandle, "CS_CD", results[7]);
-                    //        view.SetRowCellValue(rowHandle, "PCX_SUPP_MAT_ID", results[8]);
-                    //        view.SetRowCellValue(rowHandle, "NIKE_MS_STATE", results[9]);
-                    //        view.SetRowCellValue(rowHandle, "BLACK_LIST_YN", results[10]);
-                    //        view.SetRowCellValue(rowHandle, "MDM_NOT_EXST", results[11]);
-
-                    //        // Automatically tick for 'Code Transfer'.
-                    //        if (results[11] == "Y")
-                    //        {
-                    //            view.SetRowCellValue(rowHandle, "CDMKR_YN", "Y");
-                    //            view.SetRowCellValue(rowHandle, "MDM_NOT_EXST", "Y");
-                    //        }
-                    //        else
-                    //        {
-                    //            view.SetRowCellValue(rowHandle, "CDMKR_YN", "N");
-                    //            view.SetRowCellValue(rowHandle, "MDM_NOT_EXST", "N");
-                    //        }
-                    //    }
-                    //    else if (results[0] == "Color")
-                    //    {
-                    //        view.SetRowCellValue(rowHandle, "PCX_COLOR_ID", results[1]);
-                    //        view.SetRowCellValue(rowHandle, "COLOR_CD", results[2]);
-                    //        view.SetRowCellValue(rowHandle, "COLOR_NAME", results[3]);
-                    //    }
-                    //    else if (results[0] == "PCC_Material")
-                    //    {
-                    //        // Automatically tick for sticker & combine columns.
-                    //        if (results[1] == "87031" || results[1] == "78733" || results[1] == "79467")
-                    //            view.SetRowCellValue(rowHandle, "STICKER_YN", "Y");
-                    //        else if (results[1] == "54638" || results[1] == "79341")
-                    //            view.SetRowCellValue(rowHandle, "COMBINE_YN", "Y");
-                    //        else
-                    //            view.SetRowCellValue(rowHandle, "STICKER_YN", "N");
-
-                    //        view.SetRowCellValue(rowHandle, "PCX_MAT_ID", results[1]);
-                    //        view.SetRowCellValue(rowHandle, "MAT_CD", results[2]);
-                    //        view.SetRowCellValue(rowHandle, "MAT_NAME", results[3]);
-                    //        view.SetRowCellValue(rowHandle, "MXSXL_NUMBER", results[4]);
-                    //        view.SetRowCellValue(rowHandle, "MCS_NUMBER", results[5]);
-                    //        view.SetRowCellValue(rowHandle, "VENDOR_NAME", results[6]);
-                    //        view.SetRowCellValue(rowHandle, "CS_CD", results[7]);
-                    //        view.SetRowCellValue(rowHandle, "PCX_SUPP_MAT_ID", results[8]);
-                    //        view.SetRowCellValue(rowHandle, "NIKE_MS_STATE", results[9]);
-                    //        view.SetRowCellValue(rowHandle, "BLACK_LIST_YN", results[10]);
-
-                    //        // If an user finds material from 'PCC Material', it means the code of this material was already created.
-                    //        view.SetRowCellValue(rowHandle, "MDM_NOT_EXST", "N");
-                    //        view.SetRowCellValue(rowHandle, "CDMKR_YN", "N");
-                    //    }
-                    //    else if (results[0] == "CS_Material")
-                    //    {
-                    //        view.SetRowCellValue(rowHandle, "PCX_MAT_ID", "100");
-                    //        view.SetRowCellValue(rowHandle, "MAT_CD", results[2]);
-                    //        view.SetRowCellValue(rowHandle, "MAT_NAME", results[3]);
-                    //        view.SetRowCellValue(rowHandle, "MXSXL_NUMBER", results[1]);
-                    //        view.SetRowCellValue(rowHandle, "MCS_NUMBER", "");
-                    //        view.SetRowCellValue(rowHandle, "VENDOR_NAME", "");
-                    //        view.SetRowCellValue(rowHandle, "CS_CD", "CS");
-                    //        view.SetRowCellValue(rowHandle, "PCX_SUPP_MAT_ID", "100");
-                    //    }
-
-                    //    if (view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString() != "I")
-                    //        view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
-                    //}
-
-                    #endregion
                 }
                 catch (Exception ex)
                 {
@@ -1376,6 +1265,7 @@ namespace CSI.PCC.PCX
             string partName = string.Empty;
             string partCode = string.Empty;
             string rowStatus = string.Empty;
+            string lockYN = string.Empty;
 
             try
             {
@@ -1390,8 +1280,9 @@ namespace CSI.PCC.PCX
                         : view.GetRowCellValue(rowHandle, "PART_CD").ToString();
 
                     rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
+                    lockYN = view.GetRowCellValue(rowHandle, "LOCK_YN").ToString();
 
-                    if (!rowStatus.Equals("D"))
+                    if (!rowStatus.Equals("D") && !lockYN.Equals("Y"))
                     {
                         view.SetRowCellValue(rowHandle, "CS_PTRN_NAME", partName);
                         view.SetRowCellValue(rowHandle, "CS_PTRN_CD", partCode);
@@ -1474,7 +1365,7 @@ namespace CSI.PCC.PCX
             //    MessageBox.Show(ex.ToString());
             //    return;
             //}
-            
+
             #endregion
         }
 
@@ -1485,6 +1376,7 @@ namespace CSI.PCC.PCX
         private void MultiCheck(string fieldName)
         {
             string rowStatus = string.Empty;
+            string lockYN = string.Empty;
 
             try
             {
@@ -1493,8 +1385,9 @@ namespace CSI.PCC.PCX
                 foreach (int rowHandle in view.GetSelectedRows())
                 {
                     rowStatus = view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString();
+                    lockYN = view.GetRowCellValue(rowHandle, "LOCK_YN").ToString();
 
-                    if (!rowStatus.Equals("D"))
+                    if (!rowStatus.Equals("D") && !lockYN.Equals("Y"))
                     {
                         if (view.GetRowCellValue(rowHandle, fieldName).ToString().Equals("Y"))
                             view.SetRowCellValue(rowHandle, fieldName, "N");
@@ -2138,12 +2031,13 @@ namespace CSI.PCC.PCX
                             foreach (var row in package)
                             {
                                 string rowStatus = row["ROW_STATUS"].ToString();
+                                string lockYN = row["LOCK_YN"].ToString();
 
                                 // In case of 'Lamination' + 'Combine'.
                                 if (row["COMBINE_YN"].ToString().Equals("Y"))
                                     continue;
 
-                                if (rowStatus != "D")
+                                if (!rowStatus.Equals("D") && !lockYN.Equals("Y"))
                                 {
                                     // Update when Nike Pattern Part Name is different from CS Pattern Part Name.
                                     if (row["PTRN_PART_NAME"].ToString() != row["CS_PTRN_NAME"].ToString())
@@ -2152,7 +2046,7 @@ namespace CSI.PCC.PCX
                                         row["PTRN_PART_CD"] = row["CS_PTRN_CD"].ToString();
 
                                         // Update row indicator.
-                                        if (rowStatus != "I" && rowStatus != "D")
+                                        if (rowStatus != "I")
                                             row["ROW_STATUS"] = "U";
                                     }
                                 }
@@ -2170,8 +2064,9 @@ namespace CSI.PCC.PCX
                     foreach (DataRow row in rows)
                     {
                         string rowStatus = row["ROW_STATUS"].ToString();
+                        string lockYN = row["LOCK_YN"].ToString();
 
-                        if (rowStatus != "D")
+                        if (!rowStatus.Equals("D") && !lockYN.Equals("Y"))
                         {
                             // Do When Nike Pattern Part and CS Pattern Part are different.
                             if (row["PTRN_PART_NAME"].ToString() != row["CS_PTRN_NAME"].ToString())
@@ -2180,7 +2075,7 @@ namespace CSI.PCC.PCX
                                 row["PTRN_PART_CD"] = row["CS_PTRN_CD"].ToString();
 
                                 // Update indicator of row status.
-                                if (rowStatus != "I" && rowStatus != "D")
+                                if (rowStatus != "I")
                                     row["ROW_STATUS"] = "U";
                             }
                             else
@@ -2260,621 +2155,6 @@ namespace CSI.PCC.PCX
         #endregion
 
         #region Grid Events
-        
-        private void CustomKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Delete)
-            {
-                List<DataRow> rows = new List<DataRow>();
-                string[] colNonModifySingle = new string[] { "PART_NIKE_NO", "UPD_USER", "UPD_YMD" };
-                string[] colNonModifyMultiple = new string[] { "DEV_COLORWAY_ID", "PART_NIKE_NO", "UPD_USER" };
-                string[] colModifyLocked = new string[] { "MAT_COMMENT", "COLOR_COMMENT", "PROCESS", "REMARKS" };
-                string fieldName = string.Empty;
-                string rowStatus = string.Empty;
-
-                foreach (int rowHandle in view.GetSelectedRows())
-                    rows.Add(view.GetDataRow(rowHandle));
-
-                try
-                {
-                    view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
-
-                    fieldName = view.FocusedColumn.FieldName;
-
-                    // Validate the focus is valid.
-                    if (view.Name.Equals("gvwSingleEdit"))
-                    {
-                        if (colNonModifySingle.Contains(fieldName))
-                            return;
-
-                        if (isLocked)
-                        {
-                            if (!colModifyLocked.Contains(fieldName))
-                                return;
-                        }
-                    }
-                    else if (view.Name.Equals("gvwMultipleEdit"))
-                    {
-                        if (colNonModifyMultiple.Contains(fieldName))
-                            return;
-                    }
-
-                    foreach (DataRow row in rows)
-                    {
-                        rowStatus = row["ROW_STATUS"].ToString();
-
-                        if (rowStatus != "D")
-                        {
-                            switch (fieldName)
-                            {
-                                case "PTRN_PART_NAME":
-
-                                    row["PTRN_PART_CD"] = "";
-                                    row["PTRN_PART_NAME"] = "";
-                                    break;
-
-                                case "CS_PTRN_NAME":
-
-                                    row["CS_PTRN_CD"] = "";
-                                    row["CS_PTRN_NAME"] = "";
-                                    break;
-
-                                case "MAT_COMMENT":
-
-                                    row["MAT_COMMENT"] = "";
-                                    row["ENCODED_CMT"] = "";
-                                    break;
-
-                                default:
-                                    row[fieldName] = "";
-                                    break;
-                            }
-                        }
-
-                        if (rowStatus != "I")
-                            row["ROW_STATUS"] = "U";
-                    }
-
-                    view.RefreshData();
-                }
-                catch (Exception ex)
-                {
-                    Common.ShowMessageBox(ex.ToString(), "E");
-                }
-                finally
-                {
-                    view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
-                }
-            }
-        }
-
-        private void CustomDrawRowIndicator(object sender, RowIndicatorCustomDrawEventArgs e)
-        {
-            GridView view = sender as GridView;
-
-            if (e.Info.IsRowIndicator && e.RowHandle >= 0)
-            {
-                string rowStatus = view.GetRowCellValue(e.RowHandle, "ROW_STATUS").ToString();
-
-                if (rowStatus == "D")
-                {
-                    // 삭제
-                    e.Appearance.Font = new Font("SimSun", 11, FontStyle.Bold);
-                    e.Appearance.ForeColor = Color.DimGray;
-                    e.Appearance.TextOptions.HAlignment = HorzAlignment.Center;
-                    e.Info.DisplayText = "D";
-                }
-                else if (rowStatus == "I")
-                {
-                    // 삽입
-                    e.Appearance.Font = new Font("SimSun", 11, FontStyle.Bold);
-                    e.Appearance.ForeColor = Color.Green;
-                    e.Appearance.TextOptions.HAlignment = HorzAlignment.Center;
-                    e.Info.DisplayText = "I";
-                }
-                else if (rowStatus == "U")
-                {
-                    // 수정
-                    e.Appearance.Font = new Font("SimSun", 11, FontStyle.Bold);
-                    e.Appearance.ForeColor = Color.Blue;
-                    e.Appearance.TextOptions.HAlignment = HorzAlignment.Center;
-                    e.Info.DisplayText = "U";
-                }
-            }
-        }
-
-        private void CustomRowCellStyle(object sender, RowCellStyleEventArgs e)
-        {
-            GridView view = sender as GridView;
-
-            #region BOM이 LOCK된 경우 별도의 스타일 적용
-
-            if (isLocked)
-            {
-                string[] editableColumns = new string[] { "MAT_COMMENT", "COLOR_COMMENT", "PROCESS", "REMARKS", "CDMKR_YN" };
-
-                if (!editableColumns.Contains(e.Column.FieldName))
-                {
-                    if (!view.IsCellSelected(e.RowHandle, e.Column))
-                        e.Appearance.BackColor = Color.LightSlateGray;
-                }
-
-                return;
-            }
-
-            #endregion
-
-            #region 삭제된 행의 스타일 적용 - 스타일 적용의 가장 우선 순위
-
-            string rowStatus = view.GetRowCellValue(e.RowHandle, "ROW_STATUS").ToString();
-
-            if (rowStatus == "D")
-            {
-                if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                {
-                    e.Appearance.BackColor = Color.DarkGray;
-
-                    // 멀티 수정 모드의 경우 기준 라인의 글자를 볼드-흰색으로 표시
-                    if (view == gvwMultipleEdit)
-                    {
-                        string colorVersion = view.GetRowCellValue(e.RowHandle, "COLOR_VER").ToString();
-
-                        if (colorVersion == "VER1")
-                        {
-                            e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                            e.Appearance.ForeColor = Color.White;
-                        }
-                    }
-
-                    // 삭제의 경우 다른 스타일 무시
-                    return;
-                }
-            }
-
-            #endregion
-
-            #region 멀티 수정 모드의 경우 기준 라인 스타일 적용
-
-            if (view == gvwMultipleEdit)
-            {
-                string _colorVersion = view.GetRowCellValue(e.RowHandle, "COLOR_VER").ToString();
-
-                if (_colorVersion == "VER1")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.BackColor = Color.Tan;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                    return;
-                }
-            }
-
-            #endregion
-
-            if (e.Column.FieldName == "PCX_PART_ID")
-            {
-                #region PCX Part ID 공란
-                string pcxPartId = view.GetRowCellValue(e.RowHandle, "PCX_PART_ID").ToString();
-                if (pcxPartId == "")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                        e.Appearance.BackColor = Color.DeepSkyBlue;
-                }
-                #endregion
-            }
-            else if (e.Column.FieldName == "PART_CD")
-            {
-                #region 파트 코드 공란
-                string partCode = view.GetRowCellValue(e.RowHandle, "PART_CD").ToString();
-                if (partCode == "")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                        e.Appearance.BackColor = Color.Red;
-                }
-                #endregion
-            }
-            else if (e.Column.FieldName == "PART_NAME")
-            {
-                #region PCX 라이브러리 매칭 실패
-                string partName = view.GetRowCellValue(e.RowHandle, "PART_NAME").ToString();
-
-                if (partName == "Failed to load part info. from MDM." ||
-                    partName == "Failed to load ptrn. part info. from MDM.")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Red;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                #endregion
-
-                #region 파트 묶음에 다른 파트명이 존재할 경우 스타일 적용
-                if (view == gvwMultipleEdit)
-                {
-                    // 기준 라인은 건너뜀
-                    int remainder = e.RowHandle % NumSelectedBOMs;
-                    if (remainder != 0)
-                    {
-                        // 본 파트명
-                        string now = view.GetRowCellValue(e.RowHandle, "PART_NAME").ToString();
-                        // 기준 라인의 파트명으로 비교
-                        string comparer = view.GetRowCellValue(e.RowHandle - remainder, "PART_NAME").ToString();
-
-                        if (now != comparer)
-                        {
-                            if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                            {
-                                e.Appearance.BackColor = Color.Red;
-                                e.Appearance.ForeColor = Color.White;
-                            }
-                        }
-                    }
-                }
-                #endregion
-
-                #region Replace 표기
-                if (view == gvwSingleEdit)
-                {
-                    string matchedStatus = view.GetRowCellValue(e.RowHandle, "STATUS").ToString();
-
-                    if (matchedStatus == "R")
-                    {
-                        if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                        {
-                            e.Appearance.BackColor = Color.LightGreen;
-                            //e.Appearance.ForeColor = Color.White;
-                        }
-                    }
-                    else if (matchedStatus == "T")
-                    {
-                        if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                        {
-                            e.Appearance.BackColor = Color.LightSalmon;
-                            //e.Appearance.ForeColor = Color.White;
-                        }
-                    }
-                }
-                #endregion
-
-                #region Lamination
-                if (partName.Contains("LAMINATION") == true)
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.LimeGreen;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-
-                #endregion
-            }
-            else if (e.Column.FieldName == "PTRN_PART_NAME")
-            {
-                #region 패턴 파트 묶음에 다른 파트명이 존재할 경우 스타일 적용
-
-                if (view == gvwMultipleEdit)
-                {
-                    int remainder = e.RowHandle % NumSelectedBOMs;
-
-                    if (remainder != 0)
-                    {
-                        string now = view.GetRowCellValue(e.RowHandle, "PTRN_PART_NAME").ToString();
-                        string comparer = view.GetRowCellValue(e.RowHandle - remainder, "PTRN_PART_NAME").ToString();
-
-                        if (now != comparer)
-                        {
-                            if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                            {
-                                e.Appearance.BackColor = Color.Red;
-                                e.Appearance.ForeColor = Color.White;
-                            }
-                        }
-                    }
-                }
-
-                #endregion
-            }
-            else if (e.Column.FieldName == "CS_PTRN_NAME")
-            {
-                #region Fake BOM의 경우 패턴 파트 필수 입력
-
-                string ptrnPartName = view.GetRowCellValue(e.RowHandle, "CS_PTRN_NAME").ToString();
-
-                if (CSBOMStatus == "F")
-                {
-                    if (ptrnPartName == "")
-                    {
-                        if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                            e.Appearance.BackColor = Color.Red;
-                    }
-                }
-
-                #endregion
-
-                #region 패턴 파트 묶음에 다른 파트명이 존재할 경우 스타일 적용
-
-                if (view == gvwMultipleEdit)
-                {
-                    int remainder = e.RowHandle % NumSelectedBOMs;
-
-                    if (remainder != 0)
-                    {
-                        string now = view.GetRowCellValue(e.RowHandle, "CS_PTRN_NAME").ToString();
-                        string comparer = view.GetRowCellValue(e.RowHandle - remainder, "CS_PTRN_NAME").ToString();
-
-                        if (now != comparer)
-                        {
-                            if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                            {
-                                e.Appearance.BackColor = Color.Red;
-                                e.Appearance.ForeColor = Color.White;
-                            }
-                        }
-                    }
-                }
-
-                #endregion
-            }
-            else if (e.Column.FieldName == "PART_TYPE")
-            {
-                #region 유효한 파트 타입 여부 확인
-
-                if (CSBOMStatus == "F")
-                {
-                    string partType = view.GetRowCellValue(e.RowHandle, "PART_TYPE").ToString();
-                    if (partType == "")
-                    {
-                        if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                            e.Appearance.BackColor = Color.Red;
-                    }
-                }
-                else
-                {
-                    string[] validPartTypes = new string[] { "UPPER", "MIDSOLE", "OUTSOLE", "PACKAGING", "AIRBAG" };
-                    string partType = view.GetRowCellValue(e.RowHandle, "PART_TYPE").ToString();
-                    if (partType == "" || !validPartTypes.Contains(partType))
-                    {
-                        if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                            e.Appearance.BackColor = Color.DeepSkyBlue;
-                    }
-                }
-
-                #endregion
-            }
-            else if (e.Column.FieldName == "PCX_MAT_ID")
-            {
-                #region PLACEHOLDER & N/A
-                string pcxMaterialID = view.GetRowCellValue(e.RowHandle, "PCX_MAT_ID").ToString();
-                if (pcxMaterialID == "100")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Red;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                else if (pcxMaterialID == "999")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Red;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                else if (pcxMaterialID == "")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.BackColor = Color.DeepSkyBlue;
-                        //e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                #endregion
-            }
-            else if (e.Column.FieldName == "PCX_SUPP_MAT_ID")
-            {
-                #region PLACEHOLDER & N/A
-                string pcxSuppMatID = view.GetRowCellValue(e.RowHandle, "PCX_SUPP_MAT_ID").ToString();
-                if (pcxSuppMatID == "100")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Red;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                else if (pcxSuppMatID == "999")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Red;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                else if (pcxSuppMatID == "")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.BackColor = Color.DeepSkyBlue;
-                        //e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                #endregion
-            }
-            else if (e.Column.FieldName == "MAT_NAME")
-            {
-                #region 주요 속성 값 표기
-
-                string materialName = view.GetRowCellValue(e.RowHandle, "MAT_NAME").ToString();
-                string pcxMatID = view.GetRowCellValue(e.RowHandle, "PCX_MAT_ID").ToString();
-
-                if (materialName == "PLACEHOLDER" || materialName == "N/A")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Red;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-
-                        return;
-                    }
-                }
-                else if (pcxMatID == "78730" || pcxMatID == "78728" || pcxMatID == "79466"
-                    || pcxMatID == "78732" || pcxMatID == "78734" || pcxMatID == "79482")
-                {
-                    /* <LAMINATION>
-                     * Lamination  HA 700L - DS
-                     * Lamination - DM-629-MD - QD, VJ
-                     * Lamination - WSM-170 - JJ
-                     * Lamination - TECHNOMELT MELTACE 870
-                     * Lamination - CMH 1020C
-                     * LOCTITE BONDACE 7430WL-2 */
-
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.LimeGreen;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                else if (pcxMatID == "54638" || pcxMatID == "79341")
-                {
-                    /* <LOGO>
-                     * GENERIC SCREENED_TRANSFER LOGO
-                     * GENERIC SCREEN PRINT TRANSFER */
-
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.DeepSkyBlue;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                else if (pcxMatID == "87031" || pcxMatID == "78733" || pcxMatID == "79467")
-                {
-                    /* <STICKER>
-                     * Lamination - HA-710S - DS
-                     * Lamination - DM58T - QD, VJ
-                     * Lamination - WSM-100 - JJ */
-
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.DarkOrange;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-
-                if (view.GetRowCellValue(e.RowHandle, "NIKE_MS_STATE").ToString() == "Retired")
-                {
-                    /* Retired Material */
-
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Orange;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                        e.Appearance.BackColor = Color.Firebrick;
-                    }
-                }
-
-                if (view.GetRowCellValue(e.RowHandle, "BLACK_LIST_YN").ToString() == "Y")
-                {
-                    /* BlackList Material */
-
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.White;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                        e.Appearance.BackColor = Color.Black;
-                    }
-                }
-
-                if (view.GetRowCellValue(e.RowHandle, "MDM_NOT_EXST").ToString() == "Y")
-                {
-                    /* Materials which have not yet been enrolled in PCC Master. */
-
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.White;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                        e.Appearance.BackColor = Color.HotPink;
-                    }
-                }
-
-                #endregion
-            }
-            else if (e.Column.FieldName == "MAT_COMMENT")
-            {
-                #region PCX 라이브러리 매칭 실패
-                string materialComment = view.GetRowCellValue(e.RowHandle, "MAT_COMMENT").ToString();
-                if (materialComment == "Failed to load material info. from MDM.")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Red;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                #endregion
-            }
-            else if (e.Column.FieldName == "COLOR_COMMENT")
-            {
-                #region PCX 라이브러리 매칭 실패
-                string colorComment = view.GetRowCellValue(e.RowHandle, "COLOR_COMMENT").ToString();
-                if (colorComment == "Failed to load color info from PCX Lib.")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Red;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                #endregion
-            }
-            else if (e.Column.FieldName == "CS_CD")
-            {
-                #region PCX 라이브러리 매칭 실패
-                string csCode = view.GetRowCellValue(e.RowHandle, "CS_CD").ToString();
-                if (csCode == "CS")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Red;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                #endregion
-            }
-
-            #region 유저 커스텀 컬러 적용
-
-            string colorFormat = view.GetRowCellValue(e.RowHandle, "CELL_COLOR").ToString();
-            string[] items = colorFormat.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (string item in items)
-            {
-                string[] tmp = item.Split('/');
-                string columnName = tmp[0];
-                string colorName = tmp[1];
-
-                if (e.Column.FieldName == columnName)
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                        e.Appearance.BackColor = Color.FromArgb(Convert.ToInt32(colorName));
-                }
-            }
-
-            #endregion
-        }
-
-        private void CustomShowingEditor(object sender, CancelEventArgs e)
-        {
-            // 이벤트를 발생 시킨 뷰
-            GridView view = sender as GridView;
-            // 선택한 셀이 속한 행의 상태값
-            string rowStatus = view.GetRowCellValue(view.FocusedRowHandle, "ROW_STATUS").ToString();
-            // 삭제한 행은 수정 불가
-            if (rowStatus == "D")
-                e.Cancel = true;
-        }
 
         private void CustomCellValueChanged(object sender, CellValueChangedEventArgs e)
         {
@@ -3465,8 +2745,9 @@ namespace CSI.PCC.PCX
                 foreach (DataRow row in rows)
                 {
                     string rowStatus = row["ROW_STATUS"].ToString();
+                    string lockYN = row["LOCK_YN"].ToString();
 
-                    if (rowStatus != "D")
+                    if (!rowStatus.Equals("D") && !lockYN.Equals("Y"))
                     {
                         if (view.FocusedColumn.FieldName == "COLOR_CD")
                         {
@@ -3657,7 +2938,7 @@ namespace CSI.PCC.PCX
                             row["ROW_STATUS"] = "U";
                     }
                 }
-                
+
                 view.RefreshData();
                 view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
             }
@@ -3666,6 +2947,104 @@ namespace CSI.PCC.PCX
                 MessageBox.Show(ex.ToString());
                 return;
             }
+        }
+
+        private void CustomKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                List<DataRow> rows = new List<DataRow>();
+                string[] colNonModifySingle = new string[] { "PART_NIKE_NO", "UPD_USER", "UPD_YMD" };
+                string[] colNonModifyMultiple = new string[] { "DEV_COLORWAY_ID", "PART_NIKE_NO", "UPD_USER" };
+                string[] colModifyLocked = new string[] { "MAT_COMMENT", "COLOR_COMMENT", "PROCESS", "REMARKS" };
+                string fieldName = string.Empty;
+                string rowStatus = string.Empty;
+                string lockYN = string.Empty;
+
+                foreach (int rowHandle in view.GetSelectedRows())
+                    rows.Add(view.GetDataRow(rowHandle));
+
+                try
+                {
+                    view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
+
+                    fieldName = view.FocusedColumn.FieldName;
+
+                    // Validate the focus is valid.
+                    if (view.Name.Equals("gvwSingleEdit"))
+                    {
+                        if (colNonModifySingle.Contains(fieldName))
+                            return;
+
+                        if (isLocked)
+                        {
+                            if (!colModifyLocked.Contains(fieldName))
+                                return;
+                        }
+                    }
+                    else if (view.Name.Equals("gvwMultipleEdit"))
+                    {
+                        if (colNonModifyMultiple.Contains(fieldName))
+                            return;
+                    }
+
+                    foreach (DataRow row in rows)
+                    {
+                        rowStatus = row["ROW_STATUS"].ToString();
+                        lockYN = row["LOCK_YN"].ToString();
+
+                        if (!rowStatus.Equals("D") && !lockYN.ToString().Equals("Y"))
+                        {
+                            switch (fieldName)
+                            {
+                                case "PTRN_PART_NAME":
+
+                                    row["PTRN_PART_CD"] = "";
+                                    row["PTRN_PART_NAME"] = "";
+                                    break;
+
+                                case "CS_PTRN_NAME":
+
+                                    row["CS_PTRN_CD"] = "";
+                                    row["CS_PTRN_NAME"] = "";
+                                    break;
+
+                                case "MAT_COMMENT":
+
+                                    row["MAT_COMMENT"] = "";
+                                    row["ENCODED_CMT"] = "";
+                                    break;
+
+                                default:
+                                    row[fieldName] = "";
+                                    break;
+                            }
+
+                            if (!rowStatus.Equals("I"))
+                                row["ROW_STATUS"] = "U";
+                        }
+                    }
+
+                    view.RefreshData();
+                }
+                catch (Exception ex)
+                {
+                    Common.ShowMessageBox(ex.ToString(), "E");
+                }
+                finally
+                {
+                    view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
+                }
+            }
+        }
+
+        private void CustomShowingEditor(object sender, CancelEventArgs e)
+        {
+            GridView view = sender as GridView;
+
+            if (view.GetRowCellValue(view.FocusedRowHandle, "ROW_STATUS").ToString().Equals("D") ||
+                view.GetRowCellValue(view.FocusedRowHandle, "LOCK_YN").ToString().Equals("Y"))
+                e.Cancel = true;
         }
 
         private void CustomMouseDown(object sender, MouseEventArgs e)
@@ -3716,6 +3095,521 @@ namespace CSI.PCC.PCX
                 MessageBox.Show(ex.ToString());
                 return;
             }
+        }
+
+        private void CustomDrawRowIndicator(object sender, RowIndicatorCustomDrawEventArgs e)
+        {
+            GridView view = sender as GridView;
+
+            if (e.Info.IsRowIndicator && e.RowHandle >= 0)
+            {
+                string rowStatus = view.GetRowCellValue(e.RowHandle, "ROW_STATUS").ToString();
+
+                if (rowStatus == "D")
+                {
+                    // 삭제
+                    e.Appearance.Font = new Font("SimSun", 11, FontStyle.Bold);
+                    e.Appearance.ForeColor = Color.DimGray;
+                    e.Appearance.TextOptions.HAlignment = HorzAlignment.Center;
+                    e.Info.DisplayText = "D";
+                }
+                else if (rowStatus == "I")
+                {
+                    // 삽입
+                    e.Appearance.Font = new Font("SimSun", 11, FontStyle.Bold);
+                    e.Appearance.ForeColor = Color.Green;
+                    e.Appearance.TextOptions.HAlignment = HorzAlignment.Center;
+                    e.Info.DisplayText = "I";
+                }
+                else if (rowStatus == "U")
+                {
+                    // 수정
+                    e.Appearance.Font = new Font("SimSun", 11, FontStyle.Bold);
+                    e.Appearance.ForeColor = Color.Blue;
+                    e.Appearance.TextOptions.HAlignment = HorzAlignment.Center;
+                    e.Info.DisplayText = "U";
+                }
+            }
+        }
+
+        private void CustomRowCellStyle(object sender, RowCellStyleEventArgs e)
+        {
+            GridView view = sender as GridView;
+
+            #region BOM이 LOCK된 경우 별도의 스타일 적용
+
+            if (isLocked)
+            {
+                string[] editableColumns = new string[] { "MAT_COMMENT", "COLOR_COMMENT", "PROCESS", "REMARKS", "CDMKR_YN" };
+
+                if (!editableColumns.Contains(e.Column.FieldName))
+                {
+                    if (!view.IsCellSelected(e.RowHandle, e.Column))
+                        e.Appearance.BackColor = Color.LightSlateGray;
+                }
+
+                return;
+            }
+
+            #endregion
+
+            #region 삭제된 행의 스타일 적용 - 스타일 적용의 가장 우선 순위
+
+            string rowStatus = view.GetRowCellValue(e.RowHandle, "ROW_STATUS").ToString();
+
+            if (rowStatus == "D")
+            {
+                if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                {
+                    e.Appearance.BackColor = Color.DarkGray;
+
+                    // 멀티 수정 모드의 경우 기준 라인의 글자를 볼드-흰색으로 표시
+                    if (view == gvwMultipleEdit)
+                    {
+                        string colorVersion = view.GetRowCellValue(e.RowHandle, "COLOR_VER").ToString();
+
+                        if (colorVersion == "VER1")
+                        {
+                            e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                            e.Appearance.ForeColor = Color.White;
+                        }
+                    }
+
+                    // 삭제의 경우 다른 스타일 무시
+                    return;
+                }
+            }
+
+            #endregion
+
+            #region 멀티 수정 모드의 경우 기준 라인 스타일 적용
+
+            if (view == gvwMultipleEdit)
+            {
+                if (view.GetRowCellValue(e.RowHandle, "COLOR_VER").ToString().Equals("VER1"))
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.BackColor = Color.Tan;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                    return;
+                }
+            }
+
+            #endregion
+
+            if (e.Column.FieldName == "PCX_PART_ID")
+            {
+                #region PCX Part ID 공란
+                string pcxPartId = view.GetRowCellValue(e.RowHandle, "PCX_PART_ID").ToString();
+                if (pcxPartId == "")
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                        e.Appearance.BackColor = Color.DeepSkyBlue;
+                }
+                #endregion
+            }
+            else if (e.Column.FieldName == "PART_CD")
+            {
+                #region 파트 코드 공란
+                string partCode = view.GetRowCellValue(e.RowHandle, "PART_CD").ToString();
+                if (partCode == "")
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                        e.Appearance.BackColor = Color.Red;
+                }
+                #endregion
+            }
+            else if (e.Column.FieldName == "PART_NAME")
+            {
+                #region PCX 라이브러리 매칭 실패
+                string partName = view.GetRowCellValue(e.RowHandle, "PART_NAME").ToString();
+
+                if (partName == "Failed to load part info. from MDM." ||
+                    partName == "Failed to load ptrn. part info. from MDM.")
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.Red;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
+                #endregion
+
+                #region 파트 묶음에 다른 파트명이 존재할 경우 스타일 적용
+                if (view == gvwMultipleEdit)
+                {
+                    // 기준 라인은 건너뜀
+                    int remainder = e.RowHandle % NumSelectedBOMs;
+                    if (remainder != 0)
+                    {
+                        // 본 파트명
+                        string now = view.GetRowCellValue(e.RowHandle, "PART_NAME").ToString();
+                        // 기준 라인의 파트명으로 비교
+                        string comparer = view.GetRowCellValue(e.RowHandle - remainder, "PART_NAME").ToString();
+
+                        if (now != comparer)
+                        {
+                            if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                            {
+                                e.Appearance.BackColor = Color.Red;
+                                e.Appearance.ForeColor = Color.White;
+                            }
+                        }
+                    }
+                }
+                #endregion
+
+                #region Replace 표기
+                if (view == gvwSingleEdit)
+                {
+                    string matchedStatus = view.GetRowCellValue(e.RowHandle, "STATUS").ToString();
+
+                    if (matchedStatus == "R")
+                    {
+                        if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                        {
+                            e.Appearance.BackColor = Color.LightGreen;
+                            //e.Appearance.ForeColor = Color.White;
+                        }
+                    }
+                    else if (matchedStatus == "T")
+                    {
+                        if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                        {
+                            e.Appearance.BackColor = Color.LightSalmon;
+                            //e.Appearance.ForeColor = Color.White;
+                        }
+                    }
+                }
+                #endregion
+
+                #region Lamination
+                if (partName.Contains("LAMINATION") == true)
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.LimeGreen;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
+
+                #endregion
+            }
+            else if (e.Column.FieldName == "PTRN_PART_NAME")
+            {
+                #region 패턴 파트 묶음에 다른 파트명이 존재할 경우 스타일 적용
+
+                if (view == gvwMultipleEdit)
+                {
+                    int remainder = e.RowHandle % NumSelectedBOMs;
+
+                    if (remainder != 0)
+                    {
+                        string now = view.GetRowCellValue(e.RowHandle, "PTRN_PART_NAME").ToString();
+                        string comparer = view.GetRowCellValue(e.RowHandle - remainder, "PTRN_PART_NAME").ToString();
+
+                        if (now != comparer)
+                        {
+                            if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                            {
+                                e.Appearance.BackColor = Color.Red;
+                                e.Appearance.ForeColor = Color.White;
+                            }
+                        }
+                    }
+                }
+
+                #endregion
+            }
+            else if (e.Column.FieldName == "CS_PTRN_NAME")
+            {
+                #region Fake BOM의 경우 패턴 파트 필수 입력
+
+                string ptrnPartName = view.GetRowCellValue(e.RowHandle, "CS_PTRN_NAME").ToString();
+
+                if (CSBOMStatus == "F")
+                {
+                    if (ptrnPartName == "")
+                    {
+                        if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                            e.Appearance.BackColor = Color.Red;
+                    }
+                }
+
+                #endregion
+
+                #region 패턴 파트 묶음에 다른 파트명이 존재할 경우 스타일 적용
+
+                if (view == gvwMultipleEdit)
+                {
+                    int remainder = e.RowHandle % NumSelectedBOMs;
+
+                    if (remainder != 0)
+                    {
+                        string now = view.GetRowCellValue(e.RowHandle, "CS_PTRN_NAME").ToString();
+                        string comparer = view.GetRowCellValue(e.RowHandle - remainder, "CS_PTRN_NAME").ToString();
+
+                        if (now != comparer)
+                        {
+                            if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                            {
+                                e.Appearance.BackColor = Color.Red;
+                                e.Appearance.ForeColor = Color.White;
+                            }
+                        }
+                    }
+                }
+
+                #endregion
+            }
+            else if (e.Column.FieldName == "PART_TYPE")
+            {
+                #region 유효한 파트 타입 여부 확인
+
+                if (CSBOMStatus == "F")
+                {
+                    string partType = view.GetRowCellValue(e.RowHandle, "PART_TYPE").ToString();
+                    if (partType == "")
+                    {
+                        if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                            e.Appearance.BackColor = Color.Red;
+                    }
+                }
+                else
+                {
+                    string[] validPartTypes = new string[] { "UPPER", "MIDSOLE", "OUTSOLE", "PACKAGING", "AIRBAG" };
+                    string partType = view.GetRowCellValue(e.RowHandle, "PART_TYPE").ToString();
+                    if (partType == "" || !validPartTypes.Contains(partType))
+                    {
+                        if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                            e.Appearance.BackColor = Color.DeepSkyBlue;
+                    }
+                }
+
+                #endregion
+            }
+            else if (e.Column.FieldName == "PCX_MAT_ID")
+            {
+                #region PLACEHOLDER & N/A
+                string pcxMaterialID = view.GetRowCellValue(e.RowHandle, "PCX_MAT_ID").ToString();
+                if (pcxMaterialID == "100")
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.Red;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
+                else if (pcxMaterialID == "999")
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.Red;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
+                else if (pcxMaterialID == "")
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.BackColor = Color.DeepSkyBlue;
+                        //e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
+                #endregion
+            }
+            else if (e.Column.FieldName == "PCX_SUPP_MAT_ID")
+            {
+                #region PLACEHOLDER & N/A
+                string pcxSuppMatID = view.GetRowCellValue(e.RowHandle, "PCX_SUPP_MAT_ID").ToString();
+                if (pcxSuppMatID == "100")
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.Red;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
+                else if (pcxSuppMatID == "999")
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.Red;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
+                else if (pcxSuppMatID == "")
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.BackColor = Color.DeepSkyBlue;
+                        //e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
+                #endregion
+            }
+            else if (e.Column.FieldName == "MAT_NAME")
+            {
+                #region 주요 속성 값 표기
+
+                string materialName = view.GetRowCellValue(e.RowHandle, "MAT_NAME").ToString();
+                string pcxMatID = view.GetRowCellValue(e.RowHandle, "PCX_MAT_ID").ToString();
+
+                if (materialName == "PLACEHOLDER" || materialName == "N/A")
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.Red;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+
+                        return;
+                    }
+                }
+                else if (pcxMatID == "78730" || pcxMatID == "78728" || pcxMatID == "79466"
+                    || pcxMatID == "78732" || pcxMatID == "78734" || pcxMatID == "79482")
+                {
+                    /* <LAMINATION>
+                     * Lamination  HA 700L - DS
+                     * Lamination - DM-629-MD - QD, VJ
+                     * Lamination - WSM-170 - JJ
+                     * Lamination - TECHNOMELT MELTACE 870
+                     * Lamination - CMH 1020C
+                     * LOCTITE BONDACE 7430WL-2 */
+
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.LimeGreen;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
+                else if (pcxMatID == "54638" || pcxMatID == "79341")
+                {
+                    /* <LOGO>
+                     * GENERIC SCREENED_TRANSFER LOGO
+                     * GENERIC SCREEN PRINT TRANSFER */
+
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.DeepSkyBlue;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
+                else if (pcxMatID == "87031" || pcxMatID == "78733" || pcxMatID == "79467")
+                {
+                    /* <STICKER>
+                     * Lamination - HA-710S - DS
+                     * Lamination - DM58T - QD, VJ
+                     * Lamination - WSM-100 - JJ */
+
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.DarkOrange;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
+
+                if (view.GetRowCellValue(e.RowHandle, "NIKE_MS_STATE").ToString() == "Retired")
+                {
+                    /* Retired Material */
+
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.Orange;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                        e.Appearance.BackColor = Color.Firebrick;
+                    }
+                }
+
+                if (view.GetRowCellValue(e.RowHandle, "BLACK_LIST_YN").ToString() == "Y")
+                {
+                    /* BlackList Material */
+
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.White;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                        e.Appearance.BackColor = Color.Black;
+                    }
+                }
+
+                if (view.GetRowCellValue(e.RowHandle, "MDM_NOT_EXST").ToString() == "Y")
+                {
+                    /* Materials which have not yet been enrolled in PCC Master. */
+
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.White;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                        e.Appearance.BackColor = Color.HotPink;
+                    }
+                }
+
+                #endregion
+            }
+            else if (e.Column.FieldName == "MAT_COMMENT")
+            {
+                #region PCX 라이브러리 매칭 실패
+                string materialComment = view.GetRowCellValue(e.RowHandle, "MAT_COMMENT").ToString();
+                if (materialComment == "Failed to load material info. from MDM.")
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.Red;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
+                #endregion
+            }
+            else if (e.Column.FieldName == "COLOR_COMMENT")
+            {
+                #region PCX 라이브러리 매칭 실패
+                string colorComment = view.GetRowCellValue(e.RowHandle, "COLOR_COMMENT").ToString();
+                if (colorComment == "Failed to load color info from PCX Lib.")
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.Red;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
+                #endregion
+            }
+            else if (e.Column.FieldName == "CS_CD")
+            {
+                #region PCX 라이브러리 매칭 실패
+                string csCode = view.GetRowCellValue(e.RowHandle, "CS_CD").ToString();
+                if (csCode == "CS")
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                    {
+                        e.Appearance.ForeColor = Color.Red;
+                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                    }
+                }
+                #endregion
+            }
+
+            #region 유저 커스텀 컬러 적용
+
+            string colorFormat = view.GetRowCellValue(e.RowHandle, "CELL_COLOR").ToString();
+            string[] items = colorFormat.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string item in items)
+            {
+                string[] tmp = item.Split('/');
+                string columnName = tmp[0];
+                string colorName = tmp[1];
+
+                if (e.Column.FieldName == columnName)
+                {
+                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                        e.Appearance.BackColor = Color.FromArgb(Convert.ToInt32(colorName));
+                }
+            }
+
+            #endregion
         }
 
         private void CustomDrawColumnHeader(object sender, ColumnHeaderCustomDrawEventArgs e)
@@ -3854,7 +3748,7 @@ namespace CSI.PCC.PCX
         private void btnWSConfirm_Click(object sender, EventArgs e)
         {
             ArrayList list = new ArrayList();
-            
+
             if (CSBOMStatus.Equals("C"))
             {
                 Common.ShowMessageBox("Already confirmed BOM.", "E");
@@ -3908,10 +3802,10 @@ namespace CSI.PCC.PCX
                 Common.ShowMessageBox("Already confirmed BOM.", "E");
                 return;
             }
-           
+
             try
             {
-                if (Common.IsFilterApplied(gvwSingleEdit))
+                if (Common.IsFilterApplied(view))
                     return;
 
                 PKG_INTG_BOM.SELECT_BOM_INFO_BY_CONFIRM pkgSelect = new PKG_INTG_BOM.SELECT_BOM_INFO_BY_CONFIRM();
@@ -3927,7 +3821,7 @@ namespace CSI.PCC.PCX
                 sampleETS = dataSource.Rows[0]["SAMPLE_ETS"].ToString();
                 confirmCount = Convert.ToInt32(dataSource.Rows[0]["CFM_CNT"]);
 
-                if (CanPassConfirmRule(gvwSingleEdit, dataSource))
+                if (AllowConfirm(dataSource))
                 {
                     ArrayList list = new ArrayList();
 
@@ -4123,8 +4017,7 @@ namespace CSI.PCC.PCX
 
                     if (Common.projectBaseForm.Exe_Modify_PKG(list) == null)
                     {
-                        MessageBox.Show("Failed to change the BOM Status.", "",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                        Common.ShowMessageBox("Failed to change the BOM Status.", "E");
                         return;
                     }
 
@@ -4154,7 +4047,7 @@ namespace CSI.PCC.PCX
                     #endregion
 
                     SplashScreenManager.CloseForm(false);
-                    
+
                     Common.ShowMessageBox(string.Format("Complete.\n\n-> Please import the BOM on {0}.",
                         Convert.ToDateTime(dataSource.Rows[0]["WORK_YMD"]).ToString("d")), "I");
                 }
@@ -4358,7 +4251,7 @@ namespace CSI.PCC.PCX
         private void SaveData()
         {
             ArrayList list = new ArrayList();
-            
+
             NumberLineItems();
 
             for (int i = 0; i < view.RowCount; i++)
@@ -4642,7 +4535,7 @@ namespace CSI.PCC.PCX
         /// </summary>
         /// <param name="view"></param>
         /// <returns></returns>
-        private bool CanPassConfirmRule(GridView view, DataTable dataSource)
+        private bool AllowConfirm(DataTable dataSource)
         {
             string[] productionTypes = new string[] { "GTMC", "RFCC", "PRDC" };
             string prodFactory = dataSource.Rows[0]["PROD_FACTORY"].ToString();
@@ -4667,44 +4560,60 @@ namespace CSI.PCC.PCX
                 return false;
 
             // DPA is used to load PIC from PMX to send an e-mail with a file which includes changed line items.
-            if (dataSource.Rows[0]["DPA"].ToString() == "X")
+            if (dataSource.Rows[0]["DPA"].ToString().Equals("X"))
             {
-                MessageBox.Show("DPA not entered or not registered in MDM.", "",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Common.ShowMessageBox("DPA is not entered or has not yet been registered.", "E");
                 return false;
             }
 
-            // Prod. Factory is a major value for the department of production.
+            // Validate the prod. factory is valid for specific sample types.
             if (productionTypes.Contains(sampleType))
             {
-                if (prodFactory == "X" || prodFactory == "DS")
+                if (prodFactory.Equals("X") || prodFactory.Equals("DS"))
                 {
-                    MessageBox.Show("Prod. Factory not entered or DS is invalid.", "",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Common.ShowMessageBox("Not valid prod. factory.", "E");
                     return false;
                 }
             }
 
-            // When the sample type is SPA, an user must input comment data through the specific pop-up form.
-            if (sampleType == "GTMC")
+            // Logic for each sample type.
+            switch (sampleType)
             {
-                bool isContain = false;
-                DataRow[] rows = ((DataTable)grdSingleEdit.DataSource).AsEnumerable().Where(
-                    x => x["MAT_COMMENT"].ToString().Split(new string[] { ":", "/" }, StringSplitOptions.None).Length >= 6).ToArray();
+                // When the sample type is SPA, an user must input comment data through the specific pop-up form.
+                case "GTMC":
 
-                foreach (DataRow row in rows)
-                {
-                    // Validate that the comment was input through the specific pop-up form.
-                    if (row["ENCODED_CMT"].ToString().Equals(""))
-                        isContain = true;
-                }
+                    bool isIncluded = false;
+                    DataRow[] rows = ((DataTable)grdSingleEdit.DataSource).AsEnumerable().Where(
+                        x => x["MAT_COMMENT"].ToString().Split(new string[] { ":", "/" }, StringSplitOptions.None).Length >= 6).ToArray();
 
-                if (isContain)
-                {
-                    if (MessageBox.Show("Some comments must be input through pop-up, Do you want to proceed?", "",
-                        MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Cancel)
+                    foreach (DataRow row in rows)
+                    {
+                        // Validate that the comment was input through the specific pop-up form.
+                        if (row["ENCODED_CMT"].ToString().Equals(""))
+                            isIncluded = true;
+                    }
+
+                    if (isIncluded)
+                    {
+                        if (MessageBox.Show("Some comments must be input through pop-up, Do you want to proceed?", "",
+                            MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Cancel)
+                            return false;
+                    }
+
+                    break;
+
+                case "CCFM":
+
+                    if (Convert.ToInt32(dataSource.Rows[0]["JSON_HEADER_CNT"]).Equals(0))
+                    {
+                        Common.ShowMessageBox("Please matching json header information first.", "E");
                         return false;
-                }
+                    }
+
+                    break;
+
+                default:
+                    break;
             }
 
             // Load operations from database.
@@ -4733,6 +4642,10 @@ namespace CSI.PCC.PCX
             return true;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private bool CanPassWSConfirmRule()
         {
             if (Common.HasLineitemUnsaved(view))
@@ -4973,7 +4886,7 @@ namespace CSI.PCC.PCX
                     {
                         MessageBox.Show("Part Name and CS Pattern Name must be input.", "",
                             MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
-                        
+
                         FocusColumn(view, Convert.ToInt32(row["SORT_NO"]) - 1, "PART_NAME", true);
                         return true;
                     }
@@ -5155,7 +5068,7 @@ namespace CSI.PCC.PCX
             view.SelectCell(rowHandle, view.Columns[columnName]);
             view.FocusedRowHandle = rowHandle;
             view.FocusedColumn = view.Columns[columnName];
-            
+
             if (showing == true)
                 view.ShowEditor();
         }
@@ -5338,15 +5251,9 @@ namespace CSI.PCC.PCX
                 return false; ;
             }
 
-            if (view.GetSelectedCells().Length > 1)
+            if (view.GetSelectedCells().Length > 1 || !view.GetFocusedRowCellValue("COLOR_VER").ToString().Equals("VER1"))
             {
-                Common.ShowMessageBox("Please select a one uppermost cell in a bundle of parts.", "W");
-                return false;
-            }
-
-            if (!view.GetFocusedRowCellValue("COLOR_VER").ToString().Equals("VER1"))
-            {
-                Common.ShowMessageBox("Please select a one uppermost cell in a bundle of parts.", "W");
+                Common.ShowMessageBox("Please select an one uppermost cell in a bundle of parts.", "W");
                 return false;
             }
 

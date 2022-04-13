@@ -128,6 +128,7 @@
             this.gridColumn56 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn58 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn66 = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.gridColumn71 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.grdMultipleEdit = new DevExpress.XtraGrid.GridControl();
             this.multipleEditCtxMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.RowUp_Multiple = new System.Windows.Forms.ToolStripMenuItem();
@@ -213,6 +214,7 @@
             this.gridColumn57 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn59 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn67 = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.gridColumn70 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.panelControl2 = new DevExpress.XtraEditors.PanelControl();
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
             this.panelControl1.SuspendLayout();
@@ -708,7 +710,8 @@
             this.gridColumn54,
             this.gridColumn56,
             this.gridColumn58,
-            this.gridColumn66});
+            this.gridColumn66,
+            this.gridColumn71});
             styleFormatCondition1.Appearance.BackColor = System.Drawing.Color.Black;
             styleFormatCondition1.Appearance.ForeColor = System.Drawing.Color.White;
             styleFormatCondition1.Appearance.Options.UseBackColor = true;
@@ -1382,6 +1385,17 @@
             this.gridColumn66.Name = "gridColumn66";
             this.gridColumn66.OptionsColumn.AllowEdit = false;
             // 
+            // gridColumn71
+            // 
+            this.gridColumn71.AppearanceCell.Options.UseTextOptions = true;
+            this.gridColumn71.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.gridColumn71.AppearanceHeader.Options.UseTextOptions = true;
+            this.gridColumn71.AppearanceHeader.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.gridColumn71.Caption = "LOCK_YN";
+            this.gridColumn71.FieldName = "LOCK_YN";
+            this.gridColumn71.Name = "gridColumn71";
+            this.gridColumn71.OptionsColumn.AllowEdit = false;
+            // 
             // grdMultipleEdit
             // 
             this.grdMultipleEdit.ContextMenuStrip = this.multipleEditCtxMenuStrip;
@@ -1430,7 +1444,7 @@
             this.ShowFocusedRow_Multiple,
             this.MDMPartAdd_Multiple});
             this.multipleEditCtxMenuStrip.Name = "multiEditCtxMenuStrip";
-            this.multipleEditCtxMenuStrip.Size = new System.Drawing.Size(325, 474);
+            this.multipleEditCtxMenuStrip.Size = new System.Drawing.Size(325, 452);
             // 
             // RowUp_Multiple
             // 
@@ -1694,7 +1708,8 @@
             this.gridColumn55,
             this.gridColumn57,
             this.gridColumn59,
-            this.gridColumn67});
+            this.gridColumn67,
+            this.gridColumn70});
             styleFormatCondition2.Appearance.BackColor = System.Drawing.Color.Black;
             styleFormatCondition2.Appearance.ForeColor = System.Drawing.Color.White;
             styleFormatCondition2.Appearance.Options.UseBackColor = true;
@@ -2376,6 +2391,17 @@
             this.gridColumn67.Name = "gridColumn67";
             this.gridColumn67.OptionsColumn.AllowEdit = false;
             // 
+            // gridColumn70
+            // 
+            this.gridColumn70.AppearanceCell.Options.UseTextOptions = true;
+            this.gridColumn70.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.gridColumn70.AppearanceHeader.Options.UseTextOptions = true;
+            this.gridColumn70.AppearanceHeader.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.gridColumn70.Caption = "LOCK_YN";
+            this.gridColumn70.FieldName = "LOCK_YN";
+            this.gridColumn70.Name = "gridColumn70";
+            this.gridColumn70.OptionsColumn.AllowEdit = false;
+            // 
             // panelControl2
             // 
             this.panelControl2.Dock = System.Windows.Forms.DockStyle.Top;
@@ -2613,6 +2639,8 @@
         private System.Windows.Forms.ToolStripMenuItem MulChkMdsl_Multiple;
         private System.Windows.Forms.ToolStripMenuItem MulChkOtsl_Multiple;
         private System.Windows.Forms.ToolStripMenuItem MulChkCode_Multiple;
+        private DevExpress.XtraGrid.Columns.GridColumn gridColumn70;
+        private DevExpress.XtraGrid.Columns.GridColumn gridColumn71;
 
     }
 }
