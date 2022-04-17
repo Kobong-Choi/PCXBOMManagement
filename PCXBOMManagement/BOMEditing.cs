@@ -2192,7 +2192,7 @@ namespace CSI.PCC.PCX
                 GridView view = sender as GridView;
                 GridCell[] cells = view.GetSelectedCells();
 
-                var currValue = view.ActiveEditor.EditValue.ToString();
+                var currValue = view.ActiveEditor.EditValue;
                 var oldValue = view.ActiveEditor.OldEditValue;
 
                 // if there are no changes, finish event.
@@ -2202,7 +2202,7 @@ namespace CSI.PCC.PCX
                 // To avoid infinite loop.
                 view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
 
-                string value = currValue;
+                string value = currValue.ToString();
 
                 if (view.FocusedColumn.FieldName == "COLOR_CD")
                 {
@@ -4520,6 +4520,15 @@ namespace CSI.PCC.PCX
                         if (IsPartDuplicate(WSNumber))
                             return false;
                     }
+                }
+
+                DataTable dt = view.Equals(gvwSingleEdit) ? grdSingleEdit.DataSource as DataTable : grdMultipleEdit.DataSource as DataTable;
+
+                if (dt.AsEnumerable().Where(x => (x["PCX_MAT_ID"].ToString().Equals("62499") || x["PCX_MAT_ID"].ToString().Equals("62496"))
+                    && x["COLOR_CD"].ToString().Equals("10A")).Count() > 0)
+                {
+                    Common.ShowMessageBox("Please change the color of PCX material '62499' or '62496'\nto '99J'.", "W");
+                    return false;
                 }
             }
 

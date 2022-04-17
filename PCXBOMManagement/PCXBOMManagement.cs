@@ -406,7 +406,7 @@ namespace CSI.PCC.PCX
 
             foreach (int rowHandle in gvwBomList.GetSelectedRows())
             {
-                if (gvwBomList.GetRowCellValue(rowHandle, "LOGIC_BOM_YN").ToString() == "Y")
+                if (gvwBomList.GetRowCellValue(rowHandle, "LOGIC_BOM_YN").ToString().Equals("Y"))
                 {
                     MessageBox.Show("Logic BOM can not be available for multi function.", "",
                             MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
@@ -431,8 +431,8 @@ namespace CSI.PCC.PCX
             {
                 Factory = gvwBomList.GetFocusedRowCellValue("FACTORY").ToString(),
                 WorksheetNumbers = Common.ChainValues(gvwBomList, "WS_NO"),
-                EditType = "Multiple",
-                HasLockedBOM = Common.HasBOMLocked(gvwBomList, false)
+                EditType = "Multiple"
+                //HasLockedBOM = Common.HasBOMLocked(gvwBomList, false)
             };
 
             if (form.ShowDialog() == DialogResult.OK)
@@ -2034,8 +2034,8 @@ namespace CSI.PCC.PCX
                             WorksheetNumbers = view.GetFocusedRowCellValue("WS_NO").ToString(),
                             CSBOMStatus = view.GetFocusedRowCellValue("CS_BOM_CFM").ToString(),
                             ParentRowhandle = view.FocusedRowHandle,
-                            EditType = "Single",
-                            HasLockedBOM = Common.HasBOMLocked(view, false)
+                            EditType = "Single"
+                            //HasLockedBOM = Common.HasBOMLocked(view, false)
                         };
 
                         form.Show();
@@ -2073,90 +2073,6 @@ namespace CSI.PCC.PCX
 
                     break;
             }
-
-            #region backup
-
-            //if (grdView.FocusedColumn.FieldName == "BOM_STATUS")
-            //{
-            //    if (isLogicBOM == false)
-            //    {
-            //        // For inline & Fake BOM.
-            //        BOMEditing editForm = new BOMEditing();
-            //        editForm.Factory = factory;
-            //        editForm.WorksheetNumbers = wsNo;
-            //        editForm.EditType = "Single";
-            //        editForm.NumOfSelectedBOMs = 1;
-            //        editForm.ParentRowhandle = grdView.FocusedRowHandle;
-            //        editForm.CSBOMStatus = csBOMStatus;
-
-            //        editForm.Show();
-            //    }
-            //    else
-            //    {
-            //        // For only logic BOM.
-            //        LogicBOMEditing editForm = new LogicBOMEditing(factory, wsNo, csBOMStatus, gvwBomList.FocusedRowHandle);
-
-            //        editForm.Show();
-            //    }
-            //}
-            //else if (grdView.FocusedColumn.FieldName == "PUR_STATUS")
-            //{
-            //    // Logic BOM vs Inline BOM
-            //    if (isLogicBOM == false)
-            //    {
-            //        //InitializeSequence("REQ_NO");
-
-            //        Purchase form = new Purchase
-            //        {
-            //            Factory = gvwBomList.GetRowCellValue(gvwBomList.FocusedRowHandle, "FACTORY").ToString(),
-            //            WorksheetNumbers = gvwBomList.GetRowCellValue(gvwBomList.FocusedRowHandle, "WS_NO").ToString(),
-            //            CSBOMStatus = gvwBomList.GetRowCellValue(gvwBomList.FocusedRowHandle, "CS_BOM_CFM").ToString(),
-            //            ParentRowhandle = grdView.FocusedRowHandle,
-            //            EditType = "Single",
-            //            HasLockedBOM = Common.IsBOMLocked(grdView)
-            //        };
-
-            //        form.Show();
-            //    }
-            //    else
-            //    {
-            //        // Logic BOM don't order materials.
-            //        MessageBox.Show("You can't request ordering materials from logic BOM.", "",
-            //            MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-
-            //        return;
-            //    }
-            //}
-            //else if (grdView.FocusedColumn.FieldName == "WS_STATUS")
-            //{
-            //    if (isLogicBOM == false)
-            //    {
-            //        string styleName = grdView.GetRowCellValue(grdView.FocusedRowHandle, "DEV_NAME").ToString().Trim();
-            //        string colorwayID = grdView.GetRowCellValue(grdView.FocusedRowHandle, "DEV_COLORWAY_ID").ToString().Trim();
-            //        string wsStatus = grdView.GetRowCellValue(grdView.FocusedRowHandle, "WS_STATUS_CD").ToString().Trim();
-            //        string styleNumber = grdView.GetRowCellValue(grdView.FocusedRowHandle, "DEV_STYLE_NUMBER").ToString().Trim();
-            //        string season = grdView.GetRowCellValue(grdView.FocusedRowHandle, "SEASON").ToString().Trim();
-
-            //        string[] sourceBOMInfo = new string[] { factory, wsNo, styleName, colorwayID
-            //        ,wsStatus, csBOMStatus, styleNumber, season};
-
-            //        WorksheetMaking makingForm = new WorksheetMaking();
-            //        makingForm.SOURCE_BOM_INFO = sourceBOMInfo;
-            //        makingForm.ROWHANDLE = grdView.FocusedRowHandle;
-
-            //        makingForm.Show();
-            //    }
-            //    else
-            //    {
-            //        // Logic BOM don't need to make sample shoes.
-            //        MessageBox.Show("You can't request making sample shoes from logic BOM.", "",
-            //            MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-
-            //        return;
-            //    }
-            //}
-
-            #endregion
         }
 
         #endregion

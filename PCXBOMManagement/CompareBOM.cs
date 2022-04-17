@@ -920,7 +920,7 @@ namespace CSI.PCC.PCX
             {
                 SplashScreenManager.ShowForm(this, typeof(MainWaitForm), false, false, false);
 
-                if (CheckSaveValidation(gvwMaster) == false)
+                if (!AllowSave(gvwMaster))
                     return;
 
                 if (BOM_STATUS.Equals("C"))
@@ -1013,7 +1013,7 @@ namespace CSI.PCC.PCX
         /// </summary>
         /// <param name="view"></param>
         /// <returns></returns>
-        private bool CheckSaveValidation(GridView view)
+        private bool AllowSave(GridView view)
         {
             try
             {
@@ -1069,6 +1069,16 @@ namespace CSI.PCC.PCX
                     partList.Clear();
                     lamPartList.Clear();
                 }
+
+                DataTable dt = grdMaster.DataSource as DataTable;
+
+                if (dt.AsEnumerable().Where(x => (x["PCX_MAT_ID"].ToString().Equals("62499") || x["PCX_MAT_ID"].ToString().Equals("62496"))
+                    && x["COLOR_CD"].ToString().Equals("10A")).Count() > 0)
+                {
+                    Common.ShowMessageBox("Please change the color of PCX material '62499' or '62496'\nto '99J'.", "W");
+                    return false;
+                }
+
                 return true;
             }
             catch (Exception ex)

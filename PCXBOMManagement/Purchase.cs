@@ -27,13 +27,13 @@ namespace CSI.PCC.PCX
         public string WorksheetNumbers { get; set; }
         public string EditType { get; set; }
         public string CSBOMStatus { get; set; }
-        public bool HasLockedBOM { get; set; }
+        //public bool HasLockedBOM { get; set; }
         public int ParentRowhandle { get; set; }
 
         private static GridView ActiveViewBOM = null;
         private static GridView ActiveViewPMC = null;
         private static GridView ActiveView3P = null;
-        
+
         private static GridControl ActiveControlBOM = null;
         private static GridControl ActiveControlPMC = null;
         private static GridControl ActiveControl3P = null;
@@ -43,7 +43,7 @@ namespace CSI.PCC.PCX
         private static List<string> SetOfMaterialFields = new List<string>() {
             "MXSXL_NUMBER", "PCX_SUPP_MAT_ID", "CS_CD", "MCS_NUMBER", "PCX_MAT_ID",
             "MAT_CD", "MAT_NAME", "ENCODED_CMT", "VENDOR_NAME" };
-        
+
         private static List<string> SetOfColorFields = new List<string>() {
             "PCX_COLOR_ID", "COLOR_CD", "COLOR_NAME" };
 
@@ -52,8 +52,6 @@ namespace CSI.PCC.PCX
 
         private static List<string> RequiredFields = new List<string>() {
             "PART_NAME", "PART_TYPE", "MAT_NAME", "COLOR_NAME" };
-
-        //public ProjectBaseForm projectBaseForm = Common.projectBaseForm;
 
         public Purchase()
         {
@@ -113,7 +111,7 @@ namespace CSI.PCC.PCX
                 pkgSelect.OUT_CURSOR = string.Empty;
 
                 DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
-                
+
                 if (dataSource != null)
                 {
                     string caption = string.Format("{0} / {1} / {2} / {3} / {4} / {5} / Rows : {6}",
@@ -124,7 +122,7 @@ namespace CSI.PCC.PCX
                         dataSource.Rows[0]["DEV_STYLE_NUMBER"].ToString(),
                         dataSource.Rows[0]["DEV_COLORWAY_ID"].ToString(),
                         dataSource.Rows[0]["RN"].ToString());
-                    
+
                     this.Text = caption;
                 }
             }
@@ -386,7 +384,7 @@ namespace CSI.PCC.PCX
                     arrList.Add(pkgUpdate);
                 }
             };
-            
+
             action(ActiveViewPMC);
             action(ActiveView3P);
 
@@ -399,7 +397,7 @@ namespace CSI.PCC.PCX
             // Re-bind dataSource to gridView.
             ActiveControlPMC.DataSource = GetDataSourceOfPurchase("PMC");
             ActiveControl3P.DataSource = GetDataSourceOfPurchase("THREE_P");
-            
+
             MessageBox.Show("Complete.");
         }
 
@@ -416,7 +414,17 @@ namespace CSI.PCC.PCX
             if (!IsRowExisting()) return;
             if (!AreAllEnrolled()) return;
             if (!AreAllSaved()) return;
-            if (ValidateFields() == false) return;
+            if (!ValidateFields()) return;
+
+            // Validate the color of PCX material '62499' or '62496'.
+            DataTable dt = ActiveControlPMC.DataSource as DataTable;
+
+            if (dt.AsEnumerable().Where(x => (x["PCX_MAT_ID"].ToString().Equals("62499") || x["PCX_MAT_ID"].ToString().Equals("62496"))
+                   && x["COLOR_CD"].ToString().Equals("10A")).Count() > 0)
+            {
+                Common.ShowMessageBox("Please change the color of PCX material '62499' or '62496'\nto '99J'.", "W");
+                return;
+            }
 
             // Apply the changed data to the BOM.
             Action<GridView> action = (view) =>
@@ -481,7 +489,7 @@ namespace CSI.PCC.PCX
             (ActiveControl3P.DataSource as DataTable).Rows.Clear();
 
             ActiveControlBOM.DataSource = GetDataSourceOfBom();
-            
+
             MessageBox.Show("Complete.");
         }
 
@@ -498,7 +506,7 @@ namespace CSI.PCC.PCX
         {
             // 선택된 메뉴 아이템
             System.Windows.Forms.ToolStripMenuItem menuItem = sender as System.Windows.Forms.ToolStripMenuItem;
-            
+
             switch (menuItem.Name)
             {
                 #region BOM Single
@@ -686,25 +694,6 @@ namespace CSI.PCC.PCX
         /// <param name="_type"></param>
         private void FindCodeFromLibrary(GridView view)
         {
-            // 수정 불가한 파트가 포함되어 있는지 확인
-            foreach (int rowHandle in view.GetSelectedRows())
-            {
-                // BOM에 포함된 파트의 파트명은 수정 불가
-                if ((view.FocusedColumn.FieldName == "PART_NAME" || view.FocusedColumn.FieldName == "PART_TYPE")
-                    && view.GetRowCellValue(rowHandle, "MANUAL_ADD").ToString() == "N")
-                {   
-                    MessageBox.Show("Part can not be modified.");
-                    return;
-                }
-
-                // BOM에 포함되지 않는 개별로 추가된 파트의 경우 릴리즈 후 수정 가능
-                if (view.GetRowCellValue(rowHandle, "COLOR_VER").ToString() == "Enrolled")
-                {
-                    MessageBox.Show("Try after release.");
-                    return;
-                }
-            }
-
             string keyword = view.GetFocusedRowCellValue(view.FocusedColumn).ToString();
             int initSearchType = 0;
 
@@ -753,6 +742,10 @@ namespace CSI.PCC.PCX
 
                     foreach (int rowHandle in view.GetSelectedRows())
                     {
+                        if (view.GetRowCellValue(rowHandle, "COLOR_VER").ToString().Equals("Enrolled") ||
+                            view.GetRowCellValue(rowHandle, "LOCK_YN").ToString().Equals("Y"))
+                            continue;
+
                         if (result[0] == "Part")
                         {
                             view.SetRowCellValue(rowHandle, "PART_NAME", result[1]);
@@ -898,7 +891,7 @@ namespace CSI.PCC.PCX
                 {
                     MessageBox.Show("Failed to enroll.", "",
                         MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-                    
+
                     return;
                 }
 
@@ -1067,7 +1060,7 @@ namespace CSI.PCC.PCX
 
             DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
             dataSource.Columns["PART_SEQ"].AllowDBNull = true;
-            
+
             return dataSource;
         }
 
@@ -1106,7 +1099,7 @@ namespace CSI.PCC.PCX
 
                     return;
                 }
-                
+
                 // Clear rows on the visible gridview.
                 (control.DataSource as DataTable).Rows.Clear();
 
@@ -1120,7 +1113,7 @@ namespace CSI.PCC.PCX
         /// <param name="gridControl"></param>
         private void AddNewRowToPurchase(GridControl gridControl)
         {
-             DataTable dtCopied = (gridControl.DataSource as DataTable).Copy();
+            DataTable dtCopied = (gridControl.DataSource as DataTable).Copy();
 
             if (this.EditType == "Single")
             {
@@ -1295,7 +1288,7 @@ namespace CSI.PCC.PCX
                 {
                     MessageBox.Show("Material Name is required.", "",
                         MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-                    
+
                     FocusOnSelectedCell(rowHandle, "MAT_NAME", ActiveView3P);
                     isPass = false;
 
@@ -1305,7 +1298,7 @@ namespace CSI.PCC.PCX
                 {
                     MessageBox.Show("Color Name is requried.", "",
                         MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-                    
+
                     FocusOnSelectedCell(rowHandle, "COLOR_NAME", ActiveView3P);
                     isPass = false;
 
@@ -1369,7 +1362,7 @@ namespace CSI.PCC.PCX
                 pkgUpdate.ARG_FACTORY = this.Factory;
                 pkgUpdate.ARG_CHAINED_WS_NO = this.WorksheetNumbers;
                 pkgUpdate.ARG_UPD_USER = Common.sessionID;
-                
+
                 arrayList.Add(pkgUpdate);
 
                 if (Common.projectBaseForm.Exe_Modify_PKG(arrayList) == null)
@@ -1386,7 +1379,7 @@ namespace CSI.PCC.PCX
                 return false;
             }
         }
-        
+
         #endregion
 
         #region  그리드뷰 이벤트
@@ -1754,7 +1747,7 @@ namespace CSI.PCC.PCX
                 switch (colorVersion)
                 {
                     case "Manual":  // Before enroll.
-                        
+
                         if (view.IsCellSelected(e.RowHandle, e.Column) == false)
                             e.Appearance.BackColor = Color.GreenYellow;
 
@@ -1778,7 +1771,7 @@ namespace CSI.PCC.PCX
                         {
                             e.Appearance.BackColor = Color.Tan;
                             e.Appearance.Font = font;
-                            
+
                             return;
                         }
                     }
@@ -1808,7 +1801,7 @@ namespace CSI.PCC.PCX
                 }
             }
         }
-         
+
         /// <summary>
         /// PMC/3P 체크 표기를 마우스 클릭 한 번으로 가능하도록
         /// </summary>
@@ -1817,10 +1810,10 @@ namespace CSI.PCC.PCX
         private void CustomMouseDown(object sender, MouseEventArgs e)
         {
             GridView view = sender as GridView;
-            
+
             // GridHitInfo : Contains information about a specific point within a Grid View.
             GridHitInfo hitInfo = view.CalcHitInfo(e.Location);
-            
+
             // InRowCell : Gets a value indicating whether the test point is within a cell.
             if (hitInfo.InRowCell)
             {
@@ -1860,7 +1853,7 @@ namespace CSI.PCC.PCX
                 form.WSNo = view.GetFocusedRowCellValue("WS_NO").ToString();
                 form.PartSeq = view.GetFocusedRowCellValue("PART_SEQ").ToString();
                 form.Delimiter = view.GetFocusedRowCellValue("DELIMITER").ToString();
-                
+
                 form.ShowDialog();
             }
         }
@@ -2121,11 +2114,11 @@ namespace CSI.PCC.PCX
 
                     #endregion
                 }
-                
+
                 foreach (GridCell cell in cells)
                 {
-                    // 이미 등록 완료한 행은 수정 불가
-                    if (view.GetRowCellValue(cell.RowHandle, "COLOR_VER").ToString() == "Enrolled")
+                    if (view.GetRowCellValue(cell.RowHandle, "COLOR_VER").ToString().Equals("Enrolled") ||
+                        view.GetRowCellValue(cell.RowHandle, "LOCK_YN").ToString().Equals("Y"))
                         continue;
 
                     if (view.FocusedColumn.FieldName == "COLOR_CD")
@@ -2203,7 +2196,6 @@ namespace CSI.PCC.PCX
             if (e.KeyCode == Keys.Delete)
             {
                 GridView view = sender as GridView;
-                GridCell[] cells = view.GetSelectedCells();
 
                 try
                 {
@@ -2218,40 +2210,47 @@ namespace CSI.PCC.PCX
 
                     view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
 
-                    foreach (GridCell cell in cells)
+                    foreach (GridCell cell in view.GetSelectedCells())
                     {
-                        if (view.GetRowCellValue(cell.RowHandle, cell.Column.FieldName).ToString().Equals("") ||
-                            view.GetRowCellValue(cell.RowHandle, "COLOR_VER").ToString().Equals("Enrolled"))
+                        switch (view.GetRowCellValue(cell.RowHandle, "MANUAL_ADD").ToString())
                         {
-                            // When the cell value is null or the row has already been enrolled.
-                            continue;
-                        }
-                        else
-                        {
-                            if (SetOfMaterialFields.Contains(cell.Column.FieldName))
-                            {
-                                action(SetOfMaterialFields, cell.RowHandle);
-                            }
-                            else if (SetOfColorFields.Contains(cell.Column.FieldName))
-                            {
-                                action(SetOfColorFields, cell.RowHandle);
-                            }
-                            else if (SetOfPartFields.Contains(cell.Column.FieldName))
-                            {
-                                // Part fields can only be deleted when the row was manually added.
-                                if (view.GetRowCellValue(cell.RowHandle, "COLOR_VER").ToString().Equals("Manual"))
+                            case "Y":
+
+                                if (view.GetRowCellValue(cell.RowHandle, "COLOR_VER").ToString().Equals("Enrolled"))
+                                {
+                                    return;
+                                }
+                                else if (SetOfPartFields.Contains(cell.Column.FieldName))
+                                {
                                     action(SetOfPartFields, cell.RowHandle);
-                            }
-                            else
-                            {
-                                // In case of only comment.
-                                view.SetRowCellValue(cell.RowHandle, cell.Column.FieldName, "");
+                                }
 
-                                if (cell.Column.FieldName == "MAT_COMMENT")
-                                    view.SetRowCellValue(cell.RowHandle, "ENCODED_CMT", "");
+                                break;
 
-                                view.SetRowCellValue(cell.RowHandle, "ROW_STATUS", "U");
-                            }
+                            case "N":
+
+                                if (view.GetRowCellValue(cell.RowHandle, "LOCK_YN").ToString().Equals("Y"))
+                                    return;
+
+                                break;
+                        }
+
+                        if (SetOfMaterialFields.Contains(cell.Column.FieldName))
+                        {
+                            action(SetOfMaterialFields, cell.RowHandle);
+                        }
+                        else if (SetOfColorFields.Contains(cell.Column.FieldName))
+                        {
+                            action(SetOfColorFields, cell.RowHandle);
+                        }
+                        else // In case of comment.
+                        {
+                            view.SetRowCellValue(cell.RowHandle, cell.Column.FieldName, "");
+
+                            if (cell.Column.FieldName.Equals("MAT_COMMENT"))
+                                view.SetRowCellValue(cell.RowHandle, "ENCODED_CMT", "");
+
+                            view.SetRowCellValue(cell.RowHandle, "ROW_STATUS", "U");
                         }
                     }
                 }
@@ -2271,29 +2270,24 @@ namespace CSI.PCC.PCX
         {
             GridView view = sender as GridView;
             string[] uneditableFieldName = new string[] { "PART_NAME", "PART_TYPE" };
-            bool isManual = view.GetRowCellValue(view.FocusedRowHandle, "MANUAL_ADD").ToString().Equals("Y");
-            bool isEnrolled = view.GetRowCellValue(view.FocusedRowHandle, "COLOR_VER").ToString().Equals("Enrolled");
 
-            switch (HasLockedBOM)
+            switch (view.GetRowCellValue(view.FocusedRowHandle, "MANUAL_ADD").ToString())
             {
-                case true:
-
-                    if (!isManual)
-                        e.Cancel = true;
-                    else if (isEnrolled)
+                case "Y":
+                    if (view.GetRowCellValue(view.FocusedRowHandle, "COLOR_VER").ToString().Equals("Enrolled"))
                         e.Cancel = true;
 
                     break;
 
-                case false:
+                case "N":
 
-                    if (!isManual)
+                    if (view.GetRowCellValue(view.FocusedRowHandle, "LOCK_YN").ToString().Equals("Y"))
+                        e.Cancel = true;
+                    else
                     {
                         if (uneditableFieldName.Contains(view.FocusedColumn.FieldName))
                             e.Cancel = true;
                     }
-                    else if (isEnrolled)
-                        e.Cancel = true;
 
                     break;
             }
@@ -2375,7 +2369,7 @@ namespace CSI.PCC.PCX
                 }
             }
         }
-        
+
         /// <summary>
         /// 사용 안 함 - 3P는 개별 발주를 하지 않음
         /// </summary>
@@ -2390,7 +2384,7 @@ namespace CSI.PCC.PCX
             if (colorVersion != "Manual")
                 e.Cancel = true;
         }
-        
+
         /// <summary>
         /// 사용 안 함 - 3P는 개별 발주를 하지 않음
         /// </summary>
@@ -2427,7 +2421,7 @@ namespace CSI.PCC.PCX
                 this.DialogResult = System.Windows.Forms.DialogResult.OK;
             }
         }
-        
+
         #endregion
     }
 }
