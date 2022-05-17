@@ -6,8 +6,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
 using System.Collections;                       // ArrayList
+
 using DevExpress.XtraGrid;                      // GridControl
 using DevExpress.XtraGrid.Columns;              // GridColumn
 using DevExpress.XtraGrid.Views.Base;           // GridCell
@@ -15,9 +15,9 @@ using DevExpress.XtraGrid.Views.Grid;           // GridView
 using DevExpress.XtraGrid.Views.Grid.ViewInfo;  // GridHitInfo
 using DevExpress.Utils;                         // DXMouseEventArgs
 using DevExpress.XtraEditors;                   // GridLookUpEdit
+
 using CSI.Client.ProjectBaseForm;               // ProjectBaseForm Class
-using CSI.PCC.PCX.COM;                          // Common Class
-using CSI.PCC.PCX.PACKAGE;                      // Package Class
+using CSI.PCC.PCX.Packages;                     // Package Class
 
 namespace CSI.PCC.PCX
 {
@@ -93,7 +93,10 @@ namespace CSI.PCC.PCX
             dialog.OverwritePrompt = true;
 
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                grdList.ExportToExcelOld(dialog.FileName);
+            {
+                //grdList.ExportToExcelOld(dialog.FileName);
+                grdList.ExportToXls(dialog.FileName);
+            }
         }
 
         /// <summary>

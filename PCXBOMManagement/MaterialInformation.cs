@@ -8,8 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using CSI.Client.ProjectBaseForm;               // ProjectBaseForm Class
-using CSI.PCC.PCX.PACKAGE;                      // Package Class
-using CSI.PCC.PCX.COM;                          // Common Class
+using CSI.PCC.PCX.Packages;                     // Package Class
 
 namespace CSI.PCC.PCX
 {
@@ -26,40 +25,40 @@ namespace CSI.PCC.PCX
         {
             base.OnLoad(e);
 
-            PKG_INTG_BOM.SELECT_MATERIAL_INFO pkgSelect = new PKG_INTG_BOM.SELECT_MATERIAL_INFO();
-            pkgSelect.ARG_WORK_TYPE = "PCC";
-            pkgSelect.ARG_MXSXL_NUMBER = MaterialInfo["MXSXL_NUMBER"];
-            pkgSelect.ARG_MAT_CD = MaterialInfo["MAT_CD"];
-            pkgSelect.ARG_CS_CD = "";
-            pkgSelect.OUT_CURSOR = string.Empty;
+            //PKG_INTG_BOM.SELECT_MATERIAL_INFO pkgSelect = new PKG_INTG_BOM.SELECT_MATERIAL_INFO();
+            //pkgSelect.ARG_WORK_TYPE = "PCC";
+            //pkgSelect.ARG_MXSXL_NUMBER = MaterialInfo["MXSXL_NUMBER"];
+            //pkgSelect.ARG_MAT_CD = MaterialInfo["MAT_CD"];
+            //pkgSelect.ARG_CS_CD = "";
+            //pkgSelect.OUT_CURSOR = string.Empty;
             
-            DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
+            //DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
 
-            if (dataSource.Rows.Count == 0)
-            {
-                return;
-            }
-            else if (dataSource.Rows.Count == 1)
-            {
-                this.Close();
+            //if (dataSource.Rows.Count == 0)
+            //{
+            //    return;
+            //}
+            //else if (dataSource.Rows.Count == 1)
+            //{
+            //    this.Close();
 
-                MaterialInfo.Clear();
-                MaterialInfo.Add("MXSXL_NUMBER", dataSource.Rows[0]["MXSXL_NUMBER"].ToString().Trim());
-                MaterialInfo.Add("CS_CD", dataSource.Rows[0]["CS_CD"].ToString().Trim());
+            //    MaterialInfo.Clear();
+            //    MaterialInfo.Add("MXSXL_NUMBER", dataSource.Rows[0]["MXSXL_NUMBER"].ToString().Trim());
+            //    MaterialInfo.Add("CS_CD", dataSource.Rows[0]["CS_CD"].ToString().Trim());
 
-                CSMaterialInformation form = new CSMaterialInformation() { MaterialInfo = this.MaterialInfo };
-                form.ShowDialog();
-            }
-            else if (dataSource.Rows.Count > 1)
-            {
-                dataSource.AcceptChanges();
-                grdBase.DataSource = dataSource;
-            }
-            else
-            {
-                this.Close();
-                Common.ShowMessageBox("There is no material to show information.", "E");
-            }
+            //    CSMaterialInformation form = new CSMaterialInformation() { MaterialInfo = this.MaterialInfo };
+            //    form.ShowDialog();
+            //}
+            //else if (dataSource.Rows.Count > 1)
+            //{
+            //    dataSource.AcceptChanges();
+            //    grdBase.DataSource = dataSource;
+            //}
+            //else
+            //{
+            //    this.Close();
+            //    Common.ShowMessageBox("There is no material to show information.", "E");
+            //}
         }
 
         /// <summary>
@@ -69,12 +68,12 @@ namespace CSI.PCC.PCX
         /// <param name="e"></param>
         private void gvwBase_DoubleClick(object sender, EventArgs e)
         {
-            MaterialInfo.Clear();
-            MaterialInfo.Add("MXSXL_NUMBER", gvwBase.GetFocusedRowCellValue("MXSXL_NUMBER").ToString());
-            MaterialInfo.Add("CS_CD", gvwBase.GetFocusedRowCellValue("CS_CD").ToString());
+            //MaterialInfo.Clear();
+            //MaterialInfo.Add("MXSXL_NUMBER", gvwBase.GetFocusedRowCellValue("MXSXL_NUMBER").ToString());
+            //MaterialInfo.Add("CS_CD", gvwBase.GetFocusedRowCellValue("CS_CD").ToString());
 
-            CSMaterialInformation form = new CSMaterialInformation() { MaterialInfo = this.MaterialInfo };
-            form.ShowDialog();
+            //CSMaterialInformation form = new CSMaterialInformation() { MaterialInfo = this.MaterialInfo };
+            //form.ShowDialog();
         }
     }
 }

@@ -1,20 +1,20 @@
-﻿using CSI.Client.ProjectBaseForm;               // ProjectBaseForm Class
-using CSI.PCC.PCX.COM;                          // Common Class
-using CSI.PCC.PCX.PACKAGE;                      // Package Class
-
-using DevExpress.XtraTreeList;
-using DevExpress.XtraTreeList.Nodes;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Collections;
+
 using DevExpress.XtraEditors;
 using DevExpress.XtraTreeList.ViewInfo;
 using DevExpress.Utils;
 using DevExpress.XtraSplashScreen;
+using DevExpress.XtraTreeList;
+using DevExpress.XtraTreeList.Nodes;
+
+using CSI.Client.ProjectBaseForm;               // ProjectBaseForm Class
+using CSI.PCC.PCX.Packages;                     // Package Class
 
 namespace CSI.PCC.PCX
 {
@@ -1866,20 +1866,15 @@ namespace CSI.PCC.PCX
         /// </summary>
         private void ShowMaterialInfomation()
         {
-            string PDMSuppMatNumber = vwTreeList.FocusedNode.GetValue("MXSXL_NUMBER").ToString();
-            if (PDMSuppMatNumber == "") return;
-
-            string[] splitPDMSuppMatNum = PDMSuppMatNumber.Split('.');
-            if (splitPDMSuppMatNum.Length != 3) return;
-
-            string materialCode = splitPDMSuppMatNum[0];
-
-            Dictionary<string, string> dic = new Dictionary<string, string>();
-            dic.Add("MXSXL_NUMBER", PDMSuppMatNumber);
-            dic.Add("MAT_CD", materialCode);
-
-            MaterialInformation form = new MaterialInformation() { MaterialInfo = dic };
-            form.ShowDialog();
+            using (CSI.PCC.Common.MaterialInformation form = new PCC.Common.MaterialInformation()
+            {
+                PCXMatID = vwTreeList.FocusedNode.GetValue("PCX_MAT_ID").ToString(),
+                PCXSuppMatID = vwTreeList.FocusedNode.GetValue("PCX_SUPP_MAT_ID").ToString(),
+                BaseForm = Common.projectBaseForm
+            })
+            {
+                form.ShowDialog();
+            }
         }
 
         /// <summary>

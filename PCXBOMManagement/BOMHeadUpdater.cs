@@ -14,9 +14,9 @@ using DevExpress.XtraGrid.Views.Grid;           // GridView
 using DevExpress.XtraGrid.Views.Grid.ViewInfo;  // GridHitInfo
 using DevExpress.Utils;                         // DXMouseEventArgs
 using DevExpress.XtraEditors;                   // GridLookUpEdit
+
 using CSI.Client.ProjectBaseForm;               // ProjectBaseForm Class
-using CSI.PCC.PCX.COM;                          // Common Class
-using CSI.PCC.PCX.PACKAGE;                      // Package Class
+using CSI.PCC.PCX.Packages;                     // Package Class
 
 namespace CSI.PCC.PCX
 {

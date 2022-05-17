@@ -23,12 +23,10 @@ using DevExpress.Utils;                         // DXMouseEventArgs
 using DevExpress.XtraEditors;                   // GridLookUpEdit
 using DevExpress.XtraSplashScreen;              // XtraSplashScreen
 
-using Excel = Microsoft.Office.Interop.Excel;   // Excel Manage
+using Excel = Microsoft.Office.Interop.Excel;
 
-using CSI.Client.ProjectBaseForm;               // ProjectBaseForm Class
-using CSI.PCC.PCX;
-using CSI.PCC.PCX.COM;                          // Common Class
-using CSI.PCC.PCX.PACKAGE;                      // Package Class
+using CSI.Client.ProjectBaseForm;
+using CSI.PCC.PCX.Packages;
 
 using JPlatform.Client.JBaseForm;
 
@@ -435,7 +433,7 @@ namespace CSI.PCC.PCX
                 case "MatInfo_Single":
                 case "MatInfo_Multiple":
 
-                    ShowMaterialInfomation();
+                    ShowMaterialInfo();
                     break;
 
                 case "ShowFocusedRow_Single":
@@ -984,8 +982,9 @@ namespace CSI.PCC.PCX
 
                     initSearchType = 0;
 
-                    if (view.FocusedColumn.FieldName == "PTRN_PART_NAME")
+                    if (view.FocusedColumn.FieldName.Equals("PTRN_PART_NAME"))
                         partDelimiter = "Pattern";
+
                     break;
 
                 case "MXSXL_NUMBER":
@@ -997,7 +996,6 @@ namespace CSI.PCC.PCX
                 case "MAT_COMMENT":
                 case "VENDOR_NAME":
 
-                    // First of all PCX,
                     initSearchType = 1;
                     break;
 
@@ -1008,10 +1006,11 @@ namespace CSI.PCC.PCX
                     initSearchType = 2;
                     break;
 
-                case "CS_CD":
+                // Close PCC Material.
+                //case "CS_CD":
 
-                    initSearchType = 4;
-                    break;
+                //    initSearchType = 4;
+                //    break;
 
                 default:
                     return;
@@ -1047,7 +1046,7 @@ namespace CSI.PCC.PCX
                                 string oldValue = row["PART_NAME"].ToString();
 
                                 // When the part name is changed from 'Lamination' to general part.
-                                if (oldValue.Contains("LAMINATION") == true && results[1].Contains("LAMINATION") == false)
+                                if (oldValue.Contains("LAMINATION") && !results[1].Contains("LAMINATION"))
                                 {
                                     // An user doesn't need to set nike pattern part name for general part.
                                     row["PTRN_PART_NAME"] = "";
@@ -1105,19 +1104,12 @@ namespace CSI.PCC.PCX
                             }
                             else if (results[0] == "PCX_Material")
                             {
-                                // Automatically tick for sticker & combine columns.
                                 if (results[1] == "87031" || results[1] == "78733" || results[1] == "79467")
-                                {
-                                    row["STICKER_YN"] = "Y";
-                                }
+                                    row["STICKER_YN"] = "Y";    // Lamination.
                                 else if (results[1] == "54638" || results[1] == "79341")
-                                {
-                                    row["COMBINE_YN"] = "Y";
-                                }
+                                    row["COMBINE_YN"] = "Y";    // Transfer logo.
                                 else
-                                {
                                     row["STICKER_YN"] = "N";
-                                }
 
                                 row["PCX_MAT_ID"] = results[1];
                                 row["MAT_CD"] = results[2];
@@ -1125,23 +1117,17 @@ namespace CSI.PCC.PCX
                                 row["MXSXL_NUMBER"] = results[4];
                                 row["MCS_NUMBER"] = results[5];
                                 row["VENDOR_NAME"] = results[6];
-                                row["CS_CD"] = results[7];
+                                //row["CS_CD"] = results[7];
                                 row["PCX_SUPP_MAT_ID"] = results[8];
                                 row["NIKE_MS_STATE"] = results[9];
                                 row["BLACK_LIST_YN"] = results[10];
                                 row["MDM_NOT_EXST"] = results[11];
 
                                 // Automatically tick for 'Code Transfer'.
-                                if (results[11] == "Y")
-                                {
+                                if (results[11].Equals("Y"))
                                     row["CDMKR_YN"] = "Y";
-                                    row["MDM_NOT_EXST"] = "Y";
-                                }
                                 else
-                                {
                                     row["CDMKR_YN"] = "N";
-                                    row["MDM_NOT_EXST"] = "N";
-                                }
                             }
                             else if (results[0] == "Color")
                             {
@@ -1149,50 +1135,55 @@ namespace CSI.PCC.PCX
                                 row["COLOR_CD"] = results[2];
                                 row["COLOR_NAME"] = results[3];
                             }
-                            else if (results[0] == "PCC_Material")
-                            {
-                                // Automatically tick for sticker & combine columns.
-                                if (results[1] == "87031" || results[1] == "78733" || results[1] == "79467")
-                                {
-                                    row["STICKER_YN"] = "Y";
-                                }
-                                else if (results[1] == "54638" || results[1] == "79341")
-                                {
-                                    row["COMBINE_YN"] = "Y";
-                                }
-                                else
-                                {
-                                    row["STICKER_YN"] = "N";
-                                }
 
-                                row["PCX_MAT_ID"] = results[1];
-                                row["MAT_CD"] = results[2];
-                                row["MAT_NAME"] = results[3];
-                                row["MXSXL_NUMBER"] = results[4];
-                                row["MCS_NUMBER"] = results[5];
-                                row["VENDOR_NAME"] = results[6];
-                                row["CS_CD"] = results[7];
-                                row["PCX_SUPP_MAT_ID"] = results[8];
-                                row["NIKE_MS_STATE"] = results[9];
-                                row["BLACK_LIST_YN"] = results[10];
+                            #region Close PCC Material
 
-                                // If an user finds material from 'PCC Material', it means the code of this material was already created.
-                                row["MDM_NOT_EXST"] = "N";
-                                row["CDMKR_YN"] = "N";
-                            }
-                            else if (results[0] == "CS_Material")
-                            {
-                                row["PCX_MAT_ID"] = "100";
-                                row["MAT_CD"] = results[2];
-                                row["MAT_NAME"] = results[3];
-                                row["MXSXL_NUMBER"] = results[1];
-                                row["MCS_NUMBER"] = "";
-                                row["VENDOR_NAME"] = "";
-                                row["CS_CD"] = "CS";
-                                row["PCX_SUPP_MAT_ID"] = "100";
-                            }
+                            //else if (results[0] == "PCC_Material")
+                            //{
+                            //    // Automatically tick for sticker & combine columns.
+                            //    if (results[1] == "87031" || results[1] == "78733" || results[1] == "79467")
+                            //    {
+                            //        row["STICKER_YN"] = "Y";
+                            //    }
+                            //    else if (results[1] == "54638" || results[1] == "79341")
+                            //    {
+                            //        row["COMBINE_YN"] = "Y";
+                            //    }
+                            //    else
+                            //    {
+                            //        row["STICKER_YN"] = "N";
+                            //    }
 
-                            if (row["ROW_STATUS"].ToString() != "I")
+                            //    row["PCX_MAT_ID"] = results[1];
+                            //    row["MAT_CD"] = results[2];
+                            //    row["MAT_NAME"] = results[3];
+                            //    row["MXSXL_NUMBER"] = results[4];
+                            //    row["MCS_NUMBER"] = results[5];
+                            //    row["VENDOR_NAME"] = results[6];
+                            //    row["CS_CD"] = results[7];
+                            //    row["PCX_SUPP_MAT_ID"] = results[8];
+                            //    row["NIKE_MS_STATE"] = results[9];
+                            //    row["BLACK_LIST_YN"] = results[10];
+
+                            //    // If an user finds material from 'PCC Material', it means the code of this material was already created.
+                            //    row["MDM_NOT_EXST"] = "N";
+                            //    row["CDMKR_YN"] = "N";
+                            //}
+                            //else if (results[0] == "CS_Material")
+                            //{
+                            //    row["PCX_MAT_ID"] = "100";
+                            //    row["MAT_CD"] = results[2];
+                            //    row["MAT_NAME"] = results[3];
+                            //    row["MXSXL_NUMBER"] = results[1];
+                            //    row["MCS_NUMBER"] = "";
+                            //    row["VENDOR_NAME"] = "";
+                            //    row["CS_CD"] = "CS";
+                            //    row["PCX_SUPP_MAT_ID"] = "100";
+                            //}
+
+                            #endregion
+
+                            if (!row["ROW_STATUS"].ToString().Equals("I"))
                                 row["ROW_STATUS"] = "U";
                         }
                     }
@@ -1200,11 +1191,9 @@ namespace CSI.PCC.PCX
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.ToString());
-                    return;
                 }
                 finally
                 {
-                    // Link event again.
                     view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
                 }
             }
@@ -1462,24 +1451,17 @@ namespace CSI.PCC.PCX
         /// <summary>
         /// 
         /// </summary>
-        private void ShowMaterialInfomation()
+        private void ShowMaterialInfo()
         {
-            string PDMSuppMatNumber = view.GetRowCellValue(view.FocusedRowHandle, "MXSXL_NUMBER").ToString();
-
-            if (PDMSuppMatNumber == "")
-                return;
-
-            string[] splitPDMSuppMatNum = PDMSuppMatNumber.Split('.');
-
-            if (splitPDMSuppMatNum.Length != 3)
-                return;
-
-            Dictionary<string, string> dic = new Dictionary<string, string>();
-            dic.Add("MXSXL_NUMBER", PDMSuppMatNumber);
-            dic.Add("MAT_CD", splitPDMSuppMatNum[0]);
-
-            MaterialInformation form = new MaterialInformation() { MaterialInfo = dic };
-            form.ShowDialog();
+            using (CSI.PCC.Common.MaterialInformation form = new PCC.Common.MaterialInformation()
+            {
+                PCXMatID = view.GetRowCellValue(view.FocusedRowHandle, "PCX_MAT_ID").ToString(),
+                PCXSuppMatID = view.GetRowCellValue(view.FocusedRowHandle, "PCX_SUPP_MAT_ID").ToString(),
+                BaseForm = Common.projectBaseForm
+            })
+            {
+                form.ShowDialog();
+            }
         }
 
         /// <summary>
@@ -1754,7 +1736,7 @@ namespace CSI.PCC.PCX
 
                         newRow["PART_TYPE"] = "UPPER";
                         newRow["MXSXL_NUMBER"] = row["MXSXL_NUMBER"].ToString();
-                        newRow["CS_CD"] = row["CS_CD"].ToString();
+                        //newRow["CS_CD"] = row["CS_CD"].ToString();
                         newRow["MCS_NUMBER"] = row["MCS_NUMBER"].ToString();
                         newRow["PCX_SUPP_MAT_ID"] = row["PCX_SUPP_MAT_ID"].ToString();
                         newRow["MAT_CD"] = row["MAT_CD"].ToString();
@@ -1793,13 +1775,12 @@ namespace CSI.PCC.PCX
         {
             // Datasource which has no duplication.
             DataTable dataSource = new DataTable();
+            Dictionary<string, string> keys = new Dictionary<string, string>();
 
             if (view == gvwSingleEdit)
                 dataSource = ((DataTable)grdSingleEdit.DataSource).Clone();
             else if (view == gvwMultipleEdit)
                 dataSource = ((DataTable)grdMultipleEdit.DataSource).Clone();
-
-            Dictionary<string, string> dicKeys = new Dictionary<string, string>();
 
             foreach (int rowHandle in view.GetSelectedRows())
             {
@@ -1808,21 +1789,21 @@ namespace CSI.PCC.PCX
                 string suppMatID = row["PCX_SUPP_MAT_ID"].ToString();
                 string colorID = row["PCX_COLOR_ID"].ToString();
 
-                if (dicKeys.Count == 0)
+                if (keys.Count == 0)
                 {
                     // When the dictionary is empty.
                     // Key : PCX Supp. Mat. ID + Color ID
-                    dicKeys.Add(suppMatID + colorID, "Y");
+                    keys.Add(suppMatID + colorID, "Y");
                     dataSource.ImportRow(row);
                 }
                 else
                 {
                     // Verify that the same key exists.
-                    if (dicKeys.ContainsKey(suppMatID + colorID) == true)
+                    if (keys.ContainsKey(suppMatID + colorID))
                         continue;
                     else
                     {
-                        dicKeys.Add(suppMatID + colorID, "Y");
+                        keys.Add(suppMatID + colorID, "Y");
                         dataSource.ImportRow(row);
                     }
                 }
@@ -2131,24 +2112,33 @@ namespace CSI.PCC.PCX
         /// </summary>
         private void ShowCommentForm()
         {
-            PCXComment form = new PCXComment("EDIT");
-            form.BaseForm = Common.projectBaseForm;
-            form.EncodedComment = view.GetRowCellValue(view.FocusedRowHandle, "ENCODED_CMT").ToString();
+            PCXComment form = new PCXComment()
+            {
+                Mode = "EDIT",
+                BaseForm = Common.projectBaseForm,
+                EncodedComment = view.GetRowCellValue(view.FocusedRowHandle, "ENCODED_CMT").ToString(),
+                Comment = string.Empty
+            };
 
             if (form.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
-
-                foreach (int rowHandle in view.GetSelectedRows())
+                try
                 {
-                    view.SetRowCellValue(rowHandle, "MAT_COMMENT", form.Comment);
-                    view.SetRowCellValue(rowHandle, "ENCODED_CMT", form.EncodedComment);
+                    view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
 
-                    if (view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString() != "I")
-                        view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
+                    foreach (int rowHandle in view.GetSelectedRows())
+                    {
+                        view.SetRowCellValue(rowHandle, "MAT_COMMENT", form.Comment);
+                        view.SetRowCellValue(rowHandle, "ENCODED_CMT", form.EncodedComment);
+
+                        if (view.GetRowCellValue(rowHandle, "ROW_STATUS").ToString() != "I")
+                            view.SetRowCellValue(rowHandle, "ROW_STATUS", "U");
+                    }
                 }
-
-                view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
+                finally
+                {
+                    view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
+                }
             }
         }
 
@@ -2160,8 +2150,6 @@ namespace CSI.PCC.PCX
         {
             try
             {
-                #region Variable
-
                 // for part info.
                 string partCode = string.Empty;
                 string partName = string.Empty;
@@ -2171,13 +2159,12 @@ namespace CSI.PCC.PCX
                 // for material info.
                 string mxsxlNumber = string.Empty;
                 string pcxSuppMatID = string.Empty;
-                string csCode = string.Empty;
+                //string csCode = string.Empty;
                 string mcsNumber = string.Empty;
                 string pcxMatID = string.Empty;
                 string pdmMatCode = string.Empty;
                 string pdmMatName = string.Empty;
                 string vendorName = string.Empty;
-                //string matRisk = string.Empty;
                 string nikeMSState = string.Empty;
                 string blackListYN = "N";
                 string mdmNotExisting = "N";
@@ -2187,20 +2174,15 @@ namespace CSI.PCC.PCX
                 string pdmColorCode = string.Empty;
                 string pdmColorName = string.Empty;
 
-                #endregion
-
-                GridView view = sender as GridView;
-                GridCell[] cells = view.GetSelectedCells();
+                // To avoid infinite loop.
+                view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
 
                 var currValue = view.ActiveEditor.EditValue;
                 var oldValue = view.ActiveEditor.OldEditValue;
 
-                // if there are no changes, finish event.
+                // If there are no changes, finish event.
                 if (currValue.ToString() == oldValue.ToString())
                     return;
-
-                // To avoid infinite loop.
-                view.CellValueChanged -= new CellValueChangedEventHandler(CustomCellValueChanged);
 
                 string value = currValue.ToString();
 
@@ -2230,6 +2212,7 @@ namespace CSI.PCC.PCX
                             pdmColorName = "";
                         }
                     }
+
                     #endregion
                 }
                 else if (view.FocusedColumn.FieldName == "COLOR_NAME")
@@ -2261,6 +2244,7 @@ namespace CSI.PCC.PCX
                             }
                         }
                     }
+
                     #endregion
                 }
                 else if (view.FocusedColumn.FieldName == "PART_NAME")
@@ -2342,179 +2326,14 @@ namespace CSI.PCC.PCX
                 }
                 else if (view.FocusedColumn.FieldName == "MXSXL_NUMBER")
                 {
-                    #region 백업
-
-                    //if (value != "")
-                    //{
-                    //    // PCC 자재 우선 검색
-                    //    PKG_INTG_BOM.SELECT_FOR_DIRECT_INPUT pkgSelect = new PKG_INTG_BOM.SELECT_FOR_DIRECT_INPUT();
-                    //    pkgSelect.ARG_TYPE = "PCC_ByCode";
-                    //    pkgSelect.ARG_CODE = value;
-                    //    pkgSelect.ARG_NAME = "";
-                    //    pkgSelect.OUT_CURSOR = string.Empty;
-
-                    //    DataTable dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
-
-                    //    if (dataSource.Rows.Count == 0)
-                    //    {
-                    //        #region PCC 자재에 없는 경우 CS 대표 자재 검색
-
-                    //        PKG_INTG_BOM.SELECT_FOR_DIRECT_INPUT pkgSelect2 = new PKG_INTG_BOM.SELECT_FOR_DIRECT_INPUT();
-                    //        pkgSelect2.ARG_TYPE = "CS_ByCode";
-                    //        pkgSelect2.ARG_CODE = value;
-                    //        pkgSelect2.ARG_NAME = "";
-                    //        pkgSelect2.OUT_CURSOR = string.Empty;
-
-                    //        dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect2).Tables[0];
-
-                    //        if (dataSource.Rows.Count == 0)
-                    //        {
-                    //            mxsxlNumber = "";
-                    //            pcxSuppMatID = "100";
-                    //            csCode = "";
-                    //            mcsNumber = "";
-                    //            pcxMatID = "100";
-                    //            pdmMatCode = "";
-                    //            pdmMatName = "";
-                    //            vendorName = "";
-                    //            matRisk = "";
-                    //            blackListYN = "N";
-
-                    //            MessageBox.Show("Unregistered Material.");
-                    //        }
-                    //        else if (dataSource.Rows.Count == 1)
-                    //        {
-                    //            mxsxlNumber = dataSource.Rows[0]["MXSXL_NUMBER"].ToString();
-                    //            mcsNumber = dataSource.Rows[0]["MCS_NUMBER"].ToString();
-                    //            csCode = dataSource.Rows[0]["CS_CD"].ToString();
-                    //            pdmMatCode = dataSource.Rows[0]["MAT_CD"].ToString();
-                    //            pdmMatName = dataSource.Rows[0]["MAT_NAME"].ToString();
-                    //            matRisk = dataSource.Rows[0]["MAT_RISK"].ToString();
-                    //            pcxSuppMatID = "100";
-                    //            pcxMatID = "100";
-                    //            blackListYN = "N";
-                    //        }
-
-                    //        #region 케이스 발생 안함
-                    //        //else if (dataSource2.Rows.Count > 1)
-                    //        //{
-                    //        //    FindCode findForm = new FindCode();
-                    //        //    findForm.INITIAL_TYPE = 4;
-                    //        //    findForm.INITIAL_KEYWORD = value;
-
-                    //        //    if (findForm.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    //        //    {
-                    //        //        // 검색 결과
-                    //        //        string[] result = (string[])findForm.FORM_RESULT;
-
-                    //        //        if (result[0] == "PCX_Material")
-                    //        //        {
-                    //        //            pdmMatCode = result[2];
-                    //        //            pdmMatName = result[3];
-                    //        //            mxsxlNumber = result[4];
-                    //        //            mcsNumber = result[5];
-                    //        //        }
-                    //        //        else if (result[0] == "PCC_Material")
-                    //        //        {
-                    //        //            pdmMatCode = result[2];
-                    //        //            pdmMatName = result[3];
-                    //        //            mxsxlNumber = result[4];
-                    //        //            mcsNumber = result[5];
-                    //        //            csCode = result[7];
-                    //        //        }
-                    //        //        else if (result[0] == "CS_Material")
-                    //        //        {
-                    //        //            pdmMatCode = result[2];
-                    //        //            pdmMatName = result[3];
-                    //        //            mxsxlNumber = result[1];
-                    //        //            pcxSuppMatID = "100";
-                    //        //            pcxMatID = "100";
-                    //        //        }
-                    //        //    }
-                    //        //}
-                    //        #endregion
-
-                    //        #endregion
-                    //    }
-                    //    else if (dataSource.Rows.Count == 1)
-                    //    {
-                    //        mxsxlNumber = dataSource.Rows[0]["MXSXL_NUMBER"].ToString();
-                    //        pcxSuppMatID = dataSource.Rows[0]["PCX_SUPP_MTL_NUMBER"].ToString();
-                    //        csCode = dataSource.Rows[0]["CS_CD"].ToString();
-                    //        mcsNumber = dataSource.Rows[0]["MCS_NUMBER"].ToString();
-                    //        pcxMatID = dataSource.Rows[0]["PCX_MTL_NUMBER"].ToString();
-                    //        pdmMatCode = dataSource.Rows[0]["MAT_CD"].ToString();
-                    //        pdmMatName = dataSource.Rows[0]["MAT_NAME"].ToString();
-                    //        vendorName = dataSource.Rows[0]["VENDOR_NAME"].ToString();
-                    //        matRisk = dataSource.Rows[0]["MAT_RISK"].ToString();
-                    //        nikeMSState = dataSource.Rows[0]["NIKE_MS_STATE"].ToString();
-                    //        blackListYN = dataSource.Rows[0]["BLACK_LIST_YN"].ToString();
-                    //    }
-                    //    else if (dataSource.Rows.Count > 1)
-                    //    {
-                    //        #region 둘 이상 조회된 경우 팝업 표기 후 선택 유도
-
-                    //        object[] parameters = new object[] { 3, value, "" };
-
-                    //        FindCode findForm = new FindCode(parameters);
-
-                    //        if (findForm.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    //        {
-                    //            string[] result = (string[])findForm.FORM_RESULT;
-
-                    //            if (result[0] == "PCX_Material")
-                    //            {
-                    //                pcxMatID = result[1];
-                    //                pdmMatCode = result[2];
-                    //                pdmMatName = result[3];
-                    //                mxsxlNumber = result[4];
-                    //                mcsNumber = result[5];
-                    //                vendorName = result[6];
-                    //                csCode = result[7];
-                    //                pcxSuppMatID = result[8];
-                    //                nikeMSState = result[9];
-                    //                blackListYN = result[10];
-                    //            }
-                    //            else if (result[0] == "PCC_Material")
-                    //            {
-                    //                pcxMatID = result[1];
-                    //                pdmMatCode = result[2];
-                    //                pdmMatName = result[3];
-                    //                mxsxlNumber = result[4];
-                    //                mcsNumber = result[5];
-                    //                vendorName = result[6];
-                    //                csCode = result[7];
-                    //                pcxSuppMatID = result[8];
-                    //                nikeMSState = result[9];
-                    //                blackListYN = result[10];
-                    //            }
-                    //            else if (result[0] == "CS_Material")
-                    //            {
-                    //                mxsxlNumber = result[1];
-                    //                pdmMatCode = result[2];
-                    //                pdmMatName = result[3];
-                    //                csCode = "CS";
-                    //                pcxMatID = "100";
-                    //                pcxSuppMatID = "100";
-                    //                mcsNumber = "";
-                    //            }
-                    //        }
-
-                    //        #endregion
-                    //    }
-                    //}
-
-                    #endregion
-
                     #region MXSXL Number 다이렉트 입력 시, 다른 속성 자동 입력을 위해 코드 정보를 가져옴
 
                     if (value != "")
                     {
-                        // Get the material info. from PCX library.
                         PKG_INTG_BOM.SELECT_FOR_DIRECT_INPUT pkgSelect = new PKG_INTG_BOM.SELECT_FOR_DIRECT_INPUT();
-                        pkgSelect.ARG_TYPE = "PCX_ByCode";
+                        pkgSelect.ARG_TYPE = "Material";
                         pkgSelect.ARG_CODE = value;
-                        pkgSelect.ARG_NAME = "";
+                        pkgSelect.ARG_NAME = "Code";
                         pkgSelect.OUT_CURSOR = string.Empty;
 
                         DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
@@ -2529,18 +2348,18 @@ namespace CSI.PCC.PCX
                             pcxMatID = dataSource.Rows[0]["PCX_MTL_NUMBER"].ToString();
                             pcxSuppMatID = dataSource.Rows[0]["PCX_SUPP_MTL_NUMBER"].ToString();
                             nikeMSState = dataSource.Rows[0]["NIKE_MS_STATE"].ToString();
-                            csCode = dataSource.Rows[0]["CS_CD"].ToString();
+                            //csCode = dataSource.Rows[0]["CS_CD"].ToString();
                             blackListYN = dataSource.Rows[0]["BLACK_LIST_YN"].ToString();
                             mdmNotExisting = dataSource.Rows[0]["MDM_NOT_EXST"].ToString();
-                            //matRisk = dataSource.Rows[0]["MAT_RISK"].ToString();
                         }
                         else
                         {
                             pcxMatID = "100";
                             pcxSuppMatID = "100";
                             pdmMatName = "PLACEHOLDER";
+                            mdmNotExisting = "Y";
 
-                            MessageBox.Show("Not registered in PCX.");
+                            Common.ShowMessageBox("Unregistered code.", "E");
                         }
                     }
 
@@ -2552,128 +2371,26 @@ namespace CSI.PCC.PCX
 
                     if (value != "")
                     {
-                        if (CSBOMStatus != "F")
+                        if (!Common.IsFakeBOM(CSBOMStatus))
                         {
-                            if (value.ToUpper() == "PLACEHOLDER" || value.ToUpper() == "N/A")
+                            if (value.ToUpper().Equals("PLACEHOLDER") || value.ToUpper().Equals("N/A"))
                             {
-                                #region 자재명에 PLACEHOLDER 또는 N/A 입력 시 코드 자동 기입
+                                bool isPlaceholder = value.ToUpper().Equals("PLACEHOLDER");
 
-                                mxsxlNumber = "";
-                                pcxSuppMatID = (value.ToUpper() == "PLACEHOLDER") ? "100" : "999";
-                                csCode = "";
-                                mcsNumber = "";
-                                pcxMatID = (value.ToUpper() == "PLACEHOLDER") ? "100" : "999";
-                                pdmMatCode = "";
-                                pdmMatName = (value.ToUpper() == "PLACEHOLDER") ? "PLACEHOLDER" : "N/A";
-                                vendorName = "";
-                                //matRisk = "";
-                                nikeMSState = "";
-                                blackListYN = "N";
+                                pcxMatID = isPlaceholder ? "100" : "999";
+                                pcxSuppMatID = isPlaceholder ? "100" : "999";
+                                pdmMatName = isPlaceholder ? "PLACEHOLDER" : "N/A";
                                 mdmNotExisting = "Y";
-
-                                #endregion
                             }
                             else
                             {
                                 PKG_INTG_BOM.SELECT_FOR_DIRECT_INPUT pkgSelect = new PKG_INTG_BOM.SELECT_FOR_DIRECT_INPUT();
-                                pkgSelect.ARG_TYPE = "PCX_ByName";
-                                pkgSelect.ARG_CODE = "";
-                                pkgSelect.ARG_NAME = value.ToUpper();
+                                pkgSelect.ARG_TYPE = "Material";
+                                pkgSelect.ARG_CODE = value.ToUpper();
+                                pkgSelect.ARG_NAME = "Name";
                                 pkgSelect.OUT_CURSOR = string.Empty;
 
                                 DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
-
-                                #region backup
-                                //if (dataSource.Rows.Count == 0)
-                                //{
-                                //    #region PCC 자재에 없는 경우 CS 대표 자재 검색
-
-                                //    PKG_INTG_BOM.SELECT_FOR_DIRECT_INPUT pkgSelect2 = new PKG_INTG_BOM.SELECT_FOR_DIRECT_INPUT();
-                                //    pkgSelect2.ARG_TYPE = "CS_ByName";
-                                //    pkgSelect2.ARG_CODE = "";
-                                //    pkgSelect2.ARG_NAME = value;
-                                //    pkgSelect2.OUT_CURSOR = string.Empty;
-
-                                //    dataSource = projectBaseForm.Exe_Select_PKG(pkgSelect2).Tables[0];
-
-                                //    if (dataSource.Rows.Count == 0)
-                                //    {
-                                //        mxsxlNumber = "";
-                                //        pcxSuppMatID = "100";
-                                //        csCode = "";
-                                //        mcsNumber = "";
-                                //        pcxMatID = "100";
-                                //        pdmMatCode = "";
-                                //        pdmMatName = "PLACEHOLDER";
-                                //        vendorName = "";
-                                //        matRisk = "";
-                                //        blackListYN = "N";
-
-                                //        MessageBox.Show("Unregistered Material.");
-                                //    }
-                                //    else if (dataSource.Rows.Count == 1)
-                                //    {
-                                //        mxsxlNumber = dataSource.Rows[0]["MXSXL_NUMBER"].ToString();
-                                //        csCode = dataSource.Rows[0]["CS_CD"].ToString();
-                                //        pdmMatCode = dataSource.Rows[0]["MAT_CD"].ToString();
-                                //        pdmMatName = dataSource.Rows[0]["MAT_NAME"].ToString();
-                                //        vendorName = dataSource.Rows[0]["VENDOR_NAME"].ToString();
-                                //        mcsNumber = dataSource.Rows[0]["MCS_NUMBER"].ToString();
-                                //        pcxMatID = "100";
-                                //        pcxSuppMatID = "100";
-                                //        matRisk = dataSource.Rows[0]["MAT_RISK"].ToString();
-                                //        blackListYN = "N";
-                                //    }
-
-                                //    #region 케이스 발생 안함
-                                //    //else if (dataSource.Rows.Count > 1)
-                                //    //{
-                                //    //    FindCode findForm = new FindCode();
-                                //    //    findForm.INITIAL_TYPE = 4;
-                                //    //    findForm.INITIAL_KEYWORD = value;
-
-                                //    //    if (findForm.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                                //    //    {
-                                //    //        string[] result = (string[])findForm.FORM_RESULT;
-
-                                //    //        if (result[0] == "PCX_Material")
-                                //    //        {
-                                //    //            pcxMatID = result[1];
-                                //    //            pdmMatCode = result[2];
-                                //    //            pdmMatName = result[3];
-                                //    //            mxsxlNumber = result[4];
-                                //    //            mcsNumber = result[5];
-                                //    //            vendorName = result[6];
-                                //    //            csCode = result[7];
-                                //    //            pcxSuppMatID = result[8];
-                                //    //        }
-                                //    //        else if (result[0] == "PCC_Material")
-                                //    //        {
-                                //    //            pcxMatID = result[1];
-                                //    //            pdmMatCode = result[2];
-                                //    //            pdmMatName = result[3];
-                                //    //            mxsxlNumber = result[4];
-                                //    //            mcsNumber = result[5];
-                                //    //            vendorName = result[6];
-                                //    //            csCode = result[7];
-                                //    //            pcxSuppMatID = result[8];
-                                //    //        }
-                                //    //        else if (result[0] == "CS_Material")
-                                //    //        {
-                                //    //            mxsxlNumber = result[1];
-                                //    //            pdmMatCode = result[2];
-                                //    //            pdmMatName = result[3];
-                                //    //            pcxSuppMatID = "100";
-                                //    //            pcxMatID = "100";
-                                //    //        }
-                                //    //    }
-                                //    //}
-                                //    #endregion
-
-                                //    #endregion
-                                //}
-                                //else 
-                                #endregion
 
                                 if (dataSource.Rows.Count == 1)
                                 {
@@ -2685,10 +2402,9 @@ namespace CSI.PCC.PCX
                                     pcxMatID = dataSource.Rows[0]["PCX_MTL_NUMBER"].ToString();
                                     pcxSuppMatID = dataSource.Rows[0]["PCX_SUPP_MTL_NUMBER"].ToString();
                                     nikeMSState = dataSource.Rows[0]["NIKE_MS_STATE"].ToString();
-                                    csCode = dataSource.Rows[0]["CS_CD"].ToString();
+                                    //csCode = dataSource.Rows[0]["CS_CD"].ToString();
                                     blackListYN = dataSource.Rows[0]["BLACK_LIST_YN"].ToString();
                                     mdmNotExisting = dataSource.Rows[0]["MDM_NOT_EXST"].ToString();
-                                    //matRisk = dataSource.Rows[0]["MAT_RISK"].ToString();
                                 }
                                 else if (dataSource.Rows.Count > 1)
                                 {
@@ -2711,25 +2427,25 @@ namespace CSI.PCC.PCX
                                         pcxMatID = results[1];
                                         pcxSuppMatID = results[8];
                                         nikeMSState = results[9];
-                                        csCode = results[7];
+                                        //csCode = results[7];
                                         blackListYN = results[10];
                                         mdmNotExisting = results[11];
                                     }
                                 }
                                 else
                                 {
-                                    pcxSuppMatID = "100";
                                     pcxMatID = "100";
+                                    pcxSuppMatID = "100";
                                     pdmMatName = "PLACEHOLDER";
                                     mdmNotExisting = "Y";
 
-                                    MessageBox.Show("Not registered in PCX.");
+                                    Common.ShowMessageBox("Unregistered code.", "E");
                                 }
                             }
                         }
                         else
                         {
-                            // Fake BOM의 경우 유저 입력 값을 바로 입력
+                            // When this is fake bom.
                             pdmMatName = value;
                         }
                     }
@@ -2749,203 +2465,137 @@ namespace CSI.PCC.PCX
 
                     if (!rowStatus.Equals("D") && !lockYN.Equals("Y"))
                     {
-                        if (view.FocusedColumn.FieldName == "COLOR_CD")
+                        switch (view.FocusedColumn.FieldName)
                         {
-                            row["PCX_COLOR_ID"] = pcxColorID;
-                            row["COLOR_CD"] = pdmColorCode;
-                            row["COLOR_NAME"] = pdmColorName;
-                        }
-                        else if (view.FocusedColumn.FieldName == "COLOR_NAME")
-                        {
-                            row["PCX_COLOR_ID"] = pcxColorID;
-                            row["COLOR_CD"] = pdmColorCode;
-                            row["COLOR_NAME"] = pdmColorName;
-                        }
-                        else if (view.FocusedColumn.FieldName == "PART_NAME")
-                        {
-                            // When the part name is changed from 'Lamination' to general part.
-                            if (oldValue.ToString().Contains("LAMINATION") == true && partName.Contains("LAMINATION") == false)
-                            {
-                                // An user doesn't need to set nike pattern part name for general part.
-                                row["PTRN_PART_NAME"] = "";
-                                row["PTRN_PART_CD"] = "";
-                            }
+                            case "COLOR_CD":
+                            case "COLOR_NAME":
 
-                            row["PART_NAME"] = partName;
-                            row["PART_CD"] = partCode;
+                                row["PCX_COLOR_ID"] = pcxColorID;
+                                row["COLOR_CD"] = pdmColorCode;
+                                row["COLOR_NAME"] = pdmColorName;
+                                break;
 
-                            // Set part type by each case.
-                            if (partName.Contains("AIRBAG"))
-                            {
-                                // If the part name contains 'AIRBAG', fix BOM section to 'AIRBAG'.
-                                row["PART_TYPE"] = "AIRBAG";
-                                row["MDSL_CHK"] = "Y";
-                                row["OTSL_CHK"] = "N";
-                            }
-                            else if (partName.Contains("LAMINATION"))
-                            {
-                                // If the part name contains 'LAMINATION', fix BOM section to 'UPPER'.
-                                row["PART_TYPE"] = "UPPER";
-                                row["MDSL_CHK"] = "N";
-                                row["OTSL_CHK"] = "N";
-                            }
-                            else if (partType == "MIDSOLE" || partType == "OUTSOLE")
-                            {
-                                // If the part type is 'MIDSOLE' or 'OUTSOLE', fix BOM section to it.
-                                row["PART_TYPE"] = partType;
-                                row["MDSL_CHK"] = (partType == "MIDSOLE") ? "Y" : "N";
-                                row["OTSL_CHK"] = (partType == "OUTSOLE") ? "Y" : "N";
-                            }
-                            else if (pcxPartId == "3389" || pcxPartId == "3390")
-                            {
-                                // Fix BOM section to 'UPPER' for WET CHEMISTRY & WET CHEMISTRY-MULTI parts.
-                                row["PART_TYPE"] = "UPPER";
-                                row["MDSL_CHK"] = "N";
-                                row["OTSL_CHK"] = "N";
-                            }
-                            else
-                            {
-                                // Follow existing BOM section(When a row is created, the BOM section follows the upper row).
-                                row["PART_TYPE"] = partType;
-                                row["MDSL_CHK"] = "N";
-                                row["OTSL_CHK"] = "N";
-                            }
+                            case "PART_NAME":
 
-                            row["PCX_PART_ID"] = pcxPartId;
+                                // When the part name is changed from 'Lamination' to general part.
+                                if (oldValue.ToString().Contains("LAMINATION") && !partName.Contains("LAMINATION"))
+                                {
+                                    // An user doesn't need to set nike pattern part name for general part.
+                                    row["PTRN_PART_NAME"] = "";
+                                    row["PTRN_PART_CD"] = "";
+                                }
 
-                            Common.BindDefaultMaterialByNCFRule(view, row, pcxPartId);
-                        }
-                        else if (view.FocusedColumn.FieldName == "PTRN_PART_NAME")
-                        {
-                            row["PTRN_PART_NAME"] = partName;
-                            row["PTRN_PART_CD"] = partCode;
-                        }
-                        else if (view.FocusedColumn.FieldName == "MXSXL_NUMBER")
-                        {
-                            // LOGO, STICKER 자동 체크
-                            if (pcxMatID == "87031" || pcxMatID == "78733" || pcxMatID == "79467")
-                            {
-                                row["STICKER_YN"] = "Y";
-                            }
-                            else if (pcxMatID == "54638" || pcxMatID == "79341")
-                            {
-                                row["COMBINE_YN"] = "Y";
-                            }
-                            else
-                            {
-                                row["STICKER_YN"] = "N";
-                            }
+                                row["PART_NAME"] = partName;
+                                row["PART_CD"] = partCode;
 
-                            row["MXSXL_NUMBER"] = mxsxlNumber;
-                            row["PCX_SUPP_MAT_ID"] = (pcxSuppMatID == "") ? "100" : pcxSuppMatID;
-                            row["CS_CD"] = csCode;
-                            row["MCS_NUMBER"] = mcsNumber;
-                            row["PCX_MAT_ID"] = (pcxMatID == "") ? "100" : pcxMatID;
-                            row["MAT_CD"] = pdmMatCode;
-                            row["MAT_NAME"] = (pdmMatName == "") ? "PLACEHOLDER" : pdmMatName;
-                            row["VENDOR_NAME"] = vendorName;
-                            row["NIKE_MS_STATE"] = nikeMSState;
-                            row["BLACK_LIST_YN"] = blackListYN;
-                            row["MDM_NOT_EXST"] = mdmNotExisting;
+                                // Set part type by each case.
+                                if (partName.Contains("AIRBAG"))
+                                {
+                                    // If the part name contains 'AIRBAG', fix BOM section to 'AIRBAG'.
+                                    row["PART_TYPE"] = "AIRBAG";
+                                    row["MDSL_CHK"] = "Y";
+                                    row["OTSL_CHK"] = "N";
+                                }
+                                else if (partName.Contains("LAMINATION"))
+                                {
+                                    // If the part name contains 'LAMINATION', fix BOM section to 'UPPER'.
+                                    row["PART_TYPE"] = "UPPER";
+                                    row["MDSL_CHK"] = "N";
+                                    row["OTSL_CHK"] = "N";
+                                }
+                                else if (partType == "MIDSOLE" || partType == "OUTSOLE")
+                                {
+                                    // If the part type is 'MIDSOLE' or 'OUTSOLE', fix BOM section to it.
+                                    row["PART_TYPE"] = partType;
+                                    row["MDSL_CHK"] = (partType == "MIDSOLE") ? "Y" : "N";
+                                    row["OTSL_CHK"] = (partType == "OUTSOLE") ? "Y" : "N";
+                                }
+                                else if (pcxPartId == "3389" || pcxPartId == "3390")
+                                {
+                                    // Fix BOM section to 'UPPER' for WET CHEMISTRY & WET CHEMISTRY-MULTI parts.
+                                    row["PART_TYPE"] = "UPPER";
+                                    row["MDSL_CHK"] = "N";
+                                    row["OTSL_CHK"] = "N";
+                                }
+                                else
+                                {
+                                    // Follow existing BOM section(When a row is created, the BOM section follows the upper row).
+                                    row["PART_TYPE"] = partType;
+                                    row["MDSL_CHK"] = "N";
+                                    row["OTSL_CHK"] = "N";
+                                }
 
-                            // Automatically tick for 'Code Transfer'.
-                            if (mdmNotExisting == "Y")
-                            {
-                                row["CDMKR_YN"] = "Y";
-                                row["MDM_NOT_EXST"] = "Y";
-                            }
-                            else
-                            {
-                                row["CDMKR_YN"] = "N";
-                                row["MDM_NOT_EXST"] = "N";
-                            }
-                        }
-                        else if (view.FocusedColumn.FieldName == "MAT_NAME")
-                        {
-                            // LOGO, STICKER 자동 체크
-                            if (pcxMatID == "87031" || pcxMatID == "78733" || pcxMatID == "79467")
-                            {
-                                row["STICKER_YN"] = "Y";
-                            }
-                            else if (pcxMatID == "54638" || pcxMatID == "79341")
-                            {
-                                row["COMBINE_YN"] = "Y";
-                            }
-                            else
-                            {
-                                row["STICKER_YN"] = "N";
-                            }
+                                row["PCX_PART_ID"] = pcxPartId;
 
-                            row["MXSXL_NUMBER"] = mxsxlNumber;
-                            row["PCX_SUPP_MAT_ID"] = (pcxSuppMatID == "") ? "100" : pcxSuppMatID;
-                            row["CS_CD"] = csCode;
-                            row["MCS_NUMBER"] = mcsNumber;
-                            row["PCX_MAT_ID"] = (pcxMatID == "") ? "100" : pcxMatID;
-                            row["MAT_CD"] = pdmMatCode;
-                            row["MAT_NAME"] = (pdmMatName == "") ? "PLACEHOLDER" : pdmMatName;
-                            row["VENDOR_NAME"] = vendorName;
-                            row["NIKE_MS_STATE"] = nikeMSState;
-                            row["BLACK_LIST_YN"] = blackListYN;
-                            row["MDM_NOT_EXST"] = mdmNotExisting;
+                                Common.BindDefaultMaterialByNCFRule(view, row, pcxPartId);
 
-                            // Automatically tick for 'Code Transfer'.
-                            if (mdmNotExisting == "Y")
-                            {
-                                row["CDMKR_YN"] = "Y";
-                                row["MDM_NOT_EXST"] = "Y";
-                            }
-                            else
-                            {
-                                row["CDMKR_YN"] = "N";
-                                row["MDM_NOT_EXST"] = "N";
-                            }
-                        }
-                        else if (view.FocusedColumn.FieldName == "MAT_COMMENT")
-                        {
-                            row["MAT_COMMENT"] = value;
+                                break;
 
-                            // When an user manually types data into material comment,
-                            // clear the encoded comment to avoid discrepancy in data.
-                            row["ENCODED_CMT"] = "";
-                        }
-                        else if (view.FocusedColumn.FieldName == "COLOR_COMMENT")
-                        {
-                            row["COLOR_COMMENT"] = value;
-                        }
-                        else if (view.FocusedColumn.FieldName == "PROCESS")
-                        {
-                            row["PROCESS"] = value;
-                        }
-                        else if (view.FocusedColumn.FieldName == "REMARKS")
-                        {
-                            row["REMARKS"] = value;
-                        }
-                        else if (view.FocusedColumn.FieldName == "PART_TYPE")
-                        {
-                            row["PART_TYPE"] = value;
-                        }
-                        else if (view.FocusedColumn.FieldName == "BTTM")
-                        {
-                            row["BTTM"] = value;
-                        }
-                        else if (view.FocusedColumn.FieldName == "PART_NIKE_COMMENT")
-                        {
-                            row["PART_NIKE_COMMENT"] = value;
+                            case "PTRN_PART_NAME":
+
+                                row["PTRN_PART_NAME"] = partName;
+                                row["PTRN_PART_CD"] = partCode;
+                                break;
+
+                            case "MXSXL_NUMBER":
+                            case "MAT_NAME":
+
+                                if (pcxMatID == "87031" || pcxMatID == "78733" || pcxMatID == "79467")
+                                    row["STICKER_YN"] = "Y";    // Lamination sticker.
+                                else if (pcxMatID == "54638" || pcxMatID == "79341")
+                                    row["COMBINE_YN"] = "Y";    // Transfer logo.
+                                else
+                                    row["STICKER_YN"] = "N";
+
+                                row["MXSXL_NUMBER"] = mxsxlNumber;
+                                row["PCX_SUPP_MAT_ID"] = pcxSuppMatID;
+                                //row["CS_CD"] = csCode;
+                                row["MCS_NUMBER"] = mcsNumber;
+                                row["PCX_MAT_ID"] = pcxMatID;
+                                row["MAT_CD"] = pdmMatCode;
+                                row["MAT_NAME"] = pdmMatName;
+                                row["VENDOR_NAME"] = vendorName;
+                                row["NIKE_MS_STATE"] = nikeMSState;
+                                row["BLACK_LIST_YN"] = blackListYN;
+                                row["MDM_NOT_EXST"] = mdmNotExisting;
+
+                                // Automatically tick for 'Code Transfer'.
+                                if (mdmNotExisting.Equals("Y"))
+                                    row["CDMKR_YN"] = "Y";
+                                else
+                                    row["CDMKR_YN"] = "N";
+
+                                break;
+
+                            case "MAT_COMMENT":
+
+                                row["MAT_COMMENT"] = value;
+
+                                // When an user manually types data into material comment,
+                                // clear the encoded comment to avoid discrepancy.
+                                row["ENCODED_CMT"] = "";
+                                break;
+
+                            default:
+
+                                row[view.FocusedColumn.FieldName] = value;
+                                break;
                         }
 
-                        // Mark the change of row status.
                         if (rowStatus != "I")
                             row["ROW_STATUS"] = "U";
                     }
                 }
 
-                view.RefreshData();
-                view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
+                //view.RefreshData();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
-                return;
+                Common.ShowMessageBox(ex.ToString(), "E");
+            }
+            finally
+            {
+                view.CellValueChanged += new CellValueChangedEventHandler(CustomCellValueChanged);
             }
         }
 
@@ -3051,8 +2701,6 @@ namespace CSI.PCC.PCX
         {
             try
             {
-                GridView view = sender as GridView;
-
                 // GridHitInfo : Contains information about a specific point within a Grid View.
                 GridHitInfo hitInfo = view.CalcHitInfo(e.Location);
 
@@ -3066,7 +2714,7 @@ namespace CSI.PCC.PCX
                         view.FocusedColumn = hitInfo.Column;
                         view.FocusedRowHandle = hitInfo.RowHandle;
 
-                        // ShowEditor : Creates an editor for the cell
+                        // ShowEditor : Creates an editor for the cell.
                         view.ShowEditor();
 
                         // ActiveEditor : Gets a View's active editor.
@@ -3093,7 +2741,6 @@ namespace CSI.PCC.PCX
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
-                return;
             }
         }
 
@@ -3370,8 +3017,7 @@ namespace CSI.PCC.PCX
 
                 if (CSBOMStatus == "F")
                 {
-                    string partType = view.GetRowCellValue(e.RowHandle, "PART_TYPE").ToString();
-                    if (partType == "")
+                    if (view.GetRowCellValue(e.RowHandle, "PART_TYPE").ToString().Equals(""))
                     {
                         if (view.IsCellSelected(e.RowHandle, e.Column) == false)
                             e.Appearance.BackColor = Color.Red;
@@ -3381,6 +3027,7 @@ namespace CSI.PCC.PCX
                 {
                     string[] validPartTypes = new string[] { "UPPER", "MIDSOLE", "OUTSOLE", "PACKAGING", "AIRBAG" };
                     string partType = view.GetRowCellValue(e.RowHandle, "PART_TYPE").ToString();
+
                     if (partType == "" || !validPartTypes.Contains(partType))
                     {
                         if (view.IsCellSelected(e.RowHandle, e.Column) == false)
@@ -3390,64 +3037,43 @@ namespace CSI.PCC.PCX
 
                 #endregion
             }
-            else if (e.Column.FieldName == "PCX_MAT_ID")
+            else if (e.Column.FieldName.Equals("PCX_MAT_ID") || e.Column.FieldName.Equals("PCX_SUPP_MAT_ID"))
             {
-                #region PLACEHOLDER & N/A
-                string pcxMaterialID = view.GetRowCellValue(e.RowHandle, "PCX_MAT_ID").ToString();
-                if (pcxMaterialID == "100")
+                #region When a code is 'PLACEHOLDER' or 'NA'.
+
+                switch (view.GetRowCellValue(e.RowHandle, e.Column.FieldName).ToString())
                 {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Red;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
+                    case "100":
+
+                        if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                        {
+                            e.Appearance.ForeColor = Color.Red;
+                            e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                        }
+
+                        break;
+
+                    case "999":
+
+                        if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                        {
+                            e.Appearance.ForeColor = Color.Red;
+                            e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                        }
+
+                        break;
+
+                    case "":
+
+                        if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+                        {
+                            e.Appearance.BackColor = Color.DeepSkyBlue;
+                            //e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+                        }
+
+                        break;
                 }
-                else if (pcxMaterialID == "999")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Red;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                else if (pcxMaterialID == "")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.BackColor = Color.DeepSkyBlue;
-                        //e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                #endregion
-            }
-            else if (e.Column.FieldName == "PCX_SUPP_MAT_ID")
-            {
-                #region PLACEHOLDER & N/A
-                string pcxSuppMatID = view.GetRowCellValue(e.RowHandle, "PCX_SUPP_MAT_ID").ToString();
-                if (pcxSuppMatID == "100")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Red;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                else if (pcxSuppMatID == "999")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Red;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                else if (pcxSuppMatID == "")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.BackColor = Color.DeepSkyBlue;
-                        //e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
+
                 #endregion
             }
             else if (e.Column.FieldName == "MAT_NAME")
@@ -3457,7 +3083,7 @@ namespace CSI.PCC.PCX
                 string materialName = view.GetRowCellValue(e.RowHandle, "MAT_NAME").ToString();
                 string pcxMatID = view.GetRowCellValue(e.RowHandle, "PCX_MAT_ID").ToString();
 
-                if (materialName == "PLACEHOLDER" || materialName == "N/A")
+                if (materialName.Equals("PLACEHOLDER") || materialName.Equals("N/A"))
                 {
                     if (view.IsCellSelected(e.RowHandle, e.Column) == false)
                     {
@@ -3510,9 +3136,9 @@ namespace CSI.PCC.PCX
                     }
                 }
 
-                if (view.GetRowCellValue(e.RowHandle, "NIKE_MS_STATE").ToString() == "Retired")
+                if (view.GetRowCellValue(e.RowHandle, "NIKE_MS_STATE").ToString().Equals("Retired"))
                 {
-                    /* Retired Material */
+                    /* When a material is retired. */
 
                     if (view.IsCellSelected(e.RowHandle, e.Column) == false)
                     {
@@ -3522,9 +3148,9 @@ namespace CSI.PCC.PCX
                     }
                 }
 
-                if (view.GetRowCellValue(e.RowHandle, "BLACK_LIST_YN").ToString() == "Y")
+                if (view.GetRowCellValue(e.RowHandle, "BLACK_LIST_YN").ToString().Equals("Y"))
                 {
-                    /* BlackList Material */
+                    /* When a material has been enrolled in black list. */
 
                     if (view.IsCellSelected(e.RowHandle, e.Column) == false)
                     {
@@ -3534,9 +3160,9 @@ namespace CSI.PCC.PCX
                     }
                 }
 
-                if (view.GetRowCellValue(e.RowHandle, "MDM_NOT_EXST").ToString() == "Y")
+                if (view.GetRowCellValue(e.RowHandle, "MDM_NOT_EXST").ToString().Equals("Y"))
                 {
-                    /* Materials which have not yet been enrolled in PCC Master. */
+                    /* When a material has not yet been created as 'CS code' through MDM. */
 
                     if (view.IsCellSelected(e.RowHandle, e.Column) == false)
                     {
@@ -3550,9 +3176,8 @@ namespace CSI.PCC.PCX
             }
             else if (e.Column.FieldName == "MAT_COMMENT")
             {
-                #region PCX 라이브러리 매칭 실패
-                string materialComment = view.GetRowCellValue(e.RowHandle, "MAT_COMMENT").ToString();
-                if (materialComment == "Failed to load material info. from MDM.")
+                // When failing to match with pcx lib.
+                if (view.GetRowCellValue(e.RowHandle, "MAT_COMMENT").ToString().Equals("Failed to load material info. from MDM."))
                 {
                     if (view.IsCellSelected(e.RowHandle, e.Column) == false)
                     {
@@ -3560,13 +3185,11 @@ namespace CSI.PCC.PCX
                         e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
                     }
                 }
-                #endregion
             }
             else if (e.Column.FieldName == "COLOR_COMMENT")
             {
-                #region PCX 라이브러리 매칭 실패
-                string colorComment = view.GetRowCellValue(e.RowHandle, "COLOR_COMMENT").ToString();
-                if (colorComment == "Failed to load color info from PCX Lib.")
+                // When failing to match with pcx lib.
+                if (view.GetRowCellValue(e.RowHandle, "COLOR_COMMENT").ToString().Equals("Failed to load color info from PCX Lib."))
                 {
                     if (view.IsCellSelected(e.RowHandle, e.Column) == false)
                     {
@@ -3574,24 +3197,23 @@ namespace CSI.PCC.PCX
                         e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
                     }
                 }
-                #endregion
             }
-            else if (e.Column.FieldName == "CS_CD")
-            {
-                #region PCX 라이브러리 매칭 실패
-                string csCode = view.GetRowCellValue(e.RowHandle, "CS_CD").ToString();
-                if (csCode == "CS")
-                {
-                    if (view.IsCellSelected(e.RowHandle, e.Column) == false)
-                    {
-                        e.Appearance.ForeColor = Color.Red;
-                        e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
-                    }
-                }
-                #endregion
-            }
+            //else if (e.Column.FieldName == "CS_CD")
+            //{
+            //    #region PCX 라이브러리 매칭 실패
+            //    string csCode = view.GetRowCellValue(e.RowHandle, "CS_CD").ToString();
+            //    if (csCode == "CS")
+            //    {
+            //        if (view.IsCellSelected(e.RowHandle, e.Column) == false)
+            //        {
+            //            e.Appearance.ForeColor = Color.Red;
+            //            e.Appearance.Font = new Font(e.Appearance.Font, FontStyle.Bold);
+            //        }
+            //    }
+            //    #endregion
+            //}
 
-            #region 유저 커스텀 컬러 적용
+            #region Custom Color by User
 
             string colorFormat = view.GetRowCellValue(e.RowHandle, "CELL_COLOR").ToString();
             string[] items = colorFormat.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -4267,7 +3889,7 @@ namespace CSI.PCC.PCX
                 pkgUpdate.ARG_PART_TYPE = view.GetRowCellValue(i, "PART_TYPE").ToString().Trim();
                 pkgUpdate.ARG_BTTM = view.GetRowCellValue(i, "BTTM").ToString();
                 pkgUpdate.ARG_MXSXL_NUMBER = view.GetRowCellValue(i, "MXSXL_NUMBER").ToString();
-                pkgUpdate.ARG_CS_CD = view.GetRowCellValue(i, "CS_CD").ToString();
+                pkgUpdate.ARG_CS_CD = "";
                 pkgUpdate.ARG_MAT_CD = view.GetRowCellValue(i, "MAT_CD").ToString();
                 pkgUpdate.ARG_MAT_NAME = view.GetRowCellValue(i, "MAT_NAME").ToString();
                 pkgUpdate.ARG_MAT_COMMENT = view.GetRowCellValue(i, "MAT_COMMENT").ToString().Trim();
@@ -4831,49 +4453,6 @@ namespace CSI.PCC.PCX
         }
 
         /// <summary>
-        /// Production Confirm Validation
-        /// </summary>
-        /// <param name="view"></param>
-        /// <returns></returns>
-        private bool ProdConfirmBOMValidation(GridView view)
-        {
-            try
-            {
-                for (int rowHandle = 0; rowHandle < view.RowCount; rowHandle++)
-                {
-                    string mxsxlNumber = view.GetRowCellValue(rowHandle, "MXSXL_NUMBER").ToString().Trim();
-                    string csCode = view.GetRowCellValue(rowHandle, "CS_CD").ToString().Trim();
-                    string materialName = view.GetRowCellValue(rowHandle, "MAT_NAME").ToString().Trim();
-
-                    if (mxsxlNumber == "")
-                    {
-                        MessageBox.Show("Please input PDM. Supp. Mtl. Number");
-                        FocusColumn(view, rowHandle, "MXSXL_NUMBER", true);
-                        return false;
-                    }
-                    else if (csCode == "")
-                    {
-                        MessageBox.Show("Please input CS#");
-                        FocusColumn(view, rowHandle, "CS_CD", true);
-                        return false;
-                    }
-                    else if (materialName == "")
-                    {
-                        MessageBox.Show("Please input Material Name");
-                        FocusColumn(view, rowHandle, "MAT_NAME", true);
-                        return false;
-                    }
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return false;
-            }
-        }
-
-        /// <summary>
         /// Validate that there is a line item of which code about parts is null.
         /// </summary>
         /// <returns></returns>
@@ -4948,125 +4527,6 @@ namespace CSI.PCC.PCX
         }
 
         /// <summary>
-        /// 각 속성의 사용 중지 여부 확인 by PCC Master
-        /// </summary>
-        /// <returns></returns>
-        private bool CompareByMaster(GridView view, List<string[]> codeListForSrchLib)
-        {
-            try
-            {
-                /* codeArray 구조****************************************************
-                * 기본구조
-                * codeArray[0] : WORK_TYPE
-                * codeArray[1] : CODE
-                * codeArray[2] : ROW INDEX
-                * 
-                * WORK_TYPE이 MATERIAL_CHK인 경우
-                * codeArray[0] : WORK_TYPE
-                * codeArray[1] : MXSXL_NUMBER
-                * codeArray[2] : CS_CD
-                * codeArray[3] : ROW INDEX
-               *******************************************************************/
-
-                foreach (string[] codeArray in codeListForSrchLib)
-                {
-                    // 코드가 없는 경우 건너뜀
-                    if (codeArray[1].Trim() == "") continue;
-
-                    #region PCC 마스터에서 코드 정보를 가져옴
-                    // 패키지 매개변수 입력
-                    PKG_INTG_BOM.SELECT_PCC_MST_CODE pkgSelect = new PKG_INTG_BOM.SELECT_PCC_MST_CODE();
-                    pkgSelect.ARG_WORK_TYPE = codeArray[0];
-                    pkgSelect.ARG_CODE = codeArray[1];
-
-                    if (codeArray[0] == "MATERIAL_CHK")
-                        pkgSelect.ARG_CS_CODE = codeArray[2];
-                    else
-                        pkgSelect.ARG_CS_CODE = "";
-
-                    pkgSelect.OUT_CURSOR = string.Empty;
-                    // 패키지 호출
-                    DataTable dataSource = Common.projectBaseForm.Exe_Select_PKG(pkgSelect).Tables[0];
-                    #endregion
-
-                    // 마스터의 자재 사용 여부
-                    string useYN = string.Empty;
-                    string pccUseYN = string.Empty;
-
-                    if (dataSource.Rows.Count > 0)
-                    {
-                        useYN = dataSource.Rows[0]["USE_YN"].ToString().Trim();
-                        if (codeArray[0] == "CS_MATERIAL_CHK")
-                            pccUseYN = dataSource.Rows[0]["PCC_USE_YN"].ToString();
-                    }
-
-                    int rowHandle = Convert.ToInt32(codeArray[0] == "MATERIAL_CHK" ? codeArray[3] : codeArray[2]);
-
-                    if (dataSource.Rows.Count == 0)
-                    {
-                        string errorCode = string.Empty;
-
-                        if (codeArray[0] == "MATERIAL_CHK")
-                            errorCode = "Material";
-                        else if (codeArray[0] == "COLOR_CHK")
-                            errorCode = "CS Material";
-                        else if (codeArray[0] == "COLOR_CHK")
-                            errorCode = "Color";
-                        else if (codeArray[0] == "PROCESS_CHK")
-                            errorCode = "Process";
-                        else if (codeArray[0] == "PART_CHK")
-                        {
-                            errorCode = "Part";
-                            codeArray[1] = view.GetRowCellValue(rowHandle, "PART_NAME").ToString().Trim();
-                        }
-
-                        view.ClearSelection();
-                        view.FocusedRowHandle = rowHandle;
-                        view.SelectRow(rowHandle);
-
-                        MessageBox.Show("'" + codeArray[1] + "' " + "does not exist on the " + errorCode + " master.");
-                        return false;
-                    }
-                    else if (useYN == "N" || useYN == "")
-                    {
-                        string errorCode = string.Empty;
-
-                        if (codeArray[0] == "MATERIAL_CHK")
-                            errorCode = "Material";
-                        else if (codeArray[0] == "COLOR_CHK")
-                            errorCode = "Color";
-                        else if (codeArray[0] == "PROCESS_CHK")
-                            errorCode = "Process";
-                        else if (codeArray[0] == "PART_CHK")
-                        {
-                            errorCode = "Part";
-                            codeArray[1] = view.GetRowCellValue(rowHandle, "PART_NAME").ToString().Trim();
-                        }
-
-                        view.ClearSelection();
-                        view.FocusedRowHandle = rowHandle;
-                        view.SelectRow(rowHandle);
-
-                        MessageBox.Show("'" + codeArray[1] + "' " + "Unused " + errorCode + "Please contact MDM.");
-                        return false;
-                    }
-
-                    if (pccUseYN != "Y" && codeArray[0] == "CS_MATERIAL_CHK")
-                    {
-                        MessageBox.Show("'" + codeArray[1] + "' " + "unused CS material." + " Contact MDM Administrator.");
-                        return false;
-                    }
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return false;
-            }
-        }
-
-        /// <summary>
         /// 매개변수에 지정된 셀 선택
         /// </summary>
         /// <param name="rowHandle"></param>
@@ -5124,7 +4584,7 @@ namespace CSI.PCC.PCX
                     gvwSingleEdit.Columns["OTSL_CHK"].Visible = false;
                     gvwSingleEdit.Columns["MXSXL_NUMBER"].Visible = false;
                     gvwSingleEdit.Columns["PCX_SUPP_MAT_ID"].Visible = false;
-                    gvwSingleEdit.Columns["CS_CD"].Visible = false;
+                    //gvwSingleEdit.Columns["CS_CD"].Visible = false;
                     gvwSingleEdit.Columns["MCS_NUMBER"].Visible = false;
                     gvwSingleEdit.Columns["PCX_MAT_ID"].Visible = false;
                     gvwSingleEdit.Columns["MAT_CD"].Visible = false;
@@ -5149,7 +4609,7 @@ namespace CSI.PCC.PCX
                     gvwMultipleEdit.Columns["OTSL_CHK"].Visible = false;
                     gvwMultipleEdit.Columns["MXSXL_NUMBER"].Visible = false;
                     gvwMultipleEdit.Columns["PCX_SUPP_MAT_ID"].Visible = false;
-                    gvwMultipleEdit.Columns["CS_CD"].Visible = false;
+                    //gvwMultipleEdit.Columns["CS_CD"].Visible = false;
                     gvwMultipleEdit.Columns["MCS_NUMBER"].Visible = false;
                     gvwMultipleEdit.Columns["PCX_MAT_ID"].Visible = false;
                     gvwMultipleEdit.Columns["MAT_CD"].Visible = false;

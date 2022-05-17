@@ -42,9 +42,16 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\JihooSoft\JBrowser5\CSI.Client.ProjectBaseForm.dll</HintPath>
     </Reference>
-    <Reference Include="CSI.PCC.PCX.PCXComment, Version=1.0.7859.20977, Culture=neutral, processorArchitecture=x86">
+    <Reference Include="CSI.PCC.Common.MaterialInformation">
+      <HintPath>..\..\..\..\..\..\JihooSoft\JBrowser5\CSI.PCC.Common.MaterialInformation.dll</HintPath>
+    </Reference>
+    <Reference Include="CSI.PCC.PCX.Packages, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\JihooSoft\PCC ERP\CSI.PCC.PCX.PCXComment.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\JihooSoft\JBrowser5\CSI.PCC.PCX.Packages.dll</HintPath>
+    </Reference>
+    <Reference Include="CSI.PCC.PCX.PCXComment, Version=1.0.8157.17548, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\JihooSoft\JBrowser5\CSI.PCC.PCX.PCXComment.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.Data.v13.1, Version=13.1.8.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -164,8 +171,7 @@
     <Compile Include="CompareBOM.Designer.cs">
       <DependentUpon>CompareBOM.cs</DependentUpon>
     </Compile>
-    <Compile Include="COM\Common.cs" />
-    <Compile Include="COM\Package.cs" />
+    <Compile Include="Common.cs" />
     <Compile Include="ConfirmReason.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -177,12 +183,6 @@
     </Compile>
     <Compile Include="CopyBOM.Designer.cs">
       <DependentUpon>CopyBOM.cs</DependentUpon>
-    </Compile>
-    <Compile Include="CSMaterialInformation.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="CSMaterialInformation.Designer.cs">
-      <DependentUpon>CSMaterialInformation.cs</DependentUpon>
     </Compile>
     <Compile Include="BOMUploader_FakeBOM.cs">
       <SubType>Form</SubType>
@@ -256,12 +256,6 @@
     <Compile Include="WorksheetTemplate.Designer.cs">
       <DependentUpon>WorksheetTemplate.cs</DependentUpon>
     </Compile>
-    <Compile Include="MaterialInformation.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MaterialInformation.Designer.cs">
-      <DependentUpon>MaterialInformation.cs</DependentUpon>
-    </Compile>
     <Compile Include="PCXBOMManagement.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -324,9 +318,6 @@
     <EmbeddedResource Include="CopyBOM.resx">
       <DependentUpon>CopyBOM.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CSMaterialInformation.resx">
-      <DependentUpon>CSMaterialInformation.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="BOMUploader_FakeBOM.resx">
       <DependentUpon>BOMUploader_FakeBOM.cs</DependentUpon>
     </EmbeddedResource>
@@ -344,9 +335,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MatchOption.resx">
       <DependentUpon>MatchOption.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MaterialInformation.resx">
-      <DependentUpon>MaterialInformation.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="NewMultiEdit.resx">
       <DependentUpon>NewMultiEdit.cs</DependentUpon>

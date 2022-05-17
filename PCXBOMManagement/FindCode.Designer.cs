@@ -131,10 +131,10 @@
             this.rdoSearchType.Properties.Appearance.Options.UseFont = true;
             this.rdoSearchType.Properties.Items.AddRange(new DevExpress.XtraEditors.Controls.RadioGroupItem[] {
             new DevExpress.XtraEditors.Controls.RadioGroupItem(null, "Part"),
-            new DevExpress.XtraEditors.Controls.RadioGroupItem(null, "PCX Material"),
+            new DevExpress.XtraEditors.Controls.RadioGroupItem(null, "Material"),
             new DevExpress.XtraEditors.Controls.RadioGroupItem(null, "Color"),
-            new DevExpress.XtraEditors.Controls.RadioGroupItem(null, "PCC Material"),
-            new DevExpress.XtraEditors.Controls.RadioGroupItem(null, "CS Material")});
+            new DevExpress.XtraEditors.Controls.RadioGroupItem(null, "PCC Material", false),
+            new DevExpress.XtraEditors.Controls.RadioGroupItem(null, "CS Material", false)});
             this.rdoSearchType.Size = new System.Drawing.Size(544, 29);
             this.rdoSearchType.TabIndex = 4;
             this.rdoSearchType.SelectedIndexChanged += new System.EventHandler(this.rdoSearchType_SelectedIndexChanged);

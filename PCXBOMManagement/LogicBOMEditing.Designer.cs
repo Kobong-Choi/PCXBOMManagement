@@ -764,6 +764,7 @@
             this.MaterialInfo.Name = "MaterialInfo";
             this.MaterialInfo.Size = new System.Drawing.Size(222, 22);
             this.MaterialInfo.Text = "Material Info.";
+            this.MaterialInfo.Visible = false;
             this.MaterialInfo.Click += new System.EventHandler(this.ctxMenuStrip_Click);
             // 
             // showFcsdRow

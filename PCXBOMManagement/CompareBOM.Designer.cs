@@ -333,6 +333,7 @@
             this.MatInfo.Name = "MatInfo";
             this.MatInfo.Size = new System.Drawing.Size(324, 22);
             this.MatInfo.Text = "Material Info.";
+            this.MatInfo.Visible = false;
             this.MatInfo.Click += new System.EventHandler(this.ContextMenu_Click);
             // 
             // FocusRow
@@ -769,7 +770,7 @@
             this.gridColumn29.FieldName = "PART_NIKE_COMMENT";
             this.gridColumn29.Name = "gridColumn29";
             this.gridColumn29.Visible = true;
-            this.gridColumn29.VisibleIndex = 20;
+            this.gridColumn29.VisibleIndex = 19;
             this.gridColumn29.Width = 220;
             // 
             // colMXSXL_NUMBER
@@ -796,7 +797,7 @@
             this.colPCX_SUPP_MAT_ID.Name = "colPCX_SUPP_MAT_ID";
             this.colPCX_SUPP_MAT_ID.OptionsColumn.AllowEdit = false;
             this.colPCX_SUPP_MAT_ID.Visible = true;
-            this.colPCX_SUPP_MAT_ID.VisibleIndex = 16;
+            this.colPCX_SUPP_MAT_ID.VisibleIndex = 15;
             this.colPCX_SUPP_MAT_ID.Width = 80;
             // 
             // gridColumn38
@@ -809,8 +810,6 @@
             this.gridColumn38.FieldName = "CS_CD";
             this.gridColumn38.Name = "gridColumn38";
             this.gridColumn38.OptionsColumn.AllowEdit = false;
-            this.gridColumn38.Visible = true;
-            this.gridColumn38.VisibleIndex = 14;
             this.gridColumn38.Width = 35;
             // 
             // colMCS_NUMBER
@@ -824,7 +823,7 @@
             this.colMCS_NUMBER.Name = "colMCS_NUMBER";
             this.colMCS_NUMBER.OptionsColumn.AllowEdit = false;
             this.colMCS_NUMBER.Visible = true;
-            this.colMCS_NUMBER.VisibleIndex = 15;
+            this.colMCS_NUMBER.VisibleIndex = 14;
             this.colMCS_NUMBER.Width = 80;
             // 
             // colPCX_MAT_ID
@@ -838,7 +837,7 @@
             this.colPCX_MAT_ID.Name = "colPCX_MAT_ID";
             this.colPCX_MAT_ID.OptionsColumn.AllowEdit = false;
             this.colPCX_MAT_ID.Visible = true;
-            this.colPCX_MAT_ID.VisibleIndex = 17;
+            this.colPCX_MAT_ID.VisibleIndex = 16;
             // 
             // colMAT_CD
             // 
@@ -859,7 +858,7 @@
             this.colMAT_NAME.FieldName = "MAT_NAME";
             this.colMAT_NAME.Name = "colMAT_NAME";
             this.colMAT_NAME.Visible = true;
-            this.colMAT_NAME.VisibleIndex = 19;
+            this.colMAT_NAME.VisibleIndex = 18;
             this.colMAT_NAME.Width = 250;
             // 
             // colMAT_COMMENT
@@ -870,7 +869,7 @@
             this.colMAT_COMMENT.FieldName = "MAT_COMMENT";
             this.colMAT_COMMENT.Name = "colMAT_COMMENT";
             this.colMAT_COMMENT.Visible = true;
-            this.colMAT_COMMENT.VisibleIndex = 21;
+            this.colMAT_COMMENT.VisibleIndex = 20;
             this.colMAT_COMMENT.Width = 220;
             // 
             // gridColumn13
@@ -892,7 +891,7 @@
             this.colVENDOR_NAME.Name = "colVENDOR_NAME";
             this.colVENDOR_NAME.OptionsColumn.AllowEdit = false;
             this.colVENDOR_NAME.Visible = true;
-            this.colVENDOR_NAME.VisibleIndex = 18;
+            this.colVENDOR_NAME.VisibleIndex = 17;
             this.colVENDOR_NAME.Width = 150;
             // 
             // colPCX_COLOR_ID
@@ -906,7 +905,7 @@
             this.colPCX_COLOR_ID.Name = "colPCX_COLOR_ID";
             this.colPCX_COLOR_ID.OptionsColumn.AllowEdit = false;
             this.colPCX_COLOR_ID.Visible = true;
-            this.colPCX_COLOR_ID.VisibleIndex = 22;
+            this.colPCX_COLOR_ID.VisibleIndex = 21;
             // 
             // colCOLOR_CD
             // 
@@ -919,7 +918,7 @@
             this.colCOLOR_CD.FieldName = "COLOR_CD";
             this.colCOLOR_CD.Name = "colCOLOR_CD";
             this.colCOLOR_CD.Visible = true;
-            this.colCOLOR_CD.VisibleIndex = 23;
+            this.colCOLOR_CD.VisibleIndex = 22;
             // 
             // colCOLOR_NAME
             // 
@@ -930,7 +929,7 @@
             this.colCOLOR_NAME.FieldName = "COLOR_NAME";
             this.colCOLOR_NAME.Name = "colCOLOR_NAME";
             this.colCOLOR_NAME.Visible = true;
-            this.colCOLOR_NAME.VisibleIndex = 24;
+            this.colCOLOR_NAME.VisibleIndex = 23;
             this.colCOLOR_NAME.Width = 99;
             // 
             // gridColumn30
@@ -941,7 +940,7 @@
             this.gridColumn30.FieldName = "COLOR_COMMENT";
             this.gridColumn30.Name = "gridColumn30";
             this.gridColumn30.Visible = true;
-            this.gridColumn30.VisibleIndex = 25;
+            this.gridColumn30.VisibleIndex = 24;
             this.gridColumn30.Width = 220;
             // 
             // colPROCESS
@@ -953,7 +952,7 @@
             this.colPROCESS.FieldName = "PROCESS";
             this.colPROCESS.Name = "colPROCESS";
             this.colPROCESS.Visible = true;
-            this.colPROCESS.VisibleIndex = 26;
+            this.colPROCESS.VisibleIndex = 25;
             this.colPROCESS.Width = 228;
             // 
             // colREMARKS
@@ -964,7 +963,7 @@
             this.colREMARKS.FieldName = "REMARKS";
             this.colREMARKS.Name = "colREMARKS";
             this.colREMARKS.Visible = true;
-            this.colREMARKS.VisibleIndex = 27;
+            this.colREMARKS.VisibleIndex = 26;
             this.colREMARKS.Width = 150;
             // 
             // colUPD_USER
@@ -978,7 +977,7 @@
             this.colUPD_USER.Name = "colUPD_USER";
             this.colUPD_USER.OptionsColumn.AllowEdit = false;
             this.colUPD_USER.Visible = true;
-            this.colUPD_USER.VisibleIndex = 28;
+            this.colUPD_USER.VisibleIndex = 27;
             this.colUPD_USER.Width = 85;
             // 
             // gridColumn4
@@ -992,7 +991,7 @@
             this.gridColumn4.Name = "gridColumn4";
             this.gridColumn4.OptionsColumn.AllowEdit = false;
             this.gridColumn4.Visible = true;
-            this.gridColumn4.VisibleIndex = 29;
+            this.gridColumn4.VisibleIndex = 28;
             this.gridColumn4.Width = 150;
             // 
             // gridColumn28

@@ -6,8 +6,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
 using System.Collections;                       // ArrayList
+
 using DevExpress.XtraGrid;                      // GridControl
 using DevExpress.XtraGrid.Views.Base;           // GridCell
 using DevExpress.XtraGrid.Views.Grid;           // GridView
@@ -15,9 +15,9 @@ using DevExpress.XtraGrid.Views.Grid.ViewInfo;  // GridHitInfo
 using DevExpress.Utils;                         // DXMouseEventArgs
 using DevExpress.XtraEditors;                   // GridLookUpEdit
 using DevExpress.XtraSplashScreen;              // XtraSplashScreen
+
 using CSI.Client.ProjectBaseForm;               // ProjectBaseForm Class
-using CSI.PCC.PCX.COM;                          // Common Class
-using CSI.PCC.PCX.PACKAGE;                      // Package Class
+using CSI.PCC.PCX.Packages;                     // Package Class
 
 namespace CSI.PCC.PCX
 {

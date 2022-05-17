@@ -17,8 +17,7 @@ using System.Net.Mime;
 using System.Data.OleDb;                          // OleDbConnection
 
 using CSI.Client.ProjectBaseForm;                 // ProjectBaseForm Class
-using CSI.PCC.PCX.COM;                            // Common Class
-using CSI.PCC.PCX.PACKAGE;                        // Package Class
+using CSI.PCC.PCX.Packages;                       // Package Class
 
 using JPlatform.Client.Library.interFace;
 
@@ -1690,8 +1689,7 @@ namespace CSI.PCC.PCX
             }
             else
             {
-                MessageBox.Show("Costing PIC is not enrolled on PMX. Can't send an e-mail.", "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                Common.ShowMessageBox("Costing PIC has not yet been enrolled, Please ask the user to update it on PLM.", "W");
                 return;
             }
 
@@ -1723,7 +1721,7 @@ namespace CSI.PCC.PCX
                 if (!di.Exists)
                     di.Create();
             }
-            catch (IOException e)
+            catch
             {
                 Common.ShowMessageBox("Failed to create directory.", "E");
                 return;
@@ -2900,8 +2898,7 @@ namespace CSI.PCC.PCX
                     worksheetNumber = ds.Tables[0].Rows[0]["WS_NO"].ToString();
                 else
                 {
-                    MessageBox.Show("Failed to generate a new key.", "",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                    Common.ShowMessageBox("Failed to generate a new key", "E");
                     return;
                 }
 
@@ -3106,7 +3103,7 @@ namespace CSI.PCC.PCX
                     mtbOfSection = ds.Tables[0];
                 else
                 {
-                    Common.ShowMessageBox("Failed to load common map table.", "E");
+                    Common.ShowMessageBox("Failed to load a map table for section.", "E");
                     return;
                 }
 
@@ -3123,7 +3120,7 @@ namespace CSI.PCC.PCX
                     mtbOfBOMData = ds.Tables[0];
                 else
                 {
-                    Common.ShowMessageBox("Failed to load BOM map table.", "E");
+                    Common.ShowMessageBox("Failed to load a map table for BOM.", "E");
                     return;
                 }
 
@@ -3230,7 +3227,7 @@ namespace CSI.PCC.PCX
                         lineItem.mcsNumber = "";
                         lineItem.vendorName = "";
                         lineItem.csCode = "";
-                        lineItem.materialComments = lineItem.suppliedMaterialIdentifier == "0" ? "" : "Failed to load material info. from MDM.";
+                        lineItem.materialComments = lineItem.suppliedMaterialIdentifier.Equals("0") ? "" : "Failed to load material info. from MDM.";
                     }
 
                     #endregion
@@ -3275,8 +3272,8 @@ namespace CSI.PCC.PCX
                     pkgInsert4.ARG_PART_TYPE = lineItem.partType;
                     pkgInsert4.MXSXL_NUMBER = lineItem.mxsxlNumber;
                     pkgInsert4.ARG_MAT_CD = lineItem.pdmMaterialCode;
-                    pkgInsert4.ARG_MAT_NAME = lineItem.suppliedMaterialIdentifier == "100" ? "PLACEHOLDER" : lineItem.pdmMaterialName;
-                    pkgInsert4.ARG_MAT_COMMENTS = lineItem.bomLineItemComments == "" ? lineItem.materialComments : lineItem.bomLineItemComments;
+                    pkgInsert4.ARG_MAT_NAME = lineItem.suppliedMaterialIdentifier.Equals("100") ? "PLACEHOLDER" : lineItem.pdmMaterialName;
+                    pkgInsert4.ARG_MAT_COMMENTS = lineItem.materialComments.Equals("") ? lineItem.bomLineItemComments : lineItem.materialComments;
                     pkgInsert4.ARG_MCS_NUMBER = lineItem.mcsNumber;
                     pkgInsert4.ARG_NIKE_COMMENT = lineItem.bomLineItemComments;
                     pkgInsert4.ARG_COLOR_CD = lineItem.colorCode;
@@ -3880,6 +3877,7 @@ namespace CSI.PCC.PCX
                                 pkgInsertData.ARG_LOGIC_GROUP = dr["logicGroup"].ToString();
                                 pkgInsertData.ARG_MAT_FORECAST_PRCNT = Convert.ToDouble(dr["materialForecastPercent"].ToString());
                                 pkgInsertData.ARG_COLOR_FORECAST_PRCNT = Convert.ToDouble(dr["colorForecastPercent"].ToString());
+                                pkgInsertData.ARG_LINEITEM_UUID = "";
                                 // STICKER는 DB에서 처리
 
                                 arrayList2.Add(pkgInsertData);

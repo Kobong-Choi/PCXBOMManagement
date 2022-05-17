@@ -9,8 +9,7 @@ using System.Windows.Forms;
 using System.Collections;                       // ArrayList
 
 using CSI.Client.ProjectBaseForm;               // ProjectBaseForm Class
-using CSI.PCC.PCX.COM;                          // Common Class
-using CSI.PCC.PCX.PACKAGE;                      // Package Class
+using CSI.PCC.PCX.Packages;                     // Package Class
 
 using DevExpress.XtraGrid;                      // GridControl
 using DevExpress.XtraGrid.Views.Base;           // GridCell
@@ -47,14 +46,19 @@ namespace CSI.PCC.PCX
 
         private void FindCode_Load(object sender, EventArgs e)
         {
-            rdoSearchType.SelectedIndexChanged -= new EventHandler(rdoSearchType_SelectedIndexChanged);
+            try
+            {
+                rdoSearchType.SelectedIndexChanged -= new EventHandler(rdoSearchType_SelectedIndexChanged);
 
-            rdoSearchType.SelectedIndex = initialValues.Type;
-            txtKeyword.Text = initialValues.Keyword;
+                rdoSearchType.SelectedIndex = initialValues.Type;
+                txtKeyword.Text = initialValues.Keyword;
 
-            SetGridView(initialValues.Type);
-            
-            rdoSearchType.SelectedIndexChanged += new EventHandler(rdoSearchType_SelectedIndexChanged);
+                SetVisibleColumns(initialValues.Type);
+            }
+            finally
+            {
+                rdoSearchType.SelectedIndexChanged += new EventHandler(rdoSearchType_SelectedIndexChanged);
+            }
         }
 
         /// <summary>
@@ -64,36 +68,42 @@ namespace CSI.PCC.PCX
         /// <param name="e"></param>
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            // 검색할 문자열을 입력하였는지 확인
             if (txtKeyword.Text == "")
             {
-                MessageBox.Show("Please enter a character to search for.");
+                Common.ShowMessageBox("Please type words to search for.", "I");
                 return;
             }
+            else
+            {
+                switch (rdoSearchType.SelectedIndex)
+                {
+                    case 0:
+                        SearchCodeFromLibrary("Part");
+                        break;
 
-            // 검색 타입
-            int type = rdoSearchType.SelectedIndex;
+                    case 1:
+                        SearchCodeFromLibrary("PCX_Material");
+                        break;
 
-            // 타입에 맞게 라이브러리 조회
-            if (type == 0)
-            {
-                SearchCodeFromLibrary("Part");
-            }
-            else if (type == 1)
-            {
-                SearchCodeFromLibrary("PCX_Material");
-            }
-            else if (type == 2)
-            {
-                SearchCodeFromLibrary("Color");
-            }
-            else if (type == 3)
-            {
-                SearchCodeFromLibrary("PCC_Material");
-            }
-            else if (type == 4)
-            {
-                SearchCodeFromLibrary("CS_Material");
+                    case 2:
+                        SearchCodeFromLibrary("Color");
+                        break;
+
+                    #region Close PCC Material
+
+                    //case 3:
+                    //    SearchCodeFromLibrary("PCC_Material");
+                    //    break;
+
+                    //case 4:
+                    //    SearchCodeFromLibrary("CS_Material");
+                    //    break;
+
+                    #endregion
+
+                    default:
+                        break;
+                }
             }
         }
 
@@ -106,34 +116,41 @@ namespace CSI.PCC.PCX
         {
             if (e.KeyCode == Keys.Enter)
             {
-                // 검색할 문자열을 입력하였는지 확인
+                // Validate if a keword is entered.
                 if (txtKeyword.Text == "")
                 {
-                    MessageBox.Show("Please enter a character to search for.");
+                    Common.ShowMessageBox("Please type words to search for.", "I");
                     return;
                 }
 
-                int selectedIndex = rdoSearchType.SelectedIndex;
+                switch (rdoSearchType.SelectedIndex)
+                {
+                    case 0:
+                        SearchCodeFromLibrary("Part");
+                        break;
 
-                if (selectedIndex == 0)
-                {
-                    SearchCodeFromLibrary("Part");
-                }
-                else if (selectedIndex == 1)
-                {
-                    SearchCodeFromLibrary("PCX_Material");
-                }
-                else if (selectedIndex == 2)
-                {
-                    SearchCodeFromLibrary("Color");
-                }
-                else if (selectedIndex == 3)
-                {
-                    SearchCodeFromLibrary("PCC_Material");
-                }
-                else if (selectedIndex == 4)
-                {
-                    SearchCodeFromLibrary("CS_Material");
+                    case 1:
+                        SearchCodeFromLibrary("PCX_Material");
+                        break;
+
+                    case 2:
+                        SearchCodeFromLibrary("Color");
+                        break;
+
+                    #region Close PCC Material
+
+                    //case 3:
+                    //    SearchCodeFromLibrary("PCC_Material");
+                    //    break;
+
+                    //case 4:
+                    //    SearchCodeFromLibrary("CS_Material");
+                    //    break;
+
+                    #endregion
+
+                    default:
+                        break;
                 }
             }
         }
@@ -141,303 +158,306 @@ namespace CSI.PCC.PCX
         /// <summary>
         /// 타입에 맞는 그리드 뷰 설정
         /// </summary>
-        /// <param name="_type"></param>
-        private void SetGridView(int _type)
+        /// <param name="type"></param>
+        private void SetVisibleColumns(int type)
         {
-            if (_type == 0)
+            switch (type)
             {
-                #region Part
+                case 0:
 
-                gvwLibrary.Columns["PCX_PART_ID"].Visible = true;
-                gvwLibrary.Columns["PCX_PART_ID"].VisibleIndex = 0;
+                    #region Part
 
-                gvwLibrary.Columns["PART_NAME"].Visible = true;
-                gvwLibrary.Columns["PART_NAME"].VisibleIndex = 1;
+                    gvwLibrary.Columns["PCX_PART_ID"].Visible = true;
+                    gvwLibrary.Columns["PCX_PART_ID"].VisibleIndex = 0;
 
-                gvwLibrary.Columns["PART_TYPE"].Visible = true;
-                gvwLibrary.Columns["PART_TYPE"].VisibleIndex = 2;
+                    gvwLibrary.Columns["PART_NAME"].Visible = true;
+                    gvwLibrary.Columns["PART_NAME"].VisibleIndex = 1;
 
-                gvwLibrary.Columns["PART_CD"].Visible = true;
-                gvwLibrary.Columns["PART_CD"].VisibleIndex = 3;
+                    gvwLibrary.Columns["PART_TYPE"].Visible = true;
+                    gvwLibrary.Columns["PART_TYPE"].VisibleIndex = 2;
 
-                gvwLibrary.Columns["PART_STATUS"].Visible = true;
-                gvwLibrary.Columns["PART_STATUS"].VisibleIndex = 4;
+                    gvwLibrary.Columns["PART_CD"].Visible = true;
+                    gvwLibrary.Columns["PART_CD"].VisibleIndex = 3;
 
-                gvwLibrary.Columns["PART_SHORT_NAME"].Visible = false;
+                    gvwLibrary.Columns["PART_STATUS"].Visible = true;
+                    gvwLibrary.Columns["PART_STATUS"].VisibleIndex = 4;
 
-                gvwLibrary.Columns["BLACK_LIST_YN"].Visible = false;
-                gvwLibrary.Columns["PCX_MAT_ID"].Visible = false;
-                gvwLibrary.Columns["PCX_SUPP_MAT_ID"].Visible = false;
-                gvwLibrary.Columns["MAT_CD"].Visible = false;
-                gvwLibrary.Columns["MXSXL_NUMBER"].Visible = false;
-                gvwLibrary.Columns["CS_CD"].Visible = false;
-                gvwLibrary.Columns["MCS_NUMBER"].Visible = false;
-                gvwLibrary.Columns["MAT_NAME"].Visible = false;
-                gvwLibrary.Columns["MAT_TYPE"].Visible = false;
-                gvwLibrary.Columns["VEN_NAME"].Visible = false;
-                gvwLibrary.Columns["MAT_STATUS"].Visible = false;
+                    gvwLibrary.Columns["PART_SHORT_NAME"].Visible = false;
 
-                gvwLibrary.Columns["PCX_COLOR_ID"].Visible = false;
-                gvwLibrary.Columns["COLOR_CD"].Visible = false;
-                gvwLibrary.Columns["COLOR_NAME"].Visible = false;
-                gvwLibrary.Columns["COLOR_STATUS"].Visible = false;
-                
-                gvwLibrary.Columns["CS_MAT_CD"].Visible = false;
-                gvwLibrary.Columns["CS_MAT_NAME"].Visible = false;
-                gvwLibrary.Columns["WIDTH"].Visible = false;
-                gvwLibrary.Columns["MNG_UNIT"].Visible = false;
-                gvwLibrary.Columns["SPEC_DESC"].Visible = false;
+                    gvwLibrary.Columns["BLACK_LIST_YN"].Visible = false;
+                    gvwLibrary.Columns["PCX_MAT_ID"].Visible = false;
+                    gvwLibrary.Columns["PCX_SUPP_MAT_ID"].Visible = false;
+                    gvwLibrary.Columns["MAT_CD"].Visible = false;
+                    gvwLibrary.Columns["MXSXL_NUMBER"].Visible = false;
+                    gvwLibrary.Columns["CS_CD"].Visible = false;
+                    gvwLibrary.Columns["MCS_NUMBER"].Visible = false;
+                    gvwLibrary.Columns["MAT_NAME"].Visible = false;
+                    gvwLibrary.Columns["MAT_TYPE"].Visible = false;
+                    gvwLibrary.Columns["VEN_NAME"].Visible = false;
+                    gvwLibrary.Columns["MAT_STATUS"].Visible = false;
+
+                    gvwLibrary.Columns["PCX_COLOR_ID"].Visible = false;
+                    gvwLibrary.Columns["COLOR_CD"].Visible = false;
+                    gvwLibrary.Columns["COLOR_NAME"].Visible = false;
+                    gvwLibrary.Columns["COLOR_STATUS"].Visible = false;
+
+                    gvwLibrary.Columns["CS_MAT_CD"].Visible = false;
+                    gvwLibrary.Columns["CS_MAT_NAME"].Visible = false;
+                    gvwLibrary.Columns["WIDTH"].Visible = false;
+                    gvwLibrary.Columns["MNG_UNIT"].Visible = false;
+                    gvwLibrary.Columns["SPEC_DESC"].Visible = false;
+
+                    #endregion
+
+                    break;
+
+                case 1:
+
+                    #region PCX Material
+
+                    gvwLibrary.Columns["BLACK_LIST_YN"].Visible = true;
+                    gvwLibrary.Columns["BLACK_LIST_YN"].VisibleIndex = 0;
+
+                    gvwLibrary.Columns["MAT_STATUS"].Visible = true;
+                    gvwLibrary.Columns["MAT_STATUS"].VisibleIndex = 1;
+
+                    gvwLibrary.Columns["PCX_MAT_ID"].Visible = true;
+                    gvwLibrary.Columns["PCX_MAT_ID"].VisibleIndex = 2;
+
+                    gvwLibrary.Columns["PCX_SUPP_MAT_ID"].Visible = true;
+                    gvwLibrary.Columns["PCX_SUPP_MAT_ID"].VisibleIndex = 3;
+
+                    gvwLibrary.Columns["MAT_CD"].Visible = false;
+
+                    gvwLibrary.Columns["MXSXL_NUMBER"].Visible = true;
+                    gvwLibrary.Columns["MXSXL_NUMBER"].VisibleIndex = 4;
+
+                    gvwLibrary.Columns["CS_CD"].Visible = false;
+
+                    gvwLibrary.Columns["MCS_NUMBER"].Visible = true;
+                    gvwLibrary.Columns["MCS_NUMBER"].VisibleIndex = 5;
+
+                    gvwLibrary.Columns["MAT_NAME"].Visible = true;
+                    gvwLibrary.Columns["MAT_NAME"].VisibleIndex = 6;
+
+                    gvwLibrary.Columns["VEN_NAME"].Visible = true;
+                    gvwLibrary.Columns["VEN_NAME"].VisibleIndex = 7;
+
+                    gvwLibrary.Columns["MAT_TYPE"].Visible = true;
+                    gvwLibrary.Columns["MAT_TYPE"].VisibleIndex = 8;
+
+                    gvwLibrary.Columns["PCX_PART_ID"].Visible = false;
+                    gvwLibrary.Columns["PART_NAME"].Visible = false;
+                    gvwLibrary.Columns["PART_SHORT_NAME"].Visible = false;
+                    gvwLibrary.Columns["PART_TYPE"].Visible = false;
+                    gvwLibrary.Columns["PART_CD"].Visible = false;
+                    gvwLibrary.Columns["PART_STATUS"].Visible = false;
+
+                    gvwLibrary.Columns["PCX_COLOR_ID"].Visible = false;
+                    gvwLibrary.Columns["COLOR_CD"].Visible = false;
+                    gvwLibrary.Columns["COLOR_NAME"].Visible = false;
+                    gvwLibrary.Columns["COLOR_STATUS"].Visible = false;
+
+                    gvwLibrary.Columns["CS_MAT_CD"].Visible = false;
+                    gvwLibrary.Columns["CS_MAT_NAME"].Visible = false;
+                    gvwLibrary.Columns["WIDTH"].Visible = false;
+                    gvwLibrary.Columns["MNG_UNIT"].Visible = false;
+                    gvwLibrary.Columns["SPEC_DESC"].Visible = false;
+
+                    #endregion
+
+                    break;
+
+                case 2:
+
+                    #region Color
+
+                    gvwLibrary.Columns["PCX_COLOR_ID"].Visible = true;
+                    gvwLibrary.Columns["PCX_COLOR_ID"].VisibleIndex = 0;
+
+                    gvwLibrary.Columns["COLOR_CD"].Visible = true;
+                    gvwLibrary.Columns["COLOR_CD"].VisibleIndex = 1;
+
+                    gvwLibrary.Columns["COLOR_NAME"].Visible = true;
+                    gvwLibrary.Columns["COLOR_NAME"].VisibleIndex = 2;
+
+                    gvwLibrary.Columns["COLOR_STATUS"].Visible = true;
+                    gvwLibrary.Columns["COLOR_STATUS"].VisibleIndex = 3;
+
+                    gvwLibrary.Columns["PCX_PART_ID"].Visible = false;
+                    gvwLibrary.Columns["PART_NAME"].Visible = false;
+                    gvwLibrary.Columns["PART_SHORT_NAME"].Visible = false;
+                    gvwLibrary.Columns["PART_TYPE"].Visible = false;
+                    gvwLibrary.Columns["PART_CD"].Visible = false;
+                    gvwLibrary.Columns["PART_STATUS"].Visible = false;
+
+                    gvwLibrary.Columns["BLACK_LIST_YN"].Visible = false;
+                    gvwLibrary.Columns["PCX_MAT_ID"].Visible = false;
+                    gvwLibrary.Columns["PCX_SUPP_MAT_ID"].Visible = false;
+                    gvwLibrary.Columns["MAT_CD"].Visible = false;
+                    gvwLibrary.Columns["MXSXL_NUMBER"].Visible = false;
+                    gvwLibrary.Columns["CS_CD"].Visible = false;
+                    gvwLibrary.Columns["MCS_NUMBER"].Visible = false;
+                    gvwLibrary.Columns["MAT_NAME"].Visible = false;
+                    gvwLibrary.Columns["MAT_TYPE"].Visible = false;
+                    gvwLibrary.Columns["MAT_STATUS"].Visible = false;
+                    gvwLibrary.Columns["VEN_NAME"].Visible = false;
+
+                    gvwLibrary.Columns["CS_MAT_CD"].Visible = false;
+                    gvwLibrary.Columns["CS_MAT_NAME"].Visible = false;
+                    gvwLibrary.Columns["WIDTH"].Visible = false;
+                    gvwLibrary.Columns["MNG_UNIT"].Visible = false;
+                    gvwLibrary.Columns["SPEC_DESC"].Visible = false;
+
+                    #endregion
+
+                    break;
+
+                #region Close PCC Material
+
+                //case 3:
+
+                //    #region PCC Material
+
+                //    gvwLibrary.Columns["BLACK_LIST_YN"].Visible = true;
+                //    gvwLibrary.Columns["BLACK_LIST_YN"].VisibleIndex = 0;
+
+                //    gvwLibrary.Columns["MAT_STATUS"].Visible = true;
+                //    gvwLibrary.Columns["MAT_STATUS"].VisibleIndex = 1;
+
+                //    gvwLibrary.Columns["PCX_MAT_ID"].Visible = true;
+                //    gvwLibrary.Columns["PCX_MAT_ID"].VisibleIndex = 2;
+
+                //    gvwLibrary.Columns["PCX_SUPP_MAT_ID"].Visible = true;
+                //    gvwLibrary.Columns["PCX_SUPP_MAT_ID"].VisibleIndex = 3;
+
+                //    gvwLibrary.Columns["MXSXL_NUMBER"].Visible = true;
+                //    gvwLibrary.Columns["MXSXL_NUMBER"].VisibleIndex = 4;
+
+                //    gvwLibrary.Columns["CS_CD"].Visible = true;
+                //    gvwLibrary.Columns["CS_CD"].VisibleIndex = 5;
+
+                //    gvwLibrary.Columns["MCS_NUMBER"].Visible = true;
+                //    gvwLibrary.Columns["MCS_NUMBER"].VisibleIndex = 6;
+
+                //    gvwLibrary.Columns["MAT_NAME"].Visible = true;
+                //    gvwLibrary.Columns["MAT_NAME"].VisibleIndex = 7;
+
+                //    gvwLibrary.Columns["MAT_TYPE"].Visible = true;
+                //    gvwLibrary.Columns["MAT_TYPE"].VisibleIndex = 8;
+
+                //    gvwLibrary.Columns["VEN_NAME"].Visible = true;
+                //    gvwLibrary.Columns["VEN_NAME"].VisibleIndex = 9;
+
+                //    gvwLibrary.Columns["MAT_CD"].Visible = false;
+                //    gvwLibrary.Columns["PCX_PART_ID"].Visible = false;
+                //    gvwLibrary.Columns["PART_NAME"].Visible = false;
+                //    gvwLibrary.Columns["PART_SHORT_NAME"].Visible = false;
+                //    gvwLibrary.Columns["PART_TYPE"].Visible = false;
+                //    gvwLibrary.Columns["PART_CD"].Visible = false;
+                //    gvwLibrary.Columns["PART_STATUS"].Visible = false;
+
+                //    gvwLibrary.Columns["PCX_COLOR_ID"].Visible = false;
+                //    gvwLibrary.Columns["COLOR_CD"].Visible = false;
+                //    gvwLibrary.Columns["COLOR_NAME"].Visible = false;
+                //    gvwLibrary.Columns["COLOR_STATUS"].Visible = false;
+
+                //    gvwLibrary.Columns["CS_MAT_CD"].Visible = false;
+                //    gvwLibrary.Columns["CS_MAT_NAME"].Visible = false;
+                //    gvwLibrary.Columns["WIDTH"].Visible = false;
+                //    gvwLibrary.Columns["MNG_UNIT"].Visible = false;
+                //    gvwLibrary.Columns["SPEC_DESC"].Visible = false;
+
+                //    #endregion
+
+                //    break;
+
+                //case 4:
+
+                //    #region CS Material
+
+                //    gvwLibrary.Columns["CS_MAT_CD"].Visible = true;
+                //    gvwLibrary.Columns["CS_MAT_CD"].VisibleIndex = 0;
+
+                //    gvwLibrary.Columns["CS_MAT_NAME"].Visible = true;
+                //    gvwLibrary.Columns["CS_MAT_NAME"].VisibleIndex = 1;
+
+                //    gvwLibrary.Columns["WIDTH"].Visible = true;
+                //    gvwLibrary.Columns["WIDTH"].VisibleIndex = 2;
+
+                //    gvwLibrary.Columns["MNG_UNIT"].Visible = true;
+                //    gvwLibrary.Columns["MNG_UNIT"].VisibleIndex = 3;
+
+                //    gvwLibrary.Columns["SPEC_DESC"].Visible = true;
+                //    gvwLibrary.Columns["SPEC_DESC"].VisibleIndex = 4;
+
+                //    gvwLibrary.Columns["PCX_PART_ID"].Visible = false;
+                //    gvwLibrary.Columns["PART_NAME"].Visible = false;
+                //    gvwLibrary.Columns["PART_SHORT_NAME"].Visible = false;
+                //    gvwLibrary.Columns["PART_TYPE"].Visible = false;
+                //    gvwLibrary.Columns["PART_CD"].Visible = false;
+                //    gvwLibrary.Columns["PART_STATUS"].Visible = false;
+
+                //    gvwLibrary.Columns["BLACK_LIST_YN"].Visible = false;
+                //    gvwLibrary.Columns["PCX_MAT_ID"].Visible = false;
+                //    gvwLibrary.Columns["PCX_SUPP_MAT_ID"].Visible = false;
+                //    gvwLibrary.Columns["MAT_CD"].Visible = false;
+                //    gvwLibrary.Columns["MXSXL_NUMBER"].Visible = false;
+                //    gvwLibrary.Columns["CS_CD"].Visible = false;
+                //    gvwLibrary.Columns["MCS_NUMBER"].Visible = false;
+                //    gvwLibrary.Columns["MAT_NAME"].Visible = false;
+                //    gvwLibrary.Columns["MAT_TYPE"].Visible = false;
+                //    gvwLibrary.Columns["MAT_STATUS"].Visible = false;
+                //    gvwLibrary.Columns["VEN_NAME"].Visible = false;
+
+                //    gvwLibrary.Columns["PCX_COLOR_ID"].Visible = false;
+                //    gvwLibrary.Columns["COLOR_CD"].Visible = false;
+                //    gvwLibrary.Columns["COLOR_NAME"].Visible = false;
+                //    gvwLibrary.Columns["COLOR_STATUS"].Visible = false;
+
+                //    #endregion
+
+                //    break;
 
                 #endregion
-            }
-            else if (_type == 1)
-            {
-                #region PCX Material
 
-                gvwLibrary.Columns["BLACK_LIST_YN"].Visible = true;
-                gvwLibrary.Columns["BLACK_LIST_YN"].VisibleIndex = 0;
-
-                gvwLibrary.Columns["MAT_STATUS"].Visible = true;
-                gvwLibrary.Columns["MAT_STATUS"].VisibleIndex = 1;
-
-                gvwLibrary.Columns["PCX_MAT_ID"].Visible = true;
-                gvwLibrary.Columns["PCX_MAT_ID"].VisibleIndex = 2;
-                
-                gvwLibrary.Columns["PCX_SUPP_MAT_ID"].Visible = true;
-                gvwLibrary.Columns["PCX_SUPP_MAT_ID"].VisibleIndex = 3;
-
-                gvwLibrary.Columns["MAT_CD"].Visible = false;
-
-                gvwLibrary.Columns["MXSXL_NUMBER"].Visible = true;
-                gvwLibrary.Columns["MXSXL_NUMBER"].VisibleIndex = 4;
-
-                gvwLibrary.Columns["CS_CD"].Visible = false;
-
-                gvwLibrary.Columns["MCS_NUMBER"].Visible = true;
-                gvwLibrary.Columns["MCS_NUMBER"].VisibleIndex = 5;
-
-                gvwLibrary.Columns["MAT_NAME"].Visible = true;
-                gvwLibrary.Columns["MAT_NAME"].VisibleIndex = 6;
-
-                gvwLibrary.Columns["VEN_NAME"].Visible = true;
-                gvwLibrary.Columns["VEN_NAME"].VisibleIndex = 7;                
-
-                gvwLibrary.Columns["MAT_TYPE"].Visible = true;
-                gvwLibrary.Columns["MAT_TYPE"].VisibleIndex = 8;
-                
-                gvwLibrary.Columns["PCX_PART_ID"].Visible = false;
-                gvwLibrary.Columns["PART_NAME"].Visible = false;
-                gvwLibrary.Columns["PART_SHORT_NAME"].Visible = false;
-                gvwLibrary.Columns["PART_TYPE"].Visible = false;
-                gvwLibrary.Columns["PART_CD"].Visible = false;
-                gvwLibrary.Columns["PART_STATUS"].Visible = false;
-
-                gvwLibrary.Columns["PCX_COLOR_ID"].Visible = false;
-                gvwLibrary.Columns["COLOR_CD"].Visible = false;
-                gvwLibrary.Columns["COLOR_NAME"].Visible = false;
-                gvwLibrary.Columns["COLOR_STATUS"].Visible = false;
-
-                gvwLibrary.Columns["CS_MAT_CD"].Visible = false;
-                gvwLibrary.Columns["CS_MAT_NAME"].Visible = false;
-                gvwLibrary.Columns["WIDTH"].Visible = false;
-                gvwLibrary.Columns["MNG_UNIT"].Visible = false;
-                gvwLibrary.Columns["SPEC_DESC"].Visible = false;
-
-                #endregion
-            }
-            else if (_type == 2)
-            {
-                #region Color
-
-                gvwLibrary.Columns["PCX_COLOR_ID"].Visible = true;
-                gvwLibrary.Columns["PCX_COLOR_ID"].VisibleIndex = 0;
-
-                gvwLibrary.Columns["COLOR_CD"].Visible = true;
-                gvwLibrary.Columns["COLOR_CD"].VisibleIndex = 1;
-
-                gvwLibrary.Columns["COLOR_NAME"].Visible = true;
-                gvwLibrary.Columns["COLOR_NAME"].VisibleIndex = 2;
-
-                gvwLibrary.Columns["COLOR_STATUS"].Visible = true;
-                gvwLibrary.Columns["COLOR_STATUS"].VisibleIndex = 3;
-
-                gvwLibrary.Columns["PCX_PART_ID"].Visible = false;
-                gvwLibrary.Columns["PART_NAME"].Visible = false;
-                gvwLibrary.Columns["PART_SHORT_NAME"].Visible = false;
-                gvwLibrary.Columns["PART_TYPE"].Visible = false;
-                gvwLibrary.Columns["PART_CD"].Visible = false;
-                gvwLibrary.Columns["PART_STATUS"].Visible = false;
-
-                gvwLibrary.Columns["BLACK_LIST_YN"].Visible = false;
-                gvwLibrary.Columns["PCX_MAT_ID"].Visible = false;
-                gvwLibrary.Columns["PCX_SUPP_MAT_ID"].Visible = false;
-                gvwLibrary.Columns["MAT_CD"].Visible = false;
-                gvwLibrary.Columns["MXSXL_NUMBER"].Visible = false;
-                gvwLibrary.Columns["CS_CD"].Visible = false;
-                gvwLibrary.Columns["MCS_NUMBER"].Visible = false;
-                gvwLibrary.Columns["MAT_NAME"].Visible = false;
-                gvwLibrary.Columns["MAT_TYPE"].Visible = false;
-                gvwLibrary.Columns["MAT_STATUS"].Visible = false;
-                gvwLibrary.Columns["VEN_NAME"].Visible = false;
-
-                gvwLibrary.Columns["CS_MAT_CD"].Visible = false;
-                gvwLibrary.Columns["CS_MAT_NAME"].Visible = false;
-                gvwLibrary.Columns["WIDTH"].Visible = false;
-                gvwLibrary.Columns["MNG_UNIT"].Visible = false;
-                gvwLibrary.Columns["SPEC_DESC"].Visible = false;
-
-                #endregion
-            }
-            else if (_type == 3)
-            {
-                #region PCC Material
-
-                gvwLibrary.Columns["BLACK_LIST_YN"].Visible = true;
-                gvwLibrary.Columns["BLACK_LIST_YN"].VisibleIndex = 0;
-
-                gvwLibrary.Columns["MAT_STATUS"].Visible = true;
-                gvwLibrary.Columns["MAT_STATUS"].VisibleIndex = 1;
-
-                gvwLibrary.Columns["PCX_MAT_ID"].Visible = true;
-                gvwLibrary.Columns["PCX_MAT_ID"].VisibleIndex = 2;
-
-                gvwLibrary.Columns["PCX_SUPP_MAT_ID"].Visible = true;
-                gvwLibrary.Columns["PCX_SUPP_MAT_ID"].VisibleIndex = 3;
-
-                gvwLibrary.Columns["MXSXL_NUMBER"].Visible = true;
-                gvwLibrary.Columns["MXSXL_NUMBER"].VisibleIndex = 4;
-                                
-                gvwLibrary.Columns["CS_CD"].Visible = true;
-                gvwLibrary.Columns["CS_CD"].VisibleIndex = 5;
-
-                gvwLibrary.Columns["MCS_NUMBER"].Visible = true;
-                gvwLibrary.Columns["MCS_NUMBER"].VisibleIndex = 6;
-
-                gvwLibrary.Columns["MAT_NAME"].Visible = true;
-                gvwLibrary.Columns["MAT_NAME"].VisibleIndex = 7;
-
-                gvwLibrary.Columns["MAT_TYPE"].Visible = true;
-                gvwLibrary.Columns["MAT_TYPE"].VisibleIndex = 8;
-
-                gvwLibrary.Columns["VEN_NAME"].Visible = true;
-                gvwLibrary.Columns["VEN_NAME"].VisibleIndex = 9;
-
-                gvwLibrary.Columns["MAT_CD"].Visible = false;
-                gvwLibrary.Columns["PCX_PART_ID"].Visible = false;
-                gvwLibrary.Columns["PART_NAME"].Visible = false;
-                gvwLibrary.Columns["PART_SHORT_NAME"].Visible = false;
-                gvwLibrary.Columns["PART_TYPE"].Visible = false;
-                gvwLibrary.Columns["PART_CD"].Visible = false;
-                gvwLibrary.Columns["PART_STATUS"].Visible = false;
-
-                gvwLibrary.Columns["PCX_COLOR_ID"].Visible = false;
-                gvwLibrary.Columns["COLOR_CD"].Visible = false;
-                gvwLibrary.Columns["COLOR_NAME"].Visible = false;
-                gvwLibrary.Columns["COLOR_STATUS"].Visible = false;
-
-                gvwLibrary.Columns["CS_MAT_CD"].Visible = false;
-                gvwLibrary.Columns["CS_MAT_NAME"].Visible = false;
-                gvwLibrary.Columns["WIDTH"].Visible = false;
-                gvwLibrary.Columns["MNG_UNIT"].Visible = false;
-                gvwLibrary.Columns["SPEC_DESC"].Visible = false;
-
-                #endregion
-            }
-            else if (_type == 4)
-            {
-                #region CS Material
-
-                gvwLibrary.Columns["CS_MAT_CD"].Visible = true;
-                gvwLibrary.Columns["CS_MAT_CD"].VisibleIndex = 0;
-
-                gvwLibrary.Columns["CS_MAT_NAME"].Visible = true;
-                gvwLibrary.Columns["CS_MAT_NAME"].VisibleIndex = 1;
-
-                gvwLibrary.Columns["WIDTH"].Visible = true;
-                gvwLibrary.Columns["WIDTH"].VisibleIndex = 2;
-
-                gvwLibrary.Columns["MNG_UNIT"].Visible = true;
-                gvwLibrary.Columns["MNG_UNIT"].VisibleIndex = 3;
-
-                gvwLibrary.Columns["SPEC_DESC"].Visible = true;
-                gvwLibrary.Columns["SPEC_DESC"].VisibleIndex = 4;
-
-                gvwLibrary.Columns["PCX_PART_ID"].Visible = false;
-                gvwLibrary.Columns["PART_NAME"].Visible = false;
-                gvwLibrary.Columns["PART_SHORT_NAME"].Visible = false;
-                gvwLibrary.Columns["PART_TYPE"].Visible = false;
-                gvwLibrary.Columns["PART_CD"].Visible = false;
-                gvwLibrary.Columns["PART_STATUS"].Visible = false;
-
-                gvwLibrary.Columns["BLACK_LIST_YN"].Visible = false;
-                gvwLibrary.Columns["PCX_MAT_ID"].Visible = false;
-                gvwLibrary.Columns["PCX_SUPP_MAT_ID"].Visible = false;
-                gvwLibrary.Columns["MAT_CD"].Visible = false;
-                gvwLibrary.Columns["MXSXL_NUMBER"].Visible = false;
-                gvwLibrary.Columns["CS_CD"].Visible = false;
-                gvwLibrary.Columns["MCS_NUMBER"].Visible = false;
-                gvwLibrary.Columns["MAT_NAME"].Visible = false;
-                gvwLibrary.Columns["MAT_TYPE"].Visible = false;
-                gvwLibrary.Columns["MAT_STATUS"].Visible = false;
-                gvwLibrary.Columns["VEN_NAME"].Visible = false;
-
-                gvwLibrary.Columns["PCX_COLOR_ID"].Visible = false;
-                gvwLibrary.Columns["COLOR_CD"].Visible = false;
-                gvwLibrary.Columns["COLOR_NAME"].Visible = false;
-                gvwLibrary.Columns["COLOR_STATUS"].Visible = false;
-
-                #endregion
+                default:
+                    break;
             }
         }
 
         /// <summary>
         /// PCX 라이브러리에서 키워드에 맞는 데이터를 가져와 그리드에 바인딩
         /// </summary>
-        /// <param name="_type"></param>
-        private void SearchCodeFromLibrary(string _type)
+        /// <param name="type"></param>
+        private void SearchCodeFromLibrary(string type)
         {
-            try
+            // When searching for form color, recommend MC-MCP.
+            if (type.Equals("Color"))
             {
-                #region 폼 컬러 검색 시 Validation
-
-                // 폼 컬러 지정 시 창신 코드를 입력할 경우 MC-MCP 코드를 사용하도록 유도
-                if (_type == "Color")
+                if (txtKeyword.Text.Length > 1)
                 {
-                    // 적어도 두 자리는 입력해야 구분 가능
-                    if (txtKeyword.Text.Length > 1)
-                    {
-                        string colorCode = txtKeyword.Text;
-                        char[] eachCharacter = colorCode.ToArray();
+                    char[] characters = txtKeyword.Text.ToArray();
 
-                        // 첫 글자가 'C'이면서
-                        if (eachCharacter[0] == 'C')
+                    // 첫 글자가 'C'이면서
+                    if (characters[0] == 'C')
+                    {
+                        // 두 번째 글자가 0 - 9(아스키코드) 에 속할 경우 창신 컬러 코드임
+                        if (characters[1] >= 48 && characters[1] <= 57)
                         {
-                            // 두 번째 글자가 0 - 9(아스키코드) 에 속할 경우 창신 컬러 코드임
-                            if (eachCharacter[1] >= 48 && eachCharacter[1] <= 57)
-                            {
-                                MessageBox.Show("In case of CS Color, Please use MC-MCP Code and type color in color comment.",
-                                    "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                return;
-                            }
+                            Common.ShowMessageBox("In case of CS Color, Please use MC-MCP Code and type color in color comment.", "W");
+                            return;
                         }
                     }
                 }
-
-                #endregion
-
-                PKG_INTG_BOM_COMMON.SELECT_LIBRARY_CODE pkgSelectLibCode = new PKG_INTG_BOM_COMMON.SELECT_LIBRARY_CODE();
-                pkgSelectLibCode.ARG_TYPE = _type;
-                pkgSelectLibCode.ARG_KEYWORD = txtKeyword.Text;
-                pkgSelectLibCode.OUT_CURSOR = string.Empty;
-
-                DataTable dataSource = projectBaseForm.Exe_Select_PKG(pkgSelectLibCode).Tables[0];
-                grdLibrary.DataSource = dataSource;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return;
-            }
+
+            PKG_INTG_BOM_COMMON.SELECT_LIBRARY_CODE pkgSelectLibCode = new PKG_INTG_BOM_COMMON.SELECT_LIBRARY_CODE();
+            pkgSelectLibCode.ARG_TYPE = type;
+            pkgSelectLibCode.ARG_KEYWORD = txtKeyword.Text;
+            pkgSelectLibCode.OUT_CURSOR = string.Empty;
+
+            grdLibrary.DataSource = projectBaseForm.Exe_Select_PKG(pkgSelectLibCode).Tables[0];
         }
 
         /// <summary>
@@ -447,27 +467,30 @@ namespace CSI.PCC.PCX
         /// <param name="e"></param>
         private void rdoSearchType_SelectedIndexChanged(object sender, EventArgs e)
         {
-            try
+            int idx = (sender as RadioGroup).SelectedIndex;
+
+            SetVisibleColumns(idx);
+
+            switch (idx)
             {
-                RadioGroup rdoType = sender as RadioGroup;
-
-                int selectedType = rdoType.SelectedIndex;
-
-                SetGridView(selectedType);
-
-                if (selectedType == 1)
+                case 1:
                     SearchCodeFromLibrary("PCX_Material");
-                else if (selectedType == 3)
-                    SearchCodeFromLibrary("PCC_Material");
-                else if (selectedType == 4)
-                {
-                    SearchCodeFromLibrary("CS_Material");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-                return;
+                    break;
+
+                #region Close PCC Material
+
+                //case 3:
+                //    SearchCodeFromLibrary("PCC_Material");
+                //    break;
+
+                //case 4:
+                //    SearchCodeFromLibrary("CS_Material");
+                //    break;
+
+                #endregion
+
+                default:
+                    break;
             }
         }
 
@@ -536,42 +559,47 @@ namespace CSI.PCC.PCX
                 result[2] = colorCode;
                 result[3] = colorName;
             }
-            else if (rdoSearchType.SelectedIndex == 3)
-            {
-                string pcxMatID = view.GetFocusedRowCellValue("PCX_MAT_ID").ToString();
-                string pcxSuppMatID = view.GetFocusedRowCellValue("PCX_SUPP_MAT_ID").ToString();
-                string pdmMatCode = view.GetFocusedRowCellValue("MAT_CD").ToString();
-                string pdmSuppMatCode = view.GetFocusedRowCellValue("MXSXL_NUMBER").ToString();
-                string mcsNumber = view.GetFocusedRowCellValue("MCS_NUMBER").ToString();
-                string csCode = view.GetFocusedRowCellValue("CS_CD").ToString();
-                string pdmMatName = view.GetFocusedRowCellValue("MAT_NAME").ToString();
-                string vendorName = view.GetFocusedRowCellValue("VEN_NAME").ToString();
-                string nikeMSState = view.GetFocusedRowCellValue("MAT_STATUS").ToString();
-                string blackListYN = view.GetFocusedRowCellValue("BLACK_LIST_YN").ToString();
 
-                result[0] = "PCC_Material";
-                result[1] = (pcxMatID == "") ? "100" : pcxMatID;
-                result[2] = (pdmMatCode == "null") ? "" : pdmMatCode;           // 라이브러리에 null로 존재 시 ""로 변환
-                result[3] = pdmMatName;
-                result[4] = (pdmSuppMatCode == "null") ? "" : pdmSuppMatCode;   // 라이브러리에 null로 존재 시 ""로 변환
-                result[5] = (mcsNumber == "NULL") ? "" : mcsNumber;
-                result[6] = vendorName;
-                result[7] = csCode;
-                result[8] = (pcxSuppMatID == "") ? "100" : pcxSuppMatID;
-                result[9] = nikeMSState;
-                result[10] = blackListYN;
-            }
-            else if (rdoSearchType.SelectedIndex == 4)
-            {
-                string csMatCode = view.GetFocusedRowCellValue("CS_MAT_CD").ToString();
-                string materialCode = view.GetFocusedRowCellValue("MAT_CD").ToString();
-                string csMatName = view.GetFocusedRowCellValue("CS_MAT_NAME").ToString();
+            #region Close PCC Material
 
-                result[0] = "CS_Material";
-                result[1] = csMatCode;
-                result[2] = materialCode;
-                result[3] = csMatName;
-            }
+            //else if (rdoSearchType.SelectedIndex == 3)
+            //{
+            //    string pcxMatID = view.GetFocusedRowCellValue("PCX_MAT_ID").ToString();
+            //    string pcxSuppMatID = view.GetFocusedRowCellValue("PCX_SUPP_MAT_ID").ToString();
+            //    string pdmMatCode = view.GetFocusedRowCellValue("MAT_CD").ToString();
+            //    string pdmSuppMatCode = view.GetFocusedRowCellValue("MXSXL_NUMBER").ToString();
+            //    string mcsNumber = view.GetFocusedRowCellValue("MCS_NUMBER").ToString();
+            //    string csCode = view.GetFocusedRowCellValue("CS_CD").ToString();
+            //    string pdmMatName = view.GetFocusedRowCellValue("MAT_NAME").ToString();
+            //    string vendorName = view.GetFocusedRowCellValue("VEN_NAME").ToString();
+            //    string nikeMSState = view.GetFocusedRowCellValue("MAT_STATUS").ToString();
+            //    string blackListYN = view.GetFocusedRowCellValue("BLACK_LIST_YN").ToString();
+
+            //    result[0] = "PCC_Material";
+            //    result[1] = (pcxMatID == "") ? "100" : pcxMatID;
+            //    result[2] = (pdmMatCode == "null") ? "" : pdmMatCode;           // 라이브러리에 null로 존재 시 ""로 변환
+            //    result[3] = pdmMatName;
+            //    result[4] = (pdmSuppMatCode == "null") ? "" : pdmSuppMatCode;   // 라이브러리에 null로 존재 시 ""로 변환
+            //    result[5] = (mcsNumber == "NULL") ? "" : mcsNumber;
+            //    result[6] = vendorName;
+            //    result[7] = csCode;
+            //    result[8] = (pcxSuppMatID == "") ? "100" : pcxSuppMatID;
+            //    result[9] = nikeMSState;
+            //    result[10] = blackListYN;
+            //}
+            //else if (rdoSearchType.SelectedIndex == 4)
+            //{
+            //    string csMatCode = view.GetFocusedRowCellValue("CS_MAT_CD").ToString();
+            //    string materialCode = view.GetFocusedRowCellValue("MAT_CD").ToString();
+            //    string csMatName = view.GetFocusedRowCellValue("CS_MAT_NAME").ToString();
+
+            //    result[0] = "CS_Material";
+            //    result[1] = csMatCode;
+            //    result[2] = materialCode;
+            //    result[3] = csMatName;
+            //}
+
+            #endregion
 
             FORM_RESULT = result;
 
@@ -587,7 +615,7 @@ namespace CSI.PCC.PCX
         private void gvwLibrary_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {
             GridView view = sender as GridView;
-            
+
             // Nike MS State가 'Retired'인 자재 표기
             string status = view.GetRowCellValue(e.RowHandle, "MAT_STATUS").ToString();
 
